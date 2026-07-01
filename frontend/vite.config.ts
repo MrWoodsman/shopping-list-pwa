@@ -22,7 +22,7 @@ export default defineConfig({
           {
             // Vite domyślnie ma plik vite.svg w folderze public/,
             // docelowo wrzucisz tu ikonę np. 192x192 jako .png
-            src: "/vite.svg",
+            src: "/favicon.svg",
             sizes: "192x192",
             type: "image/svg+xml",
           },
