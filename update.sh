@@ -1,8 +1,18 @@
 #!/usr/bin/env bash
-echo "Aktualizuję aplikację..."
+echo "Pobieram najnowszą wersję z GitHuba..."
 cd /opt/shopping-list-pwa
-git pull origin main
+
+# Wymusza pobranie najnowszej wersji, ignorując lokalne zmiany
+git fetch --all
+git reset --hard origin/main
+
+# Reszta aktualizacji
+echo "Buduję frontend..."
 cd frontend && npm install && npm run build && cd ..
-cd backend && npm install
+echo "Aktualizuję backend..."
+cd backend && npm install && cd ..
+
+echo "Restartuję aplikację..."
 systemctl restart shopping-app
-echo "Gotowe! Apka zaktualizowana."
+
+echo "Aktualizacja zakończona!"
