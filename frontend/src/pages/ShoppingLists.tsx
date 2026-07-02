@@ -12,7 +12,8 @@ export interface ShoppingListData {
 
 export function ShoppingLists() {
   const [searchInput, setSearchInput] = useState("");
-  const [shoppingListsData, setShoppingListsData] = useState([
+  // setShoppingListsData
+  const [shoppingListsData] = useState([
     {
       id: 162765436543,
       name: "Pierwsza lista",
