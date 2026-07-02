@@ -44,34 +44,34 @@ export function ShoppingListsList({ shoppingLists, searchInput }: ShoppingListsL
 }
 
 function EmptyListPrompt({ searchInput }: { searchInput: string }) {
-  if (searchInput?.length == 0) {
-    return (
-      <Empty className="border border-dashed h-full">
-        <EmptyHeader>
-          <EmptyMedia variant="default"></EmptyMedia>
-          <EmptyTitle>Jakoś tu pusto...</EmptyTitle>
-          <EmptyDescription>Nie znaleziono żadnej listy zakupowej</EmptyDescription>
-        </EmptyHeader>
-        <EmptyContent>
-          <Button>Dodaj liste </Button>
-        </EmptyContent>
-      </Empty>
-    );
-  } else {
-    return (
-      <Empty className="border border-dashed h-full">
-        <EmptyHeader>
-          <EmptyMedia variant="default"></EmptyMedia>
-          <EmptyTitle>Nic nie znaleziono</EmptyTitle>
-          <EmptyDescription className="text-balance">
-            Nie znaleziono pasującej listy do `
-            <span className="font-mono text-neutral-300">{searchInput}</span>`
-          </EmptyDescription>
-        </EmptyHeader>
-        <EmptyContent>
-          <Button>Dodaj liste </Button>
-        </EmptyContent>
-      </Empty>
-    );
-  }
+  return (
+    <div className="h-full w-full p-4">
+      {searchInput?.length == 0 ? (
+        <Empty className="border border-dashed h-full">
+          <EmptyHeader>
+            <EmptyMedia variant="default"></EmptyMedia>
+            <EmptyTitle>Jakoś tu pusto...</EmptyTitle>
+            <EmptyDescription>Nie znaleziono żadnej listy zakupowej</EmptyDescription>
+          </EmptyHeader>
+          <EmptyContent>
+            <Button>Dodaj liste </Button>
+          </EmptyContent>
+        </Empty>
+      ) : (
+        <Empty className="border border-dashed h-full">
+          <EmptyHeader>
+            <EmptyMedia variant="default"></EmptyMedia>
+            <EmptyTitle>Nic nie znaleziono</EmptyTitle>
+            <EmptyDescription className="text-balance">
+              Nie znaleziono pasującej listy do `
+              <span className="font-mono text-neutral-300">{searchInput}</span>`
+            </EmptyDescription>
+          </EmptyHeader>
+          <EmptyContent>
+            <Button>Dodaj liste </Button>
+          </EmptyContent>
+        </Empty>
+      )}
+    </div>
+  );
 }
