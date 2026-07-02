@@ -6,6 +6,7 @@ const steps = [
   { title: "Witaj!", desc: "To Twoja nowa lista zakupów." },
   { title: "Szybkie dodawanie", desc: "Wpisz produkt i naciśnij plus." },
   { title: "Udostępnianie", desc: "Wyślij listę do domowników." },
+  { title: "Szybki dostęp", desc: "Dodaj do ekranu głównego telefonu." },
 ];
 
 export function Onboarding({ onComplete }: { onComplete: () => void }) {
