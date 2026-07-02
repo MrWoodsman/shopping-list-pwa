@@ -1,16 +1,20 @@
 #!/usr/bin/env bash
-echo "Pobieram najnowszą wersję z GitHuba..."
-cd /opt/shopping-list-pwa
+# Ustawiamy bazową ścieżkę
+BASE_DIR="/opt/shopping-list-pwa"
 
-# Wymusza pobranie najnowszej wersji, ignorując lokalne zmiany
+echo "Pobieram najnowszą wersję z GitHuba..."
+cd $BASE_DIR
 git fetch --all
 git reset --hard origin/main
 
-# Reszta aktualizacji
 echo "Buduję frontend..."
-cd frontend && npm install && npm run build && cd ..
+cd $BASE_DIR/frontend
+npm install
+npm run build
+
 echo "Aktualizuję backend..."
-cd backend && npm install && cd ..
+cd $BASE_DIR/backend
+npm install
 
 echo "Restartuję aplikację..."
 systemctl restart shopping-app
