@@ -6,6 +6,7 @@ import { ShoppingLists } from "./pages/ShoppingLists";
 import { HomeScreen } from "./pages/HomeScreen";
 import { Onboarding } from "./components/Onboarding";
 import { AppLayout } from "./components/AppLayout";
+import { ShoppingScreen } from "./pages/ShoppingScreen";
 
 function App() {
   const navigate = useNavigate();
@@ -31,13 +32,30 @@ function App() {
         <Route path="/" element={<HomeScreen />} />
         <Route element={<AppLayout />}>
           <Route path="/shopping-lists" element={<ShoppingLists />} />
+          <Route path="/shopping" element={<ShoppingScreen />} />
           <Route
             path="/recipes"
-            element={<div className="p-4 text-white">Ekran przepisów (wkrótce)</div>}
+            element={
+              <div className="p-4 text-white pt-[max(16px,env(safe-area-inset-top))]">
+                Ekran przepisów (wkrótce)
+              </div>
+            }
           />
           <Route
             path="/settings"
-            element={<div className="p-4 text-white">Ekran ustawień (wkrótce)</div>}
+            element={
+              <div className="p-4 text-white pt-[max(16px,env(safe-area-inset-top))]">
+                Ekran ustawień (wkrótce)
+              </div>
+            }
+          />
+          <Route
+            path="/auto-list"
+            element={
+              <div className="p-4 text-white pt-[max(16px,env(safe-area-inset-top))]">
+                Ekran automatycznego uzupełniania (wkrótce)
+              </div>
+            }
           />
         </Route>
       </Routes>
