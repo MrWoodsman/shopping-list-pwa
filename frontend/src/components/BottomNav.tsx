@@ -1,4 +1,4 @@
-import { ListChecks, ChefHat, Settings } from "lucide-react";
+import { ListChecks, ChefHat, Settings, Bot } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 export function BottomNav() {
@@ -12,12 +12,23 @@ export function BottomNav() {
       <div className="flex justify-around items-center">
         <Link to="/shopping-lists" className="w-full flex flex-col items-center -space-y-1.5">
           <ListChecks
-            className={`size-6 ${isActive("/shopping-lists") ? "text-primary" : "text-neutral-400"}`}
+            className={`size-6 ${isActive("/shopping-lists") || isActive("/shopping") ? "text-primary" : "text-neutral-400"}`}
           />
           <span
-            className={`text-[10px] ${isActive("/shopping-lists") ? "text-primary font-medium" : "text-neutral-400"}`}
+            className={`text-[10px] ${isActive("/shopping-lists") || isActive("/shopping") ? "text-primary font-medium" : "text-neutral-400"}`}
           >
             Listy
+          </span>
+        </Link>
+
+        <Link to="/auto-list" className="w-full flex flex-col items-center -space-y-1.5">
+          <Bot
+            className={`size-6 ${isActive("/auto-lista") ? "text-primary" : "text-neutral-400"}`}
+          />
+          <span
+            className={`text-[10px] ${isActive("/auto-list") ? "text-primary font-medium" : "text-neutral-400"}`}
+          >
+            Uzupełnianie
           </span>
         </Link>
 
