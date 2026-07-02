@@ -43,7 +43,7 @@ export function ShoppingLists() {
         shoppingLists={shoppingListsData.filter((list) =>
           list.name.toUpperCase().includes(searchInput.toUpperCase()),
         )}
-        isSearchOn={searchInput.length > 0}
+        searchInput={searchInput}
       />
     </div>
   );

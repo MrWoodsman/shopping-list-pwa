@@ -13,13 +13,13 @@ import type { ShoppingListData } from "@/pages/ShoppingLists";
 
 type ShoppingListsListProps = {
   shoppingLists: ShoppingListData[];
-  isSearchOn: boolean;
+  searchInput: string;
 };
 
-export function ShoppingListsList({ shoppingLists, isSearchOn }: ShoppingListsListProps) {
+export function ShoppingListsList({ shoppingLists, searchInput }: ShoppingListsListProps) {
   const navigate = useNavigate();
   if (!shoppingLists || shoppingLists.length == 0)
-    return <EmptyListPrompt isSearchOn={isSearchOn} />;
+    return <EmptyListPrompt searchInput={searchInput} />;
 
   return (
     <div className="shopping-lists-list h-full space-y-2 px-2 overflow-y-auto scrollbar-gutter-stable pb-[env(safe-area-inset-bottom)]">
@@ -43,8 +43,8 @@ export function ShoppingListsList({ shoppingLists, isSearchOn }: ShoppingListsLi
   );
 }
 
-function EmptyListPrompt({ isSearchOn }: { isSearchOn: boolean }) {
-  if (!isSearchOn) {
+function EmptyListPrompt({ searchInput }: { searchInput: string }) {
+  if (searchInput?.length == 0) {
     return (
       <Empty className="border border-dashed h-full">
         <EmptyHeader>
@@ -63,7 +63,10 @@ function EmptyListPrompt({ isSearchOn }: { isSearchOn: boolean }) {
         <EmptyHeader>
           <EmptyMedia variant="default"></EmptyMedia>
           <EmptyTitle>Nic nie znaleziono</EmptyTitle>
-          <EmptyDescription>Nie znaleziono pasującej listy do wyszukiwania</EmptyDescription>
+          <EmptyDescription className="text-balance">
+            Nie znaleziono pasującej listy do `
+            <span className="font-mono text-neutral-300">{searchInput}</span>`
+          </EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
           <Button>Dodaj liste </Button>
