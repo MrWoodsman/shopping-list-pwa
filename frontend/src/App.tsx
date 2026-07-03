@@ -32,7 +32,7 @@ function App() {
         <Route path="/" element={<HomeScreen />} />
         <Route element={<AppLayout />}>
           <Route path="/shopping-lists" element={<ShoppingLists />} />
-          <Route path="/shopping" element={<ShoppingScreen />} />
+          <Route path="/shopping/:id" element={<ShoppingScreen />} />
           <Route
             path="/recipes"
             element={

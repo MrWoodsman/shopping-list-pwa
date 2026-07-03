@@ -26,7 +26,7 @@ export function ShoppingListsList({ shoppingLists, searchInput }: ShoppingListsL
       {shoppingLists.map((el) => {
         const listCompletePercent = Math.floor((el.completedCount / el.itemsIn) * 100);
         return (
-          <Card key={el.id} onClick={() => navigate("/shopping")}>
+          <Card key={el.id} onClick={() => navigate(`/shopping/${el.id}`)}>
             <CardHeader>
               <CardTitle>{el.name}</CardTitle>
               <CardDescription>
