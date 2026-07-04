@@ -2,6 +2,8 @@ const express = require("express");
 const path = require("path");
 const app = express();
 
+app.use(express.json());
+
 // TESTOWE DANE
 const shoppingLists = [
   {
@@ -10,27 +12,35 @@ const shoppingLists = [
     createdAt: "02.07.2026",
     itemsIn: 4,
     completedCount: 1,
+    items: [
+      { id: 1, name: "Mleko", completed: false },
+      { id: 2, name: "Chleb", completed: true },
+      { id: 3, name: "Kawa", completed: false },
+    ],
   },
   {
     id: 162765436544,
     name: "Obiad niedziela",
     createdAt: "02.07.2026",
-    itemsIn: 6,
-    completedCount: 2,
+    itemsIn: 0,
+    completedCount: 0,
+    items: [],
   },
   {
     id: 162765436545,
     name: "Zupa Meksykańska",
     createdAt: "02.07.2026",
-    itemsIn: 10,
+    itemsIn: 0,
     completedCount: 0,
+    items: [],
   },
   {
     id: 162765436561,
     name: "Impreza Urodzinowa",
     createdAt: "04.07.2026",
-    itemsIn: 32,
-    completedCount: 4,
+    itemsIn: 0,
+    completedCount: 0,
+    items: [],
   },
 ];
 
@@ -55,6 +65,31 @@ app.get("/api/shopping-lists/:id", (req, res) => {
     res.status(404).json({ message: "Nie znaleziono listy" });
   }
 });
+
+// ZMIANA STATUSU PRODUKTU NA LISCIE
+app.put(
+  "/api/shopping-lists/:listId/items/:itemId",
+  (express.json(),
+  (req, res) => {
+    const listId = parseInt(req.params.listId);
+    const itemId = parseInt(req.params.itemId);
+    const { completed } = req.body; // Frontend wyśle np. { completed: true }
+
+    const list = shoppingLists.find((l) => l.id === listId);
+    if (!list) return res.status(404).json({ message: "Nie znaleziono listy" });
+
+    const item = list.items.find((i) => i.id === itemId);
+    if (!item) return res.status(404).json({ message: "Nie znaleziono produktu" });
+
+    // Zmiana statusu
+    item.completed = completed;
+
+    // Opcjonalnie: przelicz completedCount w locie
+    list.completedCount = list.items.filter((i) => i.completed).length;
+
+    res.json({ message: "Status zaktualizowany", item, list });
+  }),
+);
 
 // 2. Serwowanie zbudowanego frontendu
 // Upewnij się, że ścieżka prowadzi do folderu 'dist' w Twoim frontendzie
