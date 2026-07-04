@@ -25,6 +25,13 @@ const shoppingLists = [
     itemsIn: 10,
     completedCount: 0,
   },
+  {
+    id: 162765436561,
+    name: "Impreza Urodzinowa",
+    createdAt: "04.07.2026",
+    itemsIn: 32,
+    completedCount: 4,
+  },
 ];
 
 // 1. Twoje API (musi być przed statycznymi plikami!)
