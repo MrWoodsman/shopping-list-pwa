@@ -37,5 +37,11 @@ export default defineConfig({
   },
   server: {
     allowedHosts: ["dev.mrwoodsman.pl"],
+    proxy: {
+      "/api": {
+        target: "http://192.168.0.90:3000",
+        changeOrigin: true,
+      },
+    },
   },
 });
