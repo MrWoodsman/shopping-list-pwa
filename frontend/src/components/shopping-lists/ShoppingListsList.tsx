@@ -14,10 +14,18 @@ import type { ShoppingListData } from "@/pages/ShoppingLists";
 type ShoppingListsListProps = {
   shoppingLists: ShoppingListData[];
   searchInput: string;
+  isLoading: boolean;
 };
 
-export function ShoppingListsList({ shoppingLists, searchInput }: ShoppingListsListProps) {
+export function ShoppingListsList({
+  shoppingLists,
+  searchInput,
+  isLoading,
+}: ShoppingListsListProps) {
   const navigate = useNavigate();
+
+  if (isLoading) return <h1>Ładowanie</h1>;
+
   if (!shoppingLists || shoppingLists.length == 0)
     return <EmptyListPrompt searchInput={searchInput} />;
 
