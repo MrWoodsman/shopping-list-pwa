@@ -39,8 +39,21 @@ app.get("/api/test", (req, res) => {
   res.json({ message: "Działa!" });
 });
 
+// POBRANIE WSZYSTKICH LIST
 app.get("/api/shopping-lists", (req, res) => {
   res.json(shoppingLists);
+});
+
+// POBRANIE WYBRANEJ LISTY
+app.get("/api/shopping-lists/:id", (req, res) => {
+  const listId = parseInt(req.params.id);
+  const list = shoppingLists.find((l) => l.id === listId);
+
+  if (list) {
+    res.json(list);
+  } else {
+    res.status(404).json({ message: "Nie znaleziono listy" });
+  }
 });
 
 // 2. Serwowanie zbudowanego frontendu
