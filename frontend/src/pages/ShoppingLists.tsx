@@ -1,27 +1,33 @@
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+// COMPONENTS
 import { ShoppingListsList } from "@/components/shopping-lists/ShoppingListsList";
 import { ShoppingListsNavbar } from "@/components/shopping-lists/ShoppingListsNavbar";
-import { useState } from "react";
-
-export interface ShoppingListData {
-  id: number;
-  name: string;
-  createdAt: string;
-  itemsIn: number;
-  completedCount: number;
-}
+// TYPES
+import { type ShoppingListData } from "@shared/types";
 
 export function ShoppingLists() {
   const [searchInput, setSearchInput] = useState("");
-  // setShoppingListsData
-  const [shoppingListsData] = useState([]);
+
+  const { data, isLoading, error } = useQuery<ShoppingListData[]>({
+    queryKey: ["shoppingLists"],
+    queryFn: async () => {
+      const response = await fetch("/api/shopping-lists");
+      if (!response.ok) throw new Error("Błąd pobierania");
+      return response.json();
+    },
+  });
+
+  if (error) return <div>Wystąpił błąd: {error.message}</div>;
 
   return (
     <div className="w-full h-full flex flex-col gap-2">
       <ShoppingListsNavbar inputVal={searchInput} setInputVal={setSearchInput} />
       <ShoppingListsList
-        shoppingLists={shoppingListsData.filter((list) =>
-          list.name.toUpperCase().includes(searchInput.toUpperCase()),
-        )}
+        isLoading={isLoading}
+        shoppingLists={
+          data?.filter((list) => list.name.toUpperCase().includes(searchInput.toUpperCase())) ?? []
+        }
         searchInput={searchInput}
       />
     </div>
