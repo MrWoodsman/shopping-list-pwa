@@ -9,7 +9,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { Card, CardAction, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "../ui/button";
-import type { ShoppingListData } from "@/pages/ShoppingLists";
+import { type ShoppingListData } from "@shared/types";
 
 type ShoppingListsListProps = {
   shoppingLists: ShoppingListData[];
