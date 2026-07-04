@@ -1,3 +1,5 @@
+import { useNavigate } from "react-router-dom";
+// UI
 import {
   Empty,
   EmptyContent,
@@ -6,9 +8,9 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
-import { useNavigate } from "react-router-dom";
 import { Card, CardAction, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "../ui/button";
+// TYPE
 import { type ShoppingListData } from "@shared/types";
 
 type ShoppingListsListProps = {
