@@ -58,15 +58,15 @@ export function ItemSettingsOverlay({ listId, item }: ItemSettingsProps) {
         </DrawerHeader>
 
         {/* LISTA PRZYCISKÓW / OPCJI */}
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2">
           {/* Zmiana ilości - UI */}
-          <Button variant="secondary" className="justify-start h-14 text-base">
+          <Button variant="secondary" className="justify-start h-14 text-base" disabled>
             <Hash className="mr-3 size-5 text-primary" />
             Zmień ilość (wkrótce)
           </Button>
 
           {/* Zmiana nazwy - UI */}
-          <Button variant="secondary" className="justify-start h-14 text-base">
+          <Button variant="secondary" className="justify-start h-14 text-base" disabled>
             <Pencil className="mr-3 size-5 text-primary" />
             Edytuj nazwę (wkrótce)
           </Button>
