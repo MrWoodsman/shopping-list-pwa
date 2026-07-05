@@ -81,16 +81,19 @@ export function ShoppingScreen() {
         {/* DO KUPIENIA */}
         <AccordionItem value="to_buy">
           <AccordionTrigger>Do kupienia ({toBuyItems.length})</AccordionTrigger>
-          <AccordionContent className="flex flex-col gap-2 pt-1 pb-3 h-fit">
-            <AnimatePresence>
+          {/* USUNIĘTO gap-2 Z KLAS */}
+          <AccordionContent className="flex flex-col pt-1 pb-3 h-fit">
+            <AnimatePresence initial={false}>
               {toBuyItems.map((item) => (
                 <motion.div
                   key={item.id}
                   layout
-                  initial={{ opacity: 0, scale: 0.95, y: -5 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95, y: 5 }}
-                  transition={{ type: "spring", stiffness: 500, damping: 40 }}
+                  // ANIMACJA WYSOKOŚCI I MARGINESU:
+                  initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+                  animate={{ opacity: 1, height: "auto", marginBottom: 8 }} // 8px zastępuje gap-2
+                  exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+                  transition={{ type: "spring", bounce: 0, duration: 0.4 }}
+                  style={{ overflow: "hidden" }} // KLUCZOWE: tekst nie wylewa się przy kurczeniu
                 >
                   <ItemCard
                     item={item}
@@ -107,16 +110,18 @@ export function ShoppingScreen() {
         {/* KUPIONE */}
         <AccordionItem value="purchased">
           <AccordionTrigger>Kupione ({purchasedItems.length})</AccordionTrigger>
-          <AccordionContent className="flex flex-col gap-2 pt-1 pb-3 h-fit">
-            <AnimatePresence>
+          {/* USUNIĘTO gap-2 Z KLAS */}
+          <AccordionContent className="flex flex-col pt-1 pb-3 h-fit">
+            <AnimatePresence initial={false}>
               {purchasedItems.map((item) => (
                 <motion.div
                   key={item.id}
                   layout
-                  initial={{ opacity: 0, scale: 0.95, y: -5 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95, y: 5 }}
-                  transition={{ type: "spring", stiffness: 500, damping: 40 }}
+                  initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+                  animate={{ opacity: 1, height: "auto", marginBottom: 8 }}
+                  exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+                  transition={{ type: "spring", bounce: 0, duration: 0.4 }}
+                  style={{ overflow: "hidden" }}
                 >
                   <ItemCard
                     item={item}
