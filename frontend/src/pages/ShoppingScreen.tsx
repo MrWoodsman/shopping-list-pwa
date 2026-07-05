@@ -1,6 +1,8 @@
 import { useParams, Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
+// ICONS
+import { Settings } from "lucide-react";
 // UI
 import {
   Breadcrumb,
@@ -16,9 +18,12 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 // TYPES
 import { type ShoppingListData, type ShoppingItem } from "@shared/types";
+import { ItemAddOverlay } from "@/components/ItemAddOverlay";
+import { ItemSettingsOverlay } from "@/components/ItemSettingsOverlay";
 
 export function ShoppingScreen() {
   const { id } = useParams();
@@ -62,98 +67,113 @@ export function ShoppingScreen() {
   const purchasedItems = items.filter((item) => item.completed);
 
   return (
-    <div className="shopping-lists-list h-full space-y-2 px-2 overflow-y-auto scrollbar-gutter-stable pt-[max(8px,env(safe-area-inset-top))]">
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <Link to="/shopping-lists">Lista</Link>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>{data.name}</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
+    <div className="shopping-lists-list h-full flex flex-col bg-background">
+      {/* TOP NAVIGATION */}
+      <div className="pt-[max(8px,env(safe-area-inset-top))] px-2 pb-2 bg-background border-b z-50 flex items-center justify-between gap-3 shrink-0">
+        <Breadcrumb className="flex-1 min-w-0">
+          <BreadcrumbList className="flex-nowrap min-w-0 gap-1">
+            <BreadcrumbItem className="shrink-0">
+              <BreadcrumbLink asChild>
+                <Link to="/shopping-lists">Lista</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
 
-      <Accordion type="multiple" defaultValue={["purchased", "to_buy"]}>
-        {/* DO KUPIENIA */}
-        <AccordionItem value="to_buy">
-          <AccordionTrigger>Do kupienia ({toBuyItems.length})</AccordionTrigger>
-          {/* USUNIĘTO gap-2 Z KLAS */}
-          <AccordionContent className="flex flex-col pt-1 pb-3 h-fit">
-            <AnimatePresence initial={false}>
-              {toBuyItems.map((item) => (
-                <motion.div
-                  key={item.id}
-                  layout
-                  // ANIMACJA WYSOKOŚCI I MARGINESU:
-                  initial={{ opacity: 0, height: 0, marginBottom: 0 }}
-                  animate={{ opacity: 1, height: "auto", marginBottom: 8 }} // 8px zastępuje gap-2
-                  exit={{ opacity: 0, height: 0, marginBottom: 0 }}
-                  transition={{ type: "spring", bounce: 0, duration: 0.4 }}
-                  style={{ overflow: "hidden" }} // KLUCZOWE: tekst nie wylewa się przy kurczeniu
-                >
-                  <ItemCard
-                    item={item}
-                    onToggle={(completed) =>
-                      toggleItemMutation.mutate({ itemId: item.id, completed })
-                    }
-                  />
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </AccordionContent>
-        </AccordionItem>
+            <BreadcrumbSeparator className="shrink-0" />
 
-        {/* KUPIONE */}
-        <AccordionItem value="purchased">
-          <AccordionTrigger>Kupione ({purchasedItems.length})</AccordionTrigger>
-          {/* USUNIĘTO gap-2 Z KLAS */}
-          <AccordionContent className="flex flex-col pt-1 pb-3 h-fit">
-            <AnimatePresence initial={false}>
-              {purchasedItems.map((item) => (
-                <motion.div
-                  key={item.id}
-                  layout
-                  initial={{ opacity: 0, height: 0, marginBottom: 0 }}
-                  animate={{ opacity: 1, height: "auto", marginBottom: 8 }}
-                  exit={{ opacity: 0, height: 0, marginBottom: 0 }}
-                  transition={{ type: "spring", bounce: 0, duration: 0.4 }}
-                  style={{ overflow: "hidden" }}
-                >
-                  <ItemCard
-                    item={item}
-                    onToggle={(completed) =>
-                      toggleItemMutation.mutate({ itemId: item.id, completed })
-                    }
-                  />
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
+            <BreadcrumbItem className="min-w-0">
+              <BreadcrumbPage className="truncate block">{data.name}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+
+        <div className="flex items-center gap-1 shrink-0">
+          <Button variant={"secondary"} size="icon">
+            <Settings className="size-4" />
+          </Button>
+          <ItemAddOverlay id={id!} />
+        </div>
+      </div>
+
+      {/* CONTENT */}
+      <div className="flex-1 overflow-y-auto px-2 space-y-2 scrollbar-gutter-stable pb-4">
+        <Accordion type="multiple" defaultValue={["purchased", "to_buy"]}>
+          {/* ... DO KUPIENIA ... */}
+          <AccordionItem value="to_buy">
+            <AccordionTrigger>Do kupienia ({toBuyItems.length})</AccordionTrigger>
+            <AccordionContent className="flex flex-col pt-1 pb-3 h-fit">
+              <AnimatePresence initial={false}>
+                {toBuyItems.map((item) => (
+                  <motion.div
+                    key={item.id}
+                    layout
+                    initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+                    animate={{ opacity: 1, height: "auto", marginBottom: 8 }}
+                    exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+                    transition={{ type: "spring", bounce: 0, duration: 0.4 }}
+                    style={{ overflow: "hidden" }}
+                  >
+                    <ItemCard
+                      listId={id!}
+                      item={item}
+                      onToggle={(completed) =>
+                        toggleItemMutation.mutate({ itemId: item.id, completed })
+                      }
+                    />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </AccordionContent>
+          </AccordionItem>
+
+          {/* ... KUPIONE ... */}
+          <AccordionItem value="purchased">
+            <AccordionTrigger>Kupione ({purchasedItems.length})</AccordionTrigger>
+            <AccordionContent className="flex flex-col pt-1 pb-3 h-fit">
+              <AnimatePresence initial={false}>
+                {purchasedItems.map((item) => (
+                  <motion.div
+                    key={item.id}
+                    layout
+                    initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+                    animate={{ opacity: 1, height: "auto", marginBottom: 8 }}
+                    exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+                    transition={{ type: "spring", bounce: 0, duration: 0.4 }}
+                    style={{ overflow: "hidden" }}
+                  >
+                    <ItemCard
+                      listId={id!}
+                      item={item}
+                      onToggle={(completed) =>
+                        toggleItemMutation.mutate({ itemId: item.id, completed })
+                      }
+                    />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      </div>
     </div>
   );
 }
 
 interface ItemCardProps {
+  listId: string;
   item: ShoppingItem;
   onToggle: (completed: boolean) => void;
 }
 
-function ItemCard({ item, onToggle }: ItemCardProps) {
+function ItemCard({ listId, item, onToggle }: ItemCardProps) {
   return (
     <Card
-      className={`border-dashed border border-neutral-700 transition-colors duration-200 ${
-        item.completed ? "bg-neutral-800 line-through text-neutral-400" : "bg-neutral-900"
-      } py-2`}
+      className={`border-dashed border border-neutral-700 overflow-hidden transition-colors duration-200 ${
+        item.completed ? "bg-neutral-800 text-neutral-400" : "bg-neutral-900"
+      } py-0`}
     >
-      <CardContent className="px-4 pl-2 flex gap-2 items-center">
+      <CardContent className="px-2 pr-0 flex gap-2 items-stretch relative">
         <div
-          className="left-wrap w-full flex items-center cursor-pointer select-none"
+          className="left-wrap w-full py-1 flex items-center cursor-pointer select-none"
           onClick={() => onToggle(!item.completed)}
         >
           <div className="button h-10 aspect-square flex items-center justify-center">
@@ -165,10 +185,14 @@ function ItemCard({ item, onToggle }: ItemCardProps) {
             />
           </div>
           <div className="column flex flex-col">
-            <h1 className="font-medium text-sm">{item.name}</h1>
+            <h1 className={`font-medium text-sm ${item.completed && "line-through"}`}>
+              {item.name}
+            </h1>
             <h2 className="text-[10px] text-neutral-500">ID: {item.id}</h2>
           </div>
         </div>
+
+        <ItemSettingsOverlay listId={listId!} item={item} />
       </CardContent>
     </Card>
   );
