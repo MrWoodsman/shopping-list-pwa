@@ -1,5 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { motion, AnimatePresence } from "framer-motion";
 // UI
 import {
   Breadcrumb,
@@ -21,7 +22,7 @@ import { type ShoppingListData, type ShoppingItem } from "@shared/types";
 
 export function ShoppingScreen() {
   const { id } = useParams();
-  const queryClient = useQueryClient(); // Potrzebne do odświeżenia cache'u
+  const queryClient = useQueryClient();
 
   // 1. POBIERANIE DANYCH LISTY
   const { data, isLoading, error } = useQuery<ShoppingListData>({
@@ -47,11 +48,8 @@ export function ShoppingScreen() {
       if (!response.ok) throw new Error("Nie udało się zaktualizować statusu");
       return response.json();
     },
-    // Kiedy backend odpowie sukcesem:
     onSuccess: () => {
-      // Mówimy TanStack Query: "Dane tej listy są nieaktualne, pobierz je z backendu jeszcze raz"
       queryClient.invalidateQueries({ queryKey: ["shoppingList", id] });
-      // Opcjonalnie odświeżamy główną listę (bo tam zmienia się completedCount)
       queryClient.invalidateQueries({ queryKey: ["shoppingLists"] });
     },
   });
@@ -59,7 +57,6 @@ export function ShoppingScreen() {
   if (isLoading) return <div>Ładowanie szczegółów...</div>;
   if (error || !data) return <div>Nie znaleziono listy.</div>;
 
-  // 3. SEPARACJA PRZEDMIOTÓW (Bezpieczne mapowanie na wypadek braku tablicy items)
   const items = data.items || [];
   const toBuyItems = items.filter((item) => !item.completed);
   const purchasedItems = items.filter((item) => item.completed);
@@ -81,31 +78,55 @@ export function ShoppingScreen() {
       </Breadcrumb>
 
       <Accordion type="multiple" defaultValue={["purchased", "to_buy"]}>
-        {/* HARMONIJKA: DO KUPIENIA */}
+        {/* DO KUPIENIA */}
         <AccordionItem value="to_buy">
           <AccordionTrigger>Do kupienia ({toBuyItems.length})</AccordionTrigger>
-          <AccordionContent className="flex flex-col gap-2">
-            {toBuyItems.map((item) => (
-              <ItemCard
-                key={item.id}
-                item={item}
-                onToggle={(completed) => toggleItemMutation.mutate({ itemId: item.id, completed })}
-              />
-            ))}
+          <AccordionContent className="flex flex-col gap-2 pt-1 pb-3 h-fit">
+            <AnimatePresence>
+              {toBuyItems.map((item) => (
+                <motion.div
+                  key={item.id}
+                  layout
+                  initial={{ opacity: 0, scale: 0.95, y: -5 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: 5 }}
+                  transition={{ type: "spring", stiffness: 500, damping: 40 }}
+                >
+                  <ItemCard
+                    item={item}
+                    onToggle={(completed) =>
+                      toggleItemMutation.mutate({ itemId: item.id, completed })
+                    }
+                  />
+                </motion.div>
+              ))}
+            </AnimatePresence>
           </AccordionContent>
         </AccordionItem>
 
-        {/* HARMONIJKA: KUPIONE */}
+        {/* KUPIONE */}
         <AccordionItem value="purchased">
           <AccordionTrigger>Kupione ({purchasedItems.length})</AccordionTrigger>
-          <AccordionContent className="flex flex-col gap-2">
-            {purchasedItems.map((item) => (
-              <ItemCard
-                key={item.id}
-                item={item}
-                onToggle={(completed) => toggleItemMutation.mutate({ itemId: item.id, completed })}
-              />
-            ))}
+          <AccordionContent className="flex flex-col gap-2 pt-1 pb-3 h-fit">
+            <AnimatePresence>
+              {purchasedItems.map((item) => (
+                <motion.div
+                  key={item.id}
+                  layout
+                  initial={{ opacity: 0, scale: 0.95, y: -5 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: 5 }}
+                  transition={{ type: "spring", stiffness: 500, damping: 40 }}
+                >
+                  <ItemCard
+                    item={item}
+                    onToggle={(completed) =>
+                      toggleItemMutation.mutate({ itemId: item.id, completed })
+                    }
+                  />
+                </motion.div>
+              ))}
+            </AnimatePresence>
           </AccordionContent>
         </AccordionItem>
       </Accordion>
@@ -113,7 +134,6 @@ export function ShoppingScreen() {
   );
 }
 
-// 4. ZAKTUALIZOWANY KOMPONENT KARTY
 interface ItemCardProps {
   item: ShoppingItem;
   onToggle: (completed: boolean) => void;
@@ -122,12 +142,11 @@ interface ItemCardProps {
 function ItemCard({ item, onToggle }: ItemCardProps) {
   return (
     <Card
-      className={`border-dashed border border-neutral-700 transition-colors ${
+      className={`border-dashed border border-neutral-700 transition-colors duration-200 ${
         item.completed ? "bg-neutral-800 line-through text-neutral-400" : "bg-neutral-900"
       } py-2`}
     >
       <CardContent className="px-4 pl-2 flex gap-2 items-center">
-        {/* Kliknięcie w cały ten obszar przełącza stan na odwrotny */}
         <div
           className="left-wrap w-full flex items-center cursor-pointer select-none"
           onClick={() => onToggle(!item.completed)}
@@ -137,12 +156,11 @@ function ItemCard({ item, onToggle }: ItemCardProps) {
               type="checkbox"
               readOnly
               checked={item.completed}
-              className="size-4 accent-primary"
+              className="size-4 accent-primary cursor-pointer"
             />
           </div>
           <div className="column flex flex-col">
             <h1 className="font-medium text-sm">{item.name}</h1>
-            {/* Opcjonalnie dodatkowy opis, np. ilość */}
             <h2 className="text-[10px] text-neutral-500">ID: {item.id}</h2>
           </div>
         </div>
