@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/drawer";
 import { EllipsisVertical, Trash2, Pencil, Hash } from "lucide-react";
 import { type ShoppingItem } from "@shared/types"; // Upewnij się, że ścieżka jest poprawna
+import { fetchWithGroup } from "@/utils/api";
 
 interface ItemSettingsProps {
   listId: string;
@@ -24,7 +25,7 @@ export function ItemSettingsOverlay({ listId, item }: ItemSettingsProps) {
   const deleteItemMutation = useMutation({
     mutationFn: async () => {
       // Pamiętaj o użyciu odpowiedniego endpointu (DELETE)
-      const response = await fetch(`/api/shopping-lists/${listId}/items/${item.id}`, {
+      const response = await fetchWithGroup(`/api/shopping-lists/${listId}/items/${item.id}`, {
         method: "DELETE",
       });
       if (!response.ok) throw new Error("Nie udało się usunąć produktu");
