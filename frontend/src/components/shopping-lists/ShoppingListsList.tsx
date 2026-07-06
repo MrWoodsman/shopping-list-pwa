@@ -12,6 +12,7 @@ import { Card, CardAction, CardDescription, CardHeader, CardTitle } from "@/comp
 import { Button } from "../ui/button";
 // TYPE
 import { type ShoppingListData } from "@shared/types";
+import { ListSettingsOverlay } from "../ListSettingsOverlay";
 
 type ShoppingListsListProps = {
   shoppingLists: ShoppingListData[];
@@ -32,18 +33,25 @@ export function ShoppingListsList({
     return <EmptyListPrompt searchInput={searchInput} />;
 
   return (
-    <div className="shopping-lists-list h-full space-y-2 px-2 overflow-y-auto scrollbar-gutter-stable pb-[env(safe-area-inset-bottom)]">
+    <div className="shopping-lists-list h-full space-y-2 px-2 overflow-y-auto scrollbar-gutter-stable pb-[env(safe-area-bottom)]">
       {shoppingLists.map((el) => {
         const listCompletePercent = Math.floor((el.completedCount / el.itemsIn) * 100);
         return (
-          <Card key={el.id} onClick={() => navigate(`/shopping/${el.id}`)}>
+          // 1. Zdejmujemy onClick stąd! Karta to teraz tylko "pojemnik".
+          <Card key={el.id}>
             <CardHeader>
-              <CardTitle>{el.name}</CardTitle>
-              <CardDescription>
-                {el.completedCount}/{el.itemsIn} | {listCompletePercent}%
-              </CardDescription>
+              {/* 2. Tworzymy klikalną strefę na teksty (lewa strona) */}
+              <div className="flex-1 cursor-pointer" onClick={() => navigate(`/shopping/${el.id}`)}>
+                <CardTitle>{el.name}</CardTitle>
+                <CardDescription>
+                  {el.completedCount}/{el.itemsIn} |{" "}
+                  {listCompletePercent ? listCompletePercent : "0"}%
+                </CardDescription>
+              </div>
+
+              {/* 3. Prawa strona z przyciskiem opcji (odizolowana od nawigacji) */}
               <CardAction className="row-span-full! flex items-center justify-center h-full">
-                {">"}
+                <ListSettingsOverlay listId={el.id} listName={el.name} />
               </CardAction>
             </CardHeader>
           </Card>

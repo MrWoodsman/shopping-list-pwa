@@ -5,6 +5,7 @@ import { ShoppingListsList } from "@/components/shopping-lists/ShoppingListsList
 import { ShoppingListsNavbar } from "@/components/shopping-lists/ShoppingListsNavbar";
 // TYPES
 import { type ShoppingListData } from "@shared/types";
+import { fetchWithGroup } from "@/utils/api";
 
 export function ShoppingLists() {
   const [searchInput, setSearchInput] = useState("");
@@ -12,7 +13,7 @@ export function ShoppingLists() {
   const { data, isLoading, error } = useQuery<ShoppingListData[]>({
     queryKey: ["shoppingLists"],
     queryFn: async () => {
-      const response = await fetch("/api/shopping-lists");
+      const response = await fetchWithGroup("/api/shopping-lists");
       if (!response.ok) throw new Error("Błąd pobierania");
       return response.json();
     },
