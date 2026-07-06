@@ -1,5 +1,6 @@
 const shoppingLists = [
   {
+    groupId: "DEV",
     id: 162765436543,
     name: "Pierwsza lista",
     createdAt: "02.07.2026",
@@ -18,6 +19,7 @@ const shoppingLists = [
     ],
   },
   {
+    groupId: "DEV",
     id: 162765436544,
     name: "Obiad niedziela",
     createdAt: "02.07.2026",
@@ -33,6 +35,7 @@ const shoppingLists = [
     ],
   },
   {
+    groupId: "DEV",
     id: 162765436545,
     name: "Zupa Meksykańska",
     createdAt: "02.07.2026",
@@ -47,6 +50,7 @@ const shoppingLists = [
     ],
   },
   {
+    groupId: "TEST",
     id: 162765436561,
     name: "Taka bardzo długa nazwa listy zakupowej",
     createdAt: "04.07.2026",
