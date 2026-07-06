@@ -24,6 +24,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { type ShoppingListData, type ShoppingItem } from "@shared/types";
 import { ItemAddOverlay } from "@/components/ItemAddOverlay";
 import { ItemSettingsOverlay } from "@/components/ItemSettingsOverlay";
+import { fetchWithGroup } from "@/utils/api";
 
 export function ShoppingScreen() {
   const { id } = useParams();
@@ -33,7 +34,7 @@ export function ShoppingScreen() {
   const { data, isLoading, error } = useQuery<ShoppingListData>({
     queryKey: ["shoppingList", id],
     queryFn: async () => {
-      const response = await fetch(`/api/shopping-lists/${id}`);
+      const response = await fetchWithGroup(`/api/shopping-lists/${id}`);
       if (!response.ok) throw new Error("Błąd pobierania");
       return response.json();
     },
@@ -43,7 +44,7 @@ export function ShoppingScreen() {
   // 2. MUTACJA DO ZMIANY STATUSU PRZEDMIOTU
   const toggleItemMutation = useMutation({
     mutationFn: async ({ itemId, completed }: { itemId: number; completed: boolean }) => {
-      const response = await fetch(`/api/shopping-lists/${id}/items/${itemId}`, {
+      const response = await fetchWithGroup(`/api/shopping-lists/${id}/items/${itemId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -188,7 +189,10 @@ function ItemCard({ listId, item, onToggle }: ItemCardProps) {
             <h1 className={`font-medium text-sm ${item.completed && "line-through"}`}>
               {item.name}
             </h1>
-            <h2 className="text-[10px] text-neutral-500">ID: {item.id}</h2>
+            {/* <h2 className="text-[10px] text-neutral-500">ID: {item.id}</h2> */}
+            <h2 className="text-[10px] text-neutral-500">
+              {item.quantity} {item.unit}
+            </h2>
           </div>
         </div>
 
