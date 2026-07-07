@@ -1,0 +1,8 @@
+backend/node_modules
+backend/database.sqlite
+backend/*.sqlite
+backend/*.sqlite-wal
+backend/*.sqlite-shm
+backend/*.sqlite-journal
+backend/*.log
+frontend/node_modules
