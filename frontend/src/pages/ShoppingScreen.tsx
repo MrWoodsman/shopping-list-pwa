@@ -43,7 +43,7 @@ export function ShoppingScreen() {
 
   // 2. MUTACJA DO ZMIANY STATUSU PRZEDMIOTU
   const toggleItemMutation = useMutation({
-    mutationFn: async ({ itemId, completed }: { itemId: number; completed: boolean }) => {
+    mutationFn: async ({ itemId, completed }: { itemId: string; completed: boolean }) => {
       const response = await fetchWithGroup(`/api/shopping-lists/${id}/items/${itemId}`, {
         method: "PUT",
         headers: {
