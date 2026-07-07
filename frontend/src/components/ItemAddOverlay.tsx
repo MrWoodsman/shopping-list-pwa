@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "./ui/button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -20,12 +20,26 @@ const UNITS = ["szt.", "kg", "g", "l", "ml", "opak."];
 export function ItemAddOverlay({ id }: ItemAddOverlayProps) {
   const queryClient = useQueryClient();
   const inputRef = useRef<HTMLInputElement>(null); // Ref, żeby przywrócić focus
+  const focusInput = () => {
+    window.requestAnimationFrame(() => {
+      inputRef.current?.focus();
+      inputRef.current?.select();
+    });
+  };
 
   const [isOpen, setIsOpen] = useState(false);
   const [newItemName, setNewItemName] = useState("");
   const [quantity, setQuantity] = useState("1");
   const [unit, setUnit] = useState("szt.");
   const [keepOpen, setKeepOpen] = useState(false); // Nasz checkbox
+  const fieldClass =
+    "h-11 w-full rounded-lg border border-input bg-background px-3 text-base text-foreground outline-none focus:ring-2 focus:ring-primary";
+
+  useEffect(() => {
+    if (isOpen) {
+      focusInput();
+    }
+  }, [isOpen]);
 
   const addItemMutation = useMutation({
     mutationFn: async ({ name, qty, un }: { name: string; qty: number; un: string }) => {
@@ -51,7 +65,7 @@ export function ItemAddOverlay({ id }: ItemAddOverlayProps) {
         setIsOpen(false);
       } else {
         // Jeśli okienko zostaje, przywracamy migający kursor do inputa z nazwą!
-        inputRef.current?.focus();
+        focusInput();
       }
     },
   });
@@ -73,7 +87,13 @@ export function ItemAddOverlay({ id }: ItemAddOverlayProps) {
         </Button>
       </DrawerTrigger>
 
-      <DrawerContent className="bg-background border-border px-4 pb-[max(24px,env(safe-area-inset-bottom))]">
+      <DrawerContent
+        className="bg-background border-border px-4 pb-[max(24px,env(safe-area-inset-bottom))]"
+        onOpenAutoFocus={(event) => {
+          event.preventDefault();
+          focusInput();
+        }}
+      >
         <DrawerHeader className="px-0 text-left">
           <DrawerTitle>Dodaj nowy produkt</DrawerTitle>
         </DrawerHeader>
@@ -89,26 +109,24 @@ export function ItemAddOverlay({ id }: ItemAddOverlayProps) {
             onKeyDown={(e) => {
               if (e.key === "Enter") handleSubmit();
             }}
-            className="border p-3 rounded-lg text-base text-foreground bg-background focus:outline-none focus:ring-2 focus:ring-primary w-full"
+            className={fieldClass}
           />
 
           {/* Rząd z ilością i jednostką - ZMIENIONO NA GRID */}
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-2 items-stretch">
             <input
               type="number"
               min="0.1"
               step="any"
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
-              // ZAMIANA: usunięto w-24, dodano w-full
-              className="border p-3 rounded-lg text-base text-foreground bg-background focus:outline-none focus:ring-2 focus:ring-primary w-full text-center"
+              className={`${fieldClass} text-center`}
             />
 
             <select
               value={unit}
               onChange={(e) => setUnit(e.target.value)}
-              // ZAMIANA: usunięto flex-1, dodano w-full
-              className="border text-center p-3 rounded-lg text-base text-foreground bg-background focus:outline-none focus:ring-2 focus:ring-primary w-full appearance-none"
+              className={`${fieldClass} appearance-none text-center`}
             >
               {UNITS.map((u) => (
                 <option key={u} value={u}>
