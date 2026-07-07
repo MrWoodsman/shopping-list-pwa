@@ -27,7 +27,18 @@ export function ShoppingListsList({
 }: ShoppingListsListProps) {
   const navigate = useNavigate();
 
-  if (isLoading) return <h1>Ładowanie</h1>;
+  if (isLoading)
+    return (
+      <div className="shopping-lists-list h-full px-2 overflow-y-auto scrollbar-gutter-stable pb-[env(safe-area-bottom)]">
+        {/* Navbar placeholder */}
+        <div className="space-y-2">
+          <div className="h-12 w-full bg-neutral-800 animate-pulse rounded-lg" />
+          <div className="h-12 w-full bg-neutral-800 animate-pulse rounded-lg" />
+          <div className="h-12 w-full bg-neutral-800 animate-pulse rounded-lg" />
+          <div className="h-12 w-full bg-neutral-800 animate-pulse rounded-lg" />
+        </div>
+      </div>
+    );
 
   if (!shoppingLists || shoppingLists.length == 0)
     return <EmptyListPrompt searchInput={searchInput} />;
