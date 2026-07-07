@@ -22,8 +22,6 @@ export function ShoppingLists() {
     refetchInterval: 5000,
   });
 
-  // if (error) return <div>Wystąpił błąd: {error.message}</div>;
-
   return (
     <div className="w-full h-full flex flex-col gap-2">
       <ShoppingListsNavbar inputVal={searchInput} setInputVal={setSearchInput} />
