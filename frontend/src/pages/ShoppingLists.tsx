@@ -17,6 +17,7 @@ export function ShoppingLists() {
       if (!response.ok) throw new Error("Błąd pobierania");
       return response.json();
     },
+    refetchInterval: 5000,
   });
 
   if (error) return <div>Wystąpił błąd: {error.message}</div>;

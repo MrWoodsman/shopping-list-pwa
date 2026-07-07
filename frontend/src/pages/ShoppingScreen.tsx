@@ -39,6 +39,7 @@ export function ShoppingScreen() {
       return response.json();
     },
     enabled: !!id,
+    refetchInterval: 3000,
   });
 
   // 2. MUTACJA DO ZMIANY STATUSU PRZEDMIOTU
