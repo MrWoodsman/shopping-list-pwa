@@ -82,10 +82,23 @@ router.post("/", async (req, res) => {
   const { name } = req.body;
   try {
     const id = randomUUID();
-    console.log(`[LISTS:POST] Tworzenie listy: id=${id}, groupId=${groupId}, name=${name || "Nowa lista"}`);
-    await req.db.run(`INSERT INTO lists (id, group_id, name) VALUES (?, ?, ?)`, [id, groupId, name || "Nowa lista"]);
+    console.log(
+      `[LISTS:POST] Tworzenie listy: id=${id}, groupId=${groupId}, name=${name || "Nowa lista"}`,
+    );
+    await req.db.run(`INSERT INTO lists (id, group_id, name) VALUES (?, ?, ?)`, [
+      id,
+      groupId,
+      name || "Nowa lista",
+    ]);
     console.log(`[LISTS:POST] Lista ${id} została utworzona`);
-    const newList = { id, groupId, name: name || "Nowa lista", itemsIn: 0, completedCount: 0, items: [] };
+    const newList = {
+      id,
+      groupId,
+      name: name || "Nowa lista",
+      itemsIn: 0,
+      completedCount: 0,
+      items: [],
+    };
 
     res.status(201).json({ message: "Utworzono listę", list: newList });
   } catch (error) {
@@ -103,12 +116,18 @@ router.put("/:id", async (req, res) => {
   const { name } = req.body;
 
   try {
-    const existing = await req.db.get(`SELECT id FROM lists WHERE id = ? AND group_id = ? AND deleted_at IS NULL`, [listId, groupId]);
+    const existing = await req.db.get(
+      `SELECT id FROM lists WHERE id = ? AND group_id = ? AND deleted_at IS NULL`,
+      [listId, groupId],
+    );
     if (!existing) return res.status(404).json({ message: "Nie znaleziono listy" });
 
     if (name) await req.db.run(`UPDATE lists SET name = ? WHERE id = ?`, [name, listId]);
 
-    const updated = await req.db.get(`SELECT id, group_id as groupId, name, created_at as createdAt FROM lists WHERE id = ?`, [listId]);
+    const updated = await req.db.get(
+      `SELECT id, group_id as groupId, name, created_at as createdAt FROM lists WHERE id = ?`,
+      [listId],
+    );
     res.json({ message: "Zaktualizowano listę", list: updated });
   } catch (error) {
     res.status(500).json({ message: "Błąd aktualizacji", error: error.message });

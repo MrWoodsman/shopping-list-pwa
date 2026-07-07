@@ -18,7 +18,10 @@ router.post("/:listId/items", async (req, res) => {
     if (!list) return res.status(404).json({ message: "Nie znaleziono listy" });
 
     const id = randomUUID();
-    await req.db.run(`INSERT INTO items (id, list_id, name, quantity, unit) VALUES (?, ?, ?, ?, ?)`, [id, listId, name, quantity, unit]);
+    await req.db.run(
+      `INSERT INTO items (id, list_id, name, quantity, unit) VALUES (?, ?, ?, ?, ?)`,
+      [id, listId, name, quantity, unit],
+    );
     const newItem = { id, name, quantity, unit, completed: false };
 
     const itemsInRow = await req.db.get(
@@ -54,7 +57,10 @@ router.put("/:listId/items/:itemId", async (req, res) => {
     );
     if (!list) return res.status(404).json({ message: "Nie znaleziono listy" });
 
-    const item = await req.db.get(`SELECT id, name, quantity, unit, completed_at FROM items WHERE id = ? AND list_id = ? AND deleted_at IS NULL`, [itemId, listId]);
+    const item = await req.db.get(
+      `SELECT id, name, quantity, unit, completed_at FROM items WHERE id = ? AND list_id = ? AND deleted_at IS NULL`,
+      [itemId, listId],
+    );
     if (!item) return res.status(404).json({ message: "Nie znaleziono produktu" });
 
     if (completed) {
@@ -63,7 +69,10 @@ router.put("/:listId/items/:itemId", async (req, res) => {
       await req.db.run(`UPDATE items SET completed_at = NULL WHERE id = ?`, [itemId]);
     }
 
-    const updatedItemRow = await req.db.get(`SELECT id, name, quantity, unit, completed_at FROM items WHERE id = ?`, [itemId]);
+    const updatedItemRow = await req.db.get(
+      `SELECT id, name, quantity, unit, completed_at FROM items WHERE id = ?`,
+      [itemId],
+    );
     const updatedItem = {
       id: updatedItemRow.id,
       name: updatedItemRow.name,
