@@ -1,5 +1,5 @@
 export interface ShoppingListData {
-  id: number;
+  id: string;
   name: string;
   createdAt: string;
   itemsIn: number;
@@ -8,7 +8,7 @@ export interface ShoppingListData {
 }
 
 export interface ShoppingItem {
-  id: number;
+  id: string;
   name: string;
   quantity: number;
   unit: string;
