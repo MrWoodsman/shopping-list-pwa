@@ -1,87 +1,140 @@
 const express = require("express");
 const router = express.Router();
-const { shoppingLists } = require("../data/store");
 
 // POBRANIE WSZYSTKICH LIST DLA DANEJ GRUPY
-router.get("/", (req, res) => {
+router.get("/", async (req, res) => {
   const groupId = req.headers["x-group-id"];
   if (!groupId) return res.status(401).json({ message: "Brak ID grupy w zapytaniu" });
 
-  // Filtrujemy tablicę - zwracamy tylko te listy, które należą do grupy użytkownika
-  const groupLists = shoppingLists.filter((l) => l.groupId === groupId);
-  res.json(groupLists);
-});
+  try {
+    const lists = await req.db.all(
+      `SELECT id, group_id as groupId, name, created_at as createdAt
+       FROM lists
+       WHERE group_id = ? AND deleted_at IS NULL
+       ORDER BY created_at DESC`,
+      [groupId],
+    );
 
-// POBRANIE JEDNEJ LISTY
-router.get("/:id", (req, res) => {
-  const groupId = req.headers["x-group-id"];
-  if (!groupId) return res.status(401).json({ message: "Brak ID grupy" });
+    for (const l of lists) {
+      const items = await req.db.all(
+        `SELECT id, name, quantity, unit, completed_at FROM items WHERE list_id = ? AND deleted_at IS NULL`,
+        [l.id],
+      );
+      l.items = items.map((i) => ({
+        id: i.id,
+        name: i.name,
+        quantity: i.quantity,
+        unit: i.unit,
+        completed: !!i.completed_at,
+      }));
+      l.itemsIn = items.length;
+      l.completedCount = items.filter((i) => i.completed_at).length;
+    }
 
-  const listId = parseInt(req.params.id);
-  // Szukamy listy, która ma odpowiednie ID ORAZ należy do tej grupy
-  const list = shoppingLists.find((l) => l.id === listId && l.groupId === groupId);
-
-  if (list) {
-    res.json(list);
-  } else {
-    res.status(404).json({ message: "Nie znaleziono listy lub brak dostępu" });
+    res.json(lists);
+  } catch (error) {
+    res.status(500).json({ message: "Błąd serwera", error: error.message });
   }
 });
 
-// TWORZENIE NOWEJ LISTY (Nowy endpoint!)
-router.post("/", (req, res) => {
+const { randomUUID } = require("crypto");
+
+// POBRANIE JEDNEJ LISTY
+router.get("/:id", async (req, res) => {
   const groupId = req.headers["x-group-id"];
   if (!groupId) return res.status(401).json({ message: "Brak ID grupy" });
 
-  const { name, icon } = req.body;
+  const listId = req.params.id;
+  try {
+    const list = await req.db.get(
+      `SELECT id, group_id as groupId, name, created_at as createdAt FROM lists WHERE id = ? AND group_id = ? AND deleted_at IS NULL`,
+      [listId, groupId],
+    );
 
-  const newList = {
-    id: Date.now(),
-    groupId: groupId, // Przypisujemy listę na sztywno do grupy!
-    name: name || "Nowa lista",
-    icon: icon || "🛒",
-    itemsIn: 0,
-    completedCount: 0,
-    items: [],
-  };
+    if (!list) return res.status(404).json({ message: "Nie znaleziono listy lub brak dostępu" });
 
-  shoppingLists.push(newList);
-  res.status(201).json({ message: "Utworzono listę", list: newList });
+    const items = await req.db.all(
+      `SELECT id, name, quantity, unit, completed_at FROM items WHERE list_id = ? AND deleted_at IS NULL`,
+      [listId],
+    );
+
+    list.items = items.map((i) => ({
+      id: i.id,
+      name: i.name,
+      quantity: i.quantity,
+      unit: i.unit,
+      completed: !!i.completed_at,
+    }));
+    list.itemsIn = items.length;
+    list.completedCount = items.filter((i) => i.completed_at).length;
+
+    res.json(list);
+  } catch (error) {
+    res.status(500).json({ message: "Błąd serwera", error: error.message });
+  }
+});
+
+// TWORZENIE NOWEJ LISTY
+router.post("/", async (req, res) => {
+  const groupId = req.headers["x-group-id"];
+  if (!groupId) return res.status(401).json({ message: "Brak ID grupy" });
+
+  const { name } = req.body;
+  try {
+    const id = randomUUID();
+    console.log(`[LISTS:POST] Tworzenie listy: id=${id}, groupId=${groupId}, name=${name || "Nowa lista"}`);
+    await req.db.run(`INSERT INTO lists (id, group_id, name) VALUES (?, ?, ?)`, [id, groupId, name || "Nowa lista"]);
+    console.log(`[LISTS:POST] Lista ${id} została utworzona`);
+    const newList = { id, groupId, name: name || "Nowa lista", itemsIn: 0, completedCount: 0, items: [] };
+
+    res.status(201).json({ message: "Utworzono listę", list: newList });
+  } catch (error) {
+    console.error(`[LISTS:POST] Błąd:`, error.message);
+    res.status(500).json({ message: "Błąd tworzenia listy", error: error.message });
+  }
 });
 
 // EDYCJA LISTY (PUT) - Zmiana nazwy
-router.put("/:id", (req, res) => {
+router.put("/:id", async (req, res) => {
   const groupId = req.headers["x-group-id"];
   if (!groupId) return res.status(401).json({ message: "Brak ID grupy" });
 
-  const listId = parseInt(req.params.id);
+  const listId = req.params.id;
   const { name } = req.body;
 
-  // Szukamy listy i upewniamy się, że należy do grupy użytkownika
-  const list = shoppingLists.find((l) => l.id === listId && l.groupId === groupId);
-  if (!list) return res.status(404).json({ message: "Nie znaleziono listy" });
+  try {
+    const existing = await req.db.get(`SELECT id FROM lists WHERE id = ? AND group_id = ? AND deleted_at IS NULL`, [listId, groupId]);
+    if (!existing) return res.status(404).json({ message: "Nie znaleziono listy" });
 
-  // Aktualizujemy nazwę
-  if (name) list.name = name;
+    if (name) await req.db.run(`UPDATE lists SET name = ? WHERE id = ?`, [name, listId]);
 
-  res.json({ message: "Zaktualizowano listę", list });
+    const updated = await req.db.get(`SELECT id, group_id as groupId, name, created_at as createdAt FROM lists WHERE id = ?`, [listId]);
+    res.json({ message: "Zaktualizowano listę", list: updated });
+  } catch (error) {
+    res.status(500).json({ message: "Błąd aktualizacji", error: error.message });
+  }
 });
 
-// USUWANIE LISTY (DELETE)
-router.delete("/:id", (req, res) => {
+// USUWANIE LISTY (DELETE) - soft delete
+router.delete("/:id", async (req, res) => {
   const groupId = req.headers["x-group-id"];
   if (!groupId) return res.status(401).json({ message: "Brak ID grupy" });
 
-  const listId = parseInt(req.params.id);
+  const listId = req.params.id;
+  try {
+    const existing = await req.db.get(
+      `SELECT id FROM lists WHERE id = ? AND group_id = ? AND deleted_at IS NULL`,
+      [listId, groupId],
+    );
+    if (!existing) return res.status(404).json({ message: "Nie znaleziono listy" });
 
-  // Znajdujemy indeks listy, sprawdzając też grupę
-  const listIndex = shoppingLists.findIndex((l) => l.id === listId && l.groupId === groupId);
-  if (listIndex === -1) return res.status(404).json({ message: "Nie znaleziono listy" });
+    await req.db.run(`UPDATE lists SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?`, [listId]);
+    await req.db.run(`UPDATE items SET deleted_at = CURRENT_TIMESTAMP WHERE list_id = ?`, [listId]);
 
-  // Usuwamy 1 element z tablicy
-  shoppingLists.splice(listIndex, 1);
-
-  res.json({ message: "Lista została usunięta" });
+    res.json({ message: "Lista została usunięta" });
+  } catch (error) {
+    res.status(500).json({ message: "Błąd usuwania", error: error.message });
+  }
 });
 
 module.exports = router;
