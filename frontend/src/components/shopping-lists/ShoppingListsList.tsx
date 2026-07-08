@@ -13,6 +13,8 @@ import { Button } from "../ui/button";
 // TYPE
 import { type ShoppingListData } from "@shared/types";
 import { ListSettingsOverlay } from "../ListSettingsOverlay";
+import { ListAddOverlay } from "../ListAddOverlay";
+import { Plus } from "lucide-react";
 
 type ShoppingListsListProps = {
   shoppingLists: ShoppingListData[];
@@ -32,10 +34,10 @@ export function ShoppingListsList({
       <div className="shopping-lists-list h-full px-2 overflow-y-auto scrollbar-gutter-stable pb-[env(safe-area-bottom)]">
         {/* Navbar placeholder */}
         <div className="space-y-2">
-          <div className="h-12 w-full bg-neutral-800 animate-pulse rounded-lg" />
-          <div className="h-12 w-full bg-neutral-800 animate-pulse rounded-lg" />
-          <div className="h-12 w-full bg-neutral-800 animate-pulse rounded-lg" />
-          <div className="h-12 w-full bg-neutral-800 animate-pulse rounded-lg" />
+          <div className="h-12 w-full bg-foreground/15 animate-pulse rounded-lg" />
+          <div className="h-12 w-full bg-foreground/15 animate-pulse rounded-lg" />
+          <div className="h-12 w-full bg-foreground/15 animate-pulse rounded-lg" />
+          <div className="h-12 w-full bg-foreground/15 animate-pulse rounded-lg" />
         </div>
       </div>
     );
@@ -49,7 +51,7 @@ export function ShoppingListsList({
         const listCompletePercent = Math.floor((el.completedCount / el.itemsIn) * 100);
         return (
           // 1. Zdejmujemy onClick stąd! Karta to teraz tylko "pojemnik".
-          <Card key={el.id}>
+          <Card key={el.id} className="border border-foreground/5">
             <CardHeader>
               {/* 2. Tworzymy klikalną strefę na teksty (lewa strona) */}
               <div className="flex-1 cursor-pointer" onClick={() => navigate(`/shopping/${el.id}`)}>
@@ -61,7 +63,7 @@ export function ShoppingListsList({
               </div>
 
               {/* 3. Prawa strona z przyciskiem opcji (odizolowana od nawigacji) */}
-              <CardAction className="row-span-full! flex items-center justify-center h-full">
+              <CardAction className="row-span-full! flex items-center justify-center h-full rounded-sm">
                 <ListSettingsOverlay listId={el.id} listName={el.name} />
               </CardAction>
             </CardHeader>
@@ -83,7 +85,11 @@ function EmptyListPrompt({ searchInput }: { searchInput: string }) {
             <EmptyDescription>Nie znaleziono żadnej listy zakupowej</EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
-            <Button>Dodaj liste </Button>
+            <ListAddOverlay>
+              <Button variant="default" onClick={(e) => e.currentTarget.blur()}>
+                Dodaj liste <Plus className="size-4" />
+              </Button>
+            </ListAddOverlay>
           </EmptyContent>
         </Empty>
       ) : (
@@ -93,11 +99,15 @@ function EmptyListPrompt({ searchInput }: { searchInput: string }) {
             <EmptyTitle>Nic nie znaleziono</EmptyTitle>
             <EmptyDescription className="text-balance">
               Nie znaleziono pasującej listy do `
-              <span className="font-mono text-neutral-300">{searchInput}</span>`
+              <span className="font-mono text-primary/40">{searchInput}</span>`
             </EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
-            <Button>Dodaj liste </Button>
+            <ListAddOverlay>
+              <Button variant="default" onClick={(e) => e.currentTarget.blur()}>
+                Dodaj liste <Plus className="size-4" />
+              </Button>
+            </ListAddOverlay>
           </EmptyContent>
         </Empty>
       )}

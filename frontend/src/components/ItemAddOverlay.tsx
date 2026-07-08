@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/drawer";
 import { fetchWithGroup } from "@/utils/api";
 import { Plus } from "lucide-react";
+import { Checkbox } from "./ui/checkbox";
 
 interface ItemAddOverlayProps {
   id: string;
@@ -134,16 +135,17 @@ export function ItemAddOverlay({ id }: ItemAddOverlayProps) {
             </select>
           </div>
 
-          <label className="flex items-center gap-3 py-2 cursor-pointer select-none">
-            <div className="flex items-center justify-center h-6 w-6 rounded border border-neutral-700 bg-neutral-900">
-              <input
-                type="checkbox"
-                checked={keepOpen}
-                onChange={(e) => setKeepOpen(e.target.checked)}
-                className="size-4 accent-primary cursor-pointer"
-              />
-            </div>
-            <span className="text-sm text-neutral-300">Dodawaj wiele produktów z rzędu</span>
+          <label
+            htmlFor="keep-open-checkbox"
+            className="flex items-center gap-3 py-2 cursor-pointer select-none"
+          >
+            <Checkbox
+              id="keep-open-checkbox"
+              checked={keepOpen}
+              onCheckedChange={(checked) => setKeepOpen(checked as boolean)}
+              className="size-5"
+            />
+            <span className="text-sm text-foreground">Dodawaj wiele produktów z rzędu</span>
           </label>
 
           <Button

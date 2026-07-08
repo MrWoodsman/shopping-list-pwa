@@ -27,7 +27,7 @@ export function ShoppingLists() {
       <ShoppingListsNavbar inputVal={searchInput} setInputVal={setSearchInput} />
       {error ? (
         <div className="flex flex-col items-center justify-center h-full gap-4 p-6 text-center">
-          <div className="p-4 bg-red-900/20 rounded-full text-red-500">
+          <div className="p-4 bg-destructive/20 rounded-full text-destructive">
             <AlertCircle size={32} />
           </div>
           <h3 className="text-lg font-semibold">Coś poszło nie tak</h3>

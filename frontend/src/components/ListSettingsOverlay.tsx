@@ -73,13 +73,13 @@ export function ListSettingsOverlay({ listId, listName }: ListSettingsProps) {
         <Button
           variant="ghost"
           size="icon"
-          className="h-auto w-12 shrink-0 rounded-none"
+          className="h-full w-12 shrink-0 rounded-none"
           onClick={(e) => {
             e.stopPropagation(); // <-- TO JEST KLUCZ! Zatrzymuje kliknięcie przed pójściem wyżej
             e.currentTarget.blur(); // Zrzuca focus (żeby nie było błędu aria-hidden)
           }}
         >
-          <EllipsisVertical className="size-5 text-neutral-400" />
+          <EllipsisVertical className="size-5 text-primary" />
         </Button>
       </DrawerTrigger>
 

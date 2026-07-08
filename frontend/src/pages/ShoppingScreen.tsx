@@ -27,6 +27,7 @@ import { type ShoppingListData, type ShoppingItem } from "@shared/types";
 import { ItemAddOverlay } from "@/components/ItemAddOverlay";
 import { ItemSettingsOverlay } from "@/components/ItemSettingsOverlay";
 import { fetchWithGroup } from "@/utils/api";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export function ShoppingScreen() {
   const { id } = useParams();
@@ -204,8 +205,8 @@ interface ItemCardProps {
 function ItemCard({ listId, item, onToggle }: ItemCardProps) {
   return (
     <Card
-      className={`border-dashed border border-neutral-700 overflow-hidden transition-colors duration-200 ${
-        item.completed ? "bg-neutral-800 text-neutral-400" : "bg-neutral-900"
+      className={`border-dashed border border-foreground/20 overflow-hidden transition-colors duration-200 ${
+        item.completed ? "bg-foreground/7.5 text-primary" : "bg-foreground/7.5"
       } py-0`}
     >
       <CardContent className="px-2 pr-0 flex gap-2 items-stretch relative">
@@ -214,11 +215,9 @@ function ItemCard({ listId, item, onToggle }: ItemCardProps) {
           onClick={() => onToggle(!item.completed)}
         >
           <div className="button h-10 aspect-square flex items-center justify-center">
-            <input
-              type="checkbox"
-              readOnly
+            <Checkbox
               checked={item.completed}
-              className="size-4 accent-primary cursor-pointer"
+              className="size-4.5 border-foreground/25 bg-foreground/2.5"
             />
           </div>
           <div className="column flex flex-col">
@@ -226,7 +225,7 @@ function ItemCard({ listId, item, onToggle }: ItemCardProps) {
               {item.name}
             </h1>
             {/* <h2 className="text-[10px] text-neutral-500">ID: {item.id}</h2> */}
-            <h2 className="text-[10px] text-neutral-500">
+            <h2 className="text-[12px] text-primary/60">
               {item.quantity} {item.unit}
             </h2>
           </div>

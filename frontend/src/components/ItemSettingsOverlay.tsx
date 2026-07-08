@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -9,6 +9,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
+import { Checkbox } from "@/components/ui/checkbox";
 import { EllipsisVertical, Trash2, Check } from "lucide-react";
 import { type ShoppingItem } from "@shared/types";
 import { fetchWithGroup } from "@/utils/api";
@@ -28,14 +29,14 @@ export function ItemSettingsOverlay({ listId, item }: ItemSettingsProps) {
   const fieldClass =
     "h-11 w-full rounded-lg border border-input bg-background px-3 text-base text-foreground outline-none focus:ring-2 focus:ring-primary";
 
-  useEffect(() => {
-    if (isOpen) {
-      setName(item.name);
-      setQuantity(String(item.quantity));
-      setUnit(item.unit);
-      setCompleted(item.completed);
-    }
-  }, [isOpen, item]);
+  // useEffect(() => {
+  //   if (isOpen) {
+  //     setName(item.name);
+  //     setQuantity(String(item.quantity));
+  //     setUnit(item.unit);
+  //     setCompleted(item.completed);
+  //   }
+  // }, [isOpen, item]);
 
   // MUTACJA DO USUWANIA PRODUKTU
   const deleteItemMutation = useMutation({
@@ -87,7 +88,7 @@ export function ItemSettingsOverlay({ listId, item }: ItemSettingsProps) {
           className="h-auto w-12 shrink-0 rounded-none"
           onClick={(e) => e.currentTarget.blur()}
         >
-          <EllipsisVertical className="size-5 text-neutral-400" />
+          <EllipsisVertical className="size-5 text-foreground/75" />
         </Button>
       </DrawerTrigger>
 
@@ -140,17 +141,21 @@ export function ItemSettingsOverlay({ listId, item }: ItemSettingsProps) {
             </div>
           </div>
 
-          <label className="flex items-center gap-3 rounded-lg border border-border p-3 cursor-pointer select-none">
-            <input
-              type="checkbox"
+          <label
+            htmlFor={`completed-${item.id}`}
+            className="flex items-center gap-3 rounded-lg border border-border p-3 cursor-pointer select-none"
+          >
+            <Checkbox
+              id={`completed-${item.id}`}
               checked={completed}
-              onChange={(e) => setCompleted(e.target.checked)}
+              onCheckedChange={(checked) => setCompleted(checked as boolean)}
+              className="size-4.5 border-foreground/25 bg-foreground/2.5"
             />
             <span className="text-sm">Produkt kupiony</span>
           </label>
 
           <Button
-            className="justify-start h-14 text-base"
+            className="justify-start h-14 text-base bg-primary"
             onClick={() => updateItemMutation.mutate()}
             disabled={updateItemMutation.isPending || name.trim() === ""}
           >

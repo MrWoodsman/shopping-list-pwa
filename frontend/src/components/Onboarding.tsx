@@ -17,7 +17,7 @@ export function Onboarding({ onComplete }: { onComplete: () => void }) {
       {" "}
       <CardContent className="flex-2">
         {/* Tu możesz dodać jakąś grafikę/ilustrację dla każdego kroku */}
-        <div className="h-full bg-zinc-800 rounded-xl flex items-center justify-center">
+        <div className="h-full bg-bacground-tone rounded-xl flex items-center justify-center">
           Ilustracja {currentStep + 1}
         </div>
       </CardContent>
@@ -31,7 +31,7 @@ export function Onboarding({ onComplete }: { onComplete: () => void }) {
           {steps.map((_, i) => (
             <div
               key={i}
-              className={`h-2 w-2 rounded-full transition-all ${i === currentStep ? "bg-primary w-6" : "bg-zinc-700"}`}
+              className={`h-2 w-2 rounded-full transition-all ${i === currentStep ? "bg-primary w-6" : "bg-progres-dots"}`}
             />
           ))}
         </div>

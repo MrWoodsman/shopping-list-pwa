@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { ListAddOverlay } from "../ListAddOverlay";
+import { Plus } from "lucide-react";
 
 type ShoppingListsNavbarProps = {
   inputVal: string;
@@ -22,7 +23,11 @@ export function ShoppingListsNavbar({ inputVal, setInputVal }: ShoppingListsNavb
           />
         </ButtonGroup>
         <ButtonGroup>
-          <ListAddOverlay />
+          <ListAddOverlay>
+            <Button variant="default" onClick={(e) => e.currentTarget.blur()}>
+              Dodaj <Plus className="size-4" />
+            </Button>
+          </ListAddOverlay>
         </ButtonGroup>
       </ButtonGroup>
     </div>

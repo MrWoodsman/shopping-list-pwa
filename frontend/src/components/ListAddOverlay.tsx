@@ -10,18 +10,19 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { fetchWithGroup } from "@/utils/api";
-import { Plus } from "lucide-react"; // Importujemy ikonkę plusa
 
-// Usunęliśmy id z propsów, komponent nie przyjmuje już żadnych argumentów
-export function ListAddOverlay() {
+// DODANE: Definiujemy propsy dla komponentu
+interface ListAddOverlayProps {
+  children: React.ReactNode;
+}
+
+export function ListAddOverlay({ children }: ListAddOverlayProps) {
   const queryClient = useQueryClient();
   const [newListName, setNewListName] = useState("");
   const [isOpen, setIsOpen] = useState(false);
 
-  // MUTACJA DO TWORZENIA NOWEJ LISTY
   const addListMutation = useMutation({
     mutationFn: async ({ name }: { name: string }) => {
-      // Uderzamy prosto w główny endpoint list zakupów
       const response = await fetchWithGroup(`/api/shopping-lists`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -31,7 +32,6 @@ export function ListAddOverlay() {
       return response.json();
     },
     onSuccess: () => {
-      // Odświeżamy tylko główną tablicę list, bo to na niej jesteśmy
       queryClient.invalidateQueries({ queryKey: ["shoppingLists"] });
       setNewListName("");
       setIsOpen(false);
@@ -40,12 +40,8 @@ export function ListAddOverlay() {
 
   return (
     <Drawer open={isOpen} onOpenChange={setIsOpen}>
-      <DrawerTrigger asChild>
-        {/* Przycisk zmieniony na okrągły z ikoną plusa */}
-        <Button variant="default" onClick={(e) => e.currentTarget.blur()}>
-          Dodaj <Plus className="size-4" />
-        </Button>
-      </DrawerTrigger>
+      {/* ZMIANA: Zamiast sztywnego przycisku, renderujemy to, co podasz w propsach (children) */}
+      <DrawerTrigger asChild>{children}</DrawerTrigger>
 
       <DrawerContent className="bg-background border-border px-4 pb-[max(24px,env(safe-area-inset-bottom))]">
         <DrawerHeader className="px-0 text-left">

@@ -59,7 +59,7 @@ export function HomeScreen({ onJoin }: HomeScreenProps) {
       {/* GŁÓWNY EKRAN */}
       <div className="w-full h-full flex flex-col p-4 pt-[max(16px,env(safe-area-inset-top))] relative z-10">
         <div className="flex-1 flex items-center justify-center">
-          <div className="w-32 aspect-square bg-neutral-700 rounded-2xl shadow-lg"></div>
+          <div className="w-48 aspect-square bg-foreground/10 rounded-2xl"></div>
         </div>
 
         <div className="flex flex-col gap-6 pb-[max(8px,env(safe-area-inset-bottom))]">
@@ -70,7 +70,7 @@ export function HomeScreen({ onJoin }: HomeScreenProps) {
 
           {recentGroups.length > 0 && (
             <div className="flex flex-col gap-2.5">
-              <div className="flex items-center gap-2 text-xs text-neutral-500 font-medium uppercase tracking-wider">
+              <div className="flex items-center gap-2 text-xs text-primary font-medium uppercase tracking-wider">
                 <Clock size={14} />
                 <span>Ostatnio używane</span>
               </div>
@@ -79,7 +79,7 @@ export function HomeScreen({ onJoin }: HomeScreenProps) {
                   <button
                     key={recentId}
                     onClick={() => executeJoin(recentId)}
-                    className="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 rounded-full text-sm font-medium transition-colors border border-neutral-700"
+                    className="px-4 py-2 bg-bacground-tone/50 hover:bg-bacground-tone/25 text-primary rounded-full text-sm font-medium transition-colors border border-bacground-tone"
                   >
                     {recentId}
                   </button>
@@ -102,7 +102,7 @@ export function HomeScreen({ onJoin }: HomeScreenProps) {
               <button
                 type="button"
                 onClick={handleAddSuffix}
-                className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium bg-neutral-800/60 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-700 rounded-md transition-all border border-neutral-700/50"
+                className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium bg-bacground-tone/80 text-primary hover:text-primary/75 hover:bg-background/50 rounded-md transition-all border border-foreground/15"
               >
                 <Dices size={14} />
                 Losuj
@@ -113,7 +113,7 @@ export function HomeScreen({ onJoin }: HomeScreenProps) {
               <button
                 type="button"
                 onClick={() => setShowHelp(true)}
-                className="text-[11px] text-neutral-500 hover:text-neutral-300 transition-colors flex items-center gap-1.5 cursor-pointer py-1"
+                className="text-[11px] text-primary/75 hover:text-primary/50 transition-colors flex items-center gap-1.5 cursor-pointer py-1"
               >
                 <Info size={12} />
                 <span>Wymyśl trudną nazwę i udostępnij ją domownikom.</span>
@@ -144,23 +144,23 @@ export function HomeScreen({ onJoin }: HomeScreenProps) {
 
       {/* Sam panel wyjeżdżający z dołu */}
       <div
-        className={`fixed bottom-0 left-0 right-0 z-50 bg-neutral-900 border-t border-neutral-800 rounded-t-3xl p-6 pb-[max(32px,env(safe-area-inset-bottom))] transition-transform duration-300 ease-out shadow-[0_-10px_40px_rgba(0,0,0,0.5)] ${
+        className={`fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-background/75 rounded-t-3xl p-6 pb-[max(32px,env(safe-area-inset-bottom))] transition-transform duration-300 ease-out shadow-[0_-10px_40px_rgba(0,0,0,0.5)] ${
           showHelp ? "translate-y-0" : "translate-y-full"
         }`}
       >
         {/* Mały "uchwyt" na górze szuflady (częsty motyw w iOS/Android) */}
-        <div className="w-12 h-1.5 bg-neutral-700 rounded-full mx-auto mb-6" />
+        <div className="w-12 h-1.5 bg-bacground-tone rounded-full mx-auto mb-6" />
 
-        <h3 className="text-xl font-semibold text-neutral-100 mb-4 flex items-center gap-2">
-          <Info size={20} className="text-neutral-400" />O co chodzi z ID Grupy?
+        <h3 className="text-xl font-semibold text-primary mb-4 flex items-center gap-2">
+          <Info size={20} className="text-primary/75" />O co chodzi z ID Grupy?
         </h3>
 
         <div className="space-y-4">
           <div>
-            <h4 className="text-sm font-medium text-neutral-300 mb-1">
+            <h4 className="text-sm font-medium text-primary/85 mb-1">
               Bezpieczeństwo i unikalność
             </h4>
-            <p className="text-sm text-neutral-400 leading-relaxed">
+            <p className="text-sm text-primary/60 leading-relaxed">
               Aplikacja nie wymaga logowania hasłem, więc ID grupy to Twój jedyny klucz. Prosta
               nazwa (np. "DOM") sprawi, że wejdziesz na listy zakupów kogoś innego. Kliknij przycisk
               "Losuj", aby wygenerować bezpieczną końcówkę.
@@ -168,8 +168,8 @@ export function HomeScreen({ onJoin }: HomeScreenProps) {
           </div>
 
           <div>
-            <h4 className="text-sm font-medium text-neutral-300 mb-1">Współdzielenie list</h4>
-            <p className="text-sm text-neutral-400 leading-relaxed">
+            <h4 className="text-sm font-medium text-primary/85 mb-1">Współdzielenie list</h4>
+            <p className="text-sm text-primary/60 leading-relaxed">
               Aby robić zakupy wspólnie z drugą osobą, musisz podyktować jej dokładnie to samo ID.
               Kiedy wpisze je na swoim telefonie, połączycie się w czasie rzeczywistym.
             </p>
