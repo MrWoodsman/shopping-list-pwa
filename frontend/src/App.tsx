@@ -1,13 +1,16 @@
 import { useState } from "react";
-// Dodajemy Navigate do importów z routera!
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useGroup } from "./hooks/useGroup";
-import { ShoppingLists } from "./pages/ShoppingLists";
-import { HomeScreen } from "./pages/HomeScreen";
+// COMPONENTS
 import { Onboarding } from "./components/Onboarding";
 import { AppLayout } from "./components/AppLayout";
+// SCREENS
+import { ShoppingLists } from "./pages/ShoppingLists";
+import { HomeScreen } from "./pages/HomeScreen";
 import { ShoppingScreen } from "./pages/ShoppingScreen";
 import { SettingsScreen } from "./pages/SettingsScreen";
+import { RecipesScreen } from "./pages/RecipesScreen"; // (dopasuj ścieżkę)
+import { AutoListScreen } from "./pages/AutoListScreen";
 
 function App() {
   const { groupId, joinGroup, leaveGroup } = useGroup();
@@ -44,22 +47,8 @@ function App() {
       <Route element={<AppLayout />}>
         <Route path="/shopping-lists" element={<ShoppingLists />} />
         <Route path="/shopping/:id" element={<ShoppingScreen />} />
-        <Route
-          path="/recipes"
-          element={
-            <div className="p-4 pt-safe pt-[max(16px,env(safe-area-inset-top))]">
-              Ekran przepisów (wkrótce)
-            </div>
-          }
-        />
-        <Route
-          path="/auto-list"
-          element={
-            <div className="p-4 pt-safe pt-[max(16px,env(safe-area-inset-top))]">
-              Ekran automatyczny (wkrótce)
-            </div>
-          }
-        />
+        <Route path="/recipes" element={<RecipesScreen />} />
+        <Route path="/auto-list" element={<AutoListScreen />} />
         <Route
           path="/settings"
           element={<SettingsScreen groupId={groupId} onLeave={leaveGroup} />}
