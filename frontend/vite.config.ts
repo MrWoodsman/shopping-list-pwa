@@ -12,7 +12,7 @@ export default defineConfig({
     VitePWA({
       registerType: "autoUpdate", // automatycznie odświeża apkę, jak zmienisz kod
       manifest: {
-        name: "Lista Zakupów",
+        name: "Lista Zakupów", // możesz zmienić np. na "ZeroWaste"
         short_name: "Zakupy",
         description: "Domowa lista zakupów",
         theme_color: "#09090b",
@@ -20,11 +20,16 @@ export default defineConfig({
         display: "standalone", // wymusza tryb pełnoekranowy (bez przeglądarki)
         icons: [
           {
-            // Vite domyślnie ma plik vite.svg w folderze public/,
-            // docelowo wrzucisz tu ikonę np. 192x192 jako .png
-            src: "/favicon.svg",
+            src: "/192x192.png",
             sizes: "192x192",
-            type: "image/svg+xml",
+            type: "image/png",
+            purpose: "any maskable", // pozwala systemom na ładne przycinanie/zaokrąglanie ikony
+          },
+          {
+            src: "/512x512.png",
+            sizes: "512x512",
+            type: "image/png",
+            purpose: "any maskable",
           },
         ],
       },
