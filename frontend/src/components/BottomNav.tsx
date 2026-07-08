@@ -23,7 +23,7 @@ export function BottomNav() {
 
         <Link to="/auto-list" className="w-full flex flex-col items-center -space-y-1.5">
           <Bot
-            className={`size-6 ${isActive("/auto-lista") ? "text-primary" : "text-neutral-400"}`}
+            className={`size-6 ${isActive("/auto-list") ? "text-primary" : "text-neutral-400"}`}
           />
           <span
             className={`text-[10px] ${isActive("/auto-list") ? "text-primary font-medium" : "text-neutral-400"}`}
