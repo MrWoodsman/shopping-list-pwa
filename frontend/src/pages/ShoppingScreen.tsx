@@ -187,7 +187,12 @@ export function ShoppingScreen() {
           </AccordionItem>
         </Accordion>
       </div>
-      <Toaster position="top-center" />
+      <Toaster
+        position="top-center"
+        toastOptions={{
+          style: { marginTop: "env(safe-area-inset-top)" },
+        }}
+      />
     </div>
   );
 }

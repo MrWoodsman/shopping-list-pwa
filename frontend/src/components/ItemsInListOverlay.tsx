@@ -11,41 +11,65 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { Settings, CheckCheck, RotateCcw, Copy, Trash2, Trash } from "lucide-react";
+import { type ShoppingItem, type ShoppingListData } from "@shared/types";
 
 interface ItemsInListOverlayProps {
   listID: string;
-  items?: any[]; // Opcjonalnie podmień 'any' na swój typ np. ShoppingItem, jeśli go eksportujesz
+  items?: ShoppingItem[];
 }
 
 export function ItemsInListOverlay({ listID, items = [] }: ItemsInListOverlayProps) {
   const [isOpen, setIsOpen] = useState(false);
   const queryClient = useQueryClient();
 
-  // 1. OBLICZAMY STANY DLA PRZYCISKÓW NA BAZIE PRZEKAZANYCH PRODUKTÓW
   const totalItems = items.length;
   const completedItems = items.filter((item) => item.completed).length;
   const uncompletedItems = totalItems - completedItems;
 
-  // Logika wyłączania przycisków (true = zablokowany)
   const isListEmpty = totalItems === 0;
   const isEverythingBought = isListEmpty || uncompletedItems === 0;
   const isNothingBought = isListEmpty || completedItems === 0;
 
-  // 2. WSPÓLNA FUNKCJA PO ZAKOŃCZENIU MUTACJI
+  // WSPÓLNA FUNKCJA PO ZAKOŃCZENIU MUTACJI
   const onSuccessAction = (message: string) => {
-    queryClient.invalidateQueries({ queryKey: ["shoppingList", listID] });
     toast.success(message);
     setIsOpen(false);
   };
 
-  // 3. MUTACJE
+  // ==========================================
+  // MUTACJE Z OPTYMISTYCZNYM UI (Teraz używają ShoppingListData!)
+  // ==========================================
+
   const markAllMutation = useMutation({
     mutationFn: async () => {
       const res = await fetchWithGroup(`/api/shopping-lists/${listID}/items/mark-all`, {
         method: "PUT",
       });
-      if (!res.ok) throw new Error("Błąd oznaczania wszystkiego");
+      if (!res.ok) throw new Error("Błąd oznaczania");
     },
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: ["shoppingList", listID] });
+      const previousData = queryClient.getQueryData<ShoppingListData>(["shoppingList", listID]);
+
+      queryClient.setQueryData(
+        ["shoppingList", listID],
+        (oldData: ShoppingListData | undefined) => {
+          if (!oldData) return oldData;
+          return {
+            ...oldData,
+            items: oldData.items.map((item) => ({ ...item, completed: true })),
+            completedCount: oldData.items.length, // Optymistycznie aktualizujemy licznik!
+          };
+        },
+      );
+      return { previousData };
+    },
+    onError: (_err, _variables, context) => {
+      if (context?.previousData)
+        queryClient.setQueryData(["shoppingList", listID], context.previousData);
+      toast.error("Błąd: Nie udało się zaznaczyć wszystkiego.");
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ["shoppingList", listID] }),
     onSuccess: () => onSuccessAction("Wszystko zaznaczone jako kupione!"),
   });
 
@@ -56,6 +80,29 @@ export function ItemsInListOverlay({ listID, items = [] }: ItemsInListOverlayPro
       });
       if (!res.ok) throw new Error("Błąd resetowania");
     },
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: ["shoppingList", listID] });
+      const previousData = queryClient.getQueryData<ShoppingListData>(["shoppingList", listID]);
+
+      queryClient.setQueryData(
+        ["shoppingList", listID],
+        (oldData: ShoppingListData | undefined) => {
+          if (!oldData) return oldData;
+          return {
+            ...oldData,
+            items: oldData.items.map((item) => ({ ...item, completed: false })),
+            completedCount: 0, // Optymistycznie zerujemy licznik
+          };
+        },
+      );
+      return { previousData };
+    },
+    onError: (_err, _variables, context) => {
+      if (context?.previousData)
+        queryClient.setQueryData(["shoppingList", listID], context.previousData);
+      toast.error("Błąd: Nie udało się zresetować listy.");
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ["shoppingList", listID] }),
     onSuccess: () => onSuccessAction("Odznaczono wszystkie produkty."),
   });
 
@@ -66,6 +113,31 @@ export function ItemsInListOverlay({ listID, items = [] }: ItemsInListOverlayPro
       });
       if (!res.ok) throw new Error("Błąd usuwania");
     },
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: ["shoppingList", listID] });
+      const previousData = queryClient.getQueryData<ShoppingListData>(["shoppingList", listID]);
+
+      queryClient.setQueryData(
+        ["shoppingList", listID],
+        (oldData: ShoppingListData | undefined) => {
+          if (!oldData) return oldData;
+          const remainingItems = oldData.items.filter((item) => !item.completed);
+          return {
+            ...oldData,
+            items: remainingItems,
+            itemsIn: remainingItems.length, // Zmniejszamy całkowitą liczbę produktów
+            completedCount: 0, // Usuwamy kupione, więc licznik wynosi 0
+          };
+        },
+      );
+      return { previousData };
+    },
+    onError: (_err, _variables, context) => {
+      if (context?.previousData)
+        queryClient.setQueryData(["shoppingList", listID], context.previousData);
+      toast.error("Błąd: Nie udało się usunąć produktów.");
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ["shoppingList", listID] }),
     onSuccess: () => onSuccessAction("Usunięto kupione produkty."),
   });
 
@@ -74,12 +146,37 @@ export function ItemsInListOverlay({ listID, items = [] }: ItemsInListOverlayPro
       const res = await fetchWithGroup(`/api/shopping-lists/${listID}/items/delete-all`, {
         method: "DELETE",
       });
-      if (!res.ok) throw new Error("Błąd czyszczenia listy");
+      if (!res.ok) throw new Error("Błąd czyszczenia");
     },
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: ["shoppingList", listID] });
+      const previousData = queryClient.getQueryData<ShoppingListData>(["shoppingList", listID]);
+
+      queryClient.setQueryData(
+        ["shoppingList", listID],
+        (oldData: ShoppingListData | undefined) => {
+          if (!oldData) return oldData;
+          return {
+            ...oldData,
+            items: [],
+            itemsIn: 0,
+            completedCount: 0,
+          };
+        },
+      );
+      return { previousData };
+    },
+    onError: (_err, _variables, context) => {
+      if (context?.previousData)
+        queryClient.setQueryData(["shoppingList", listID], context.previousData);
+      toast.error("Błąd: Nie udało się wyczyścić listy.");
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ["shoppingList", listID] }),
     onSuccess: () => onSuccessAction("Lista została całkowicie wyczyszczona."),
   });
 
-  // 4. KOPIOWANIE DO SCHOWKA Z FALLBACKIEM (HTTP vs HTTPS)
+  // ==========================================
+
   const handleCopyList = () => {
     if (isListEmpty) {
       toast.error("Lista jest pusta, nie ma czego kopiować.");
@@ -92,13 +189,11 @@ export function ItemsInListOverlay({ listID, items = [] }: ItemsInListOverlayPro
 
     const finalString = `🛒 *Lista zakupów*\n\n${textToCopy}`;
 
-    // Sprawdzamy czy jesteśmy w bezpiecznym kontekście (HTTPS / localhost)
     if (navigator.clipboard && window.isSecureContext) {
       navigator.clipboard.writeText(finalString);
       toast.success("Skopiowano listę do schowka!");
       setIsOpen(false);
     } else {
-      // Fallback dla lokalnego HTTP (np. po IP w sieci Wi-Fi)
       const textArea = document.createElement("textarea");
       textArea.value = finalString;
       textArea.style.position = "absolute";
@@ -107,7 +202,7 @@ export function ItemsInListOverlay({ listID, items = [] }: ItemsInListOverlayPro
       textArea.select();
 
       try {
-        document.execCommand("copy"); // Starsza, bardziej tolerancyjna metoda
+        document.execCommand("copy");
         toast.success("Skopiowano listę do schowka!");
       } catch (error) {
         toast.error("Przeglądarka zablokowała kopiowanie.", error!);
@@ -121,7 +216,11 @@ export function ItemsInListOverlay({ listID, items = [] }: ItemsInListOverlayPro
   return (
     <Drawer open={isOpen} onOpenChange={setIsOpen}>
       <DrawerTrigger asChild>
-        <Button variant="secondary" size="icon" onClick={(e) => e.currentTarget.blur()}>
+        <Button
+          variant="secondary"
+          size="icon"
+          onClick={(e: React.MouseEvent<HTMLButtonElement>) => e.currentTarget.blur()}
+        >
           <Settings className="size-4" />
         </Button>
       </DrawerTrigger>
@@ -132,7 +231,6 @@ export function ItemsInListOverlay({ listID, items = [] }: ItemsInListOverlayPro
         </DrawerHeader>
 
         <div className="flex flex-col gap-5">
-          {/* BLOK 1: Opcje bezpieczne */}
           <div className="bg-secondary/80 rounded-xl overflow-hidden flex flex-col border border-border/50">
             <Button
               variant="ghost"
@@ -165,7 +263,6 @@ export function ItemsInListOverlay({ listID, items = [] }: ItemsInListOverlayPro
             </Button>
           </div>
 
-          {/* BLOK 2: Strefa niebezpieczeństwa */}
           <div className="flex flex-col gap-2">
             <h3 className="text-[11px] font-bold tracking-widest text-destructive uppercase px-2">
               Usuwanie danych
