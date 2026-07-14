@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/components/ThemeProvider"; // Upewnij się, że ścieżka jest poprawna
 import { Sun, Moon, Monitor } from "lucide-react";
+import { VersionBadge } from "@/components/VersionBadge";
 
 export function SettingsScreen({ groupId, onLeave }: { groupId: string; onLeave: () => void }) {
   // Pobieramy aktualny motyw i funkcję do jego zmiany z naszego Providera
@@ -80,6 +81,11 @@ export function SettingsScreen({ groupId, onLeave }: { groupId: string; onLeave:
             <span className="text-xs">System</span>
           </Button>
         </div>
+      </div>
+
+      {/* SEKCJA OSTATNIA */}
+      <div className="flex flex-col items-center">
+        <VersionBadge />
       </div>
     </div>
   );
