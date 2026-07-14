@@ -1,8 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-// ICONS
-import { Settings } from "lucide-react";
 // UI
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
@@ -20,7 +18,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 // TYPES
 import { type ShoppingListData, type ShoppingItem } from "@shared/types";
@@ -28,6 +25,7 @@ import { ItemAddOverlay } from "@/components/ItemAddOverlay";
 import { ItemSettingsOverlay } from "@/components/ItemSettingsOverlay";
 import { fetchWithGroup } from "@/utils/api";
 import { Checkbox } from "@/components/ui/checkbox";
+import { ItemsInListOverlay } from "@/components/ItemsInListOverlay";
 
 export function ShoppingScreen() {
   const { id } = useParams();
@@ -124,9 +122,7 @@ export function ShoppingScreen() {
         </Breadcrumb>
 
         <div className="flex items-center gap-1 shrink-0">
-          <Button variant={"secondary"} size="icon">
-            <Settings className="size-4" />
-          </Button>
+          <ItemsInListOverlay listID={id!} items={data?.items || []} />
           <ItemAddOverlay id={id!} />
         </div>
       </div>
@@ -191,7 +187,7 @@ export function ShoppingScreen() {
           </AccordionItem>
         </Accordion>
       </div>
-      <Toaster />
+      <Toaster position="top-center" />
     </div>
   );
 }

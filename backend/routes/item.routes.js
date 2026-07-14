@@ -1,7 +1,111 @@
 const express = require("express");
 const router = express.Router();
-
 const { randomUUID } = require("crypto");
+
+// ==============================================================
+// 🔴 TRASY MASOWE (MUSZĄ BYĆ NA GÓRZE!)
+// ==============================================================
+
+// ZAZNACZ WSZYSTKO JAKO KUPIONE
+router.put("/:listId/items/mark-all", async (req, res) => {
+  const groupId = req.headers["x-group-id"];
+  if (!groupId) return res.status(401).json({ message: "Brak ID grupy" });
+  const listId = req.params.listId;
+
+  try {
+    const list = await req.db.get(
+      `SELECT id FROM lists WHERE id = ? AND group_id = ? AND deleted_at IS NULL`,
+      [listId, groupId],
+    );
+    if (!list) return res.status(404).json({ message: "Nie znaleziono listy" });
+
+    // Zmieniamy na kupione tylko te, które nie są usunięte i nie są jeszcze kupione
+    await req.db.run(
+      `UPDATE items SET completed_at = datetime('now','localtime') WHERE list_id = ? AND completed_at IS NULL AND deleted_at IS NULL`,
+      [listId],
+    );
+
+    res.json({ message: "Wszystkie produkty oznaczone jako kupione." });
+  } catch (error) {
+    res.status(500).json({ message: "Błąd serwera", error: error.message });
+  }
+});
+
+// ODZNACZ WSZYSTKO (RESET)
+router.put("/:listId/items/reset-all", async (req, res) => {
+  const groupId = req.headers["x-group-id"];
+  if (!groupId) return res.status(401).json({ message: "Brak ID grupy" });
+  const listId = req.params.listId;
+
+  try {
+    const list = await req.db.get(
+      `SELECT id FROM lists WHERE id = ? AND group_id = ? AND deleted_at IS NULL`,
+      [listId, groupId],
+    );
+    if (!list) return res.status(404).json({ message: "Nie znaleziono listy" });
+
+    await req.db.run(
+      `UPDATE items SET completed_at = NULL WHERE list_id = ? AND deleted_at IS NULL`,
+      [listId],
+    );
+
+    res.json({ message: "Lista została zresetowana." });
+  } catch (error) {
+    res.status(500).json({ message: "Błąd serwera", error: error.message });
+  }
+});
+
+// USUŃ TYLKO KUPIONE (Miękkie usuwanie)
+router.delete("/:listId/items/delete-completed", async (req, res) => {
+  const groupId = req.headers["x-group-id"];
+  if (!groupId) return res.status(401).json({ message: "Brak ID grupy" });
+  const listId = req.params.listId;
+
+  try {
+    const list = await req.db.get(
+      `SELECT id FROM lists WHERE id = ? AND group_id = ? AND deleted_at IS NULL`,
+      [listId, groupId],
+    );
+    if (!list) return res.status(404).json({ message: "Nie znaleziono listy" });
+
+    await req.db.run(
+      `UPDATE items SET deleted_at = CURRENT_TIMESTAMP WHERE list_id = ? AND completed_at IS NOT NULL AND deleted_at IS NULL`,
+      [listId],
+    );
+
+    res.json({ message: "Usunięto kupione produkty." });
+  } catch (error) {
+    res.status(500).json({ message: "Błąd serwera", error: error.message });
+  }
+});
+
+// USUŃ WSZYSTKIE PRODUKTY (Miękkie usuwanie)
+router.delete("/:listId/items/delete-all", async (req, res) => {
+  const groupId = req.headers["x-group-id"];
+  if (!groupId) return res.status(401).json({ message: "Brak ID grupy" });
+  const listId = req.params.listId;
+
+  try {
+    const list = await req.db.get(
+      `SELECT id FROM lists WHERE id = ? AND group_id = ? AND deleted_at IS NULL`,
+      [listId, groupId],
+    );
+    if (!list) return res.status(404).json({ message: "Nie znaleziono listy" });
+
+    await req.db.run(
+      `UPDATE items SET deleted_at = CURRENT_TIMESTAMP WHERE list_id = ? AND deleted_at IS NULL`,
+      [listId],
+    );
+
+    res.json({ message: "Lista została wyczyszczona." });
+  } catch (error) {
+    res.status(500).json({ message: "Błąd serwera", error: error.message });
+  }
+});
+
+// ==============================================================
+// 🟢 TRASY POJEDYNCZE (MUSZĄ BYĆ NA DOLE!)
+// ==============================================================
 
 // DODAWANIE PRODUKTU (POST)
 router.post("/:listId/items", async (req, res) => {
