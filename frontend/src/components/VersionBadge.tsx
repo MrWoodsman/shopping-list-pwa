@@ -21,22 +21,47 @@ export function VersionBadge() {
   // 1. HISTORIA ZMIAN (Najnowsza wersja ZAWSZE musi być jako PIERWSZA w tablicy!)
   const changelog: Release[] = [
     {
-      version: "0.2.0",
-      date: "14.07.2026", // Dokładna data bez niepotrzebnej godziny
+      version: "0.4.0",
+      date: "14.07.2026",
       changes: [
-        "Dodano menu opcji listy (zaznacz/odznacz wszystko, kopiowanie)",
-        "Wdrożono ultra szybkie optymistyczne UI (brak lagów przy klikaniu)",
-        "Automatyczne czyszczenie spacji przy dodawaniu i edycji produktów",
-        "Naprawiono nachodzące powiadomienia (toasty) na iOS pod Notch / Dynamic Island",
+        "Dodano menu grupowych zmian (zaznacz/odznacz wszystko, usuwanie).",
+        "Wdrożono błyskawiczne optymistyczne UI dla akcji masowych.",
+        "Wprowadzono moduł motywów wizualnych i dostosowano kolory komponentów.",
+        "Zabezpieczono formularze przed błędami spacji z autokorekty na telefonach.",
+        "Zaktualizowano ikony w aplikacji na bardziej spójne.",
+        "Dodano widok wersji i historii zmian (Changelog) w ustawieniach.",
+      ],
+    },
+    {
+      version: "0.3.0",
+      date: "08.07.2026",
+      changes: [
+        "Całkowita migracja bazy danych na SQLite – większa szybkość i niezawodność.",
+        "Wprowadzono system Grup Współdzielonych (dołączanie, opuszczanie, pamięć ostatnich grup).",
+        "Rozbudowano produkty o podawanie ilości oraz jednostek miary.",
+        "Zmieniono interfejs przycisków na wygodne, wysuwane z dołu menu (Drawers).",
+        "Poprawiono płynność animacji rozwijania list i przechodzenia między ekranami.",
+      ],
+    },
+    {
+      version: "0.2.0",
+      date: "01.07.2026",
+      changes: [
+        "Dodano system powiadomień na ekranie (Toasty) o sukcesie lub błędzie operacji.",
+        "Wdrożono odświeżanie list i produktów w tle na żywo (Live Update).",
+        "Naprawiono irytujący błąd z chowającą się klawiaturą podczas wpisywania.",
+        "Dodano błyskawiczną reakcję interfejsu przy odhaczaniu produktów (Optimistic Update).",
+        "Poprawiono podświetlanie elementów i automatyczne łapanie ostrości (focus) przez formularze.",
       ],
     },
     {
       version: "0.1.0",
       date: "25.06.2026",
       changes: [
-        "Pierwsza wersja PWA aplikacji ZeroWaste",
-        "Podstawowe zarządzanie listami i produktami",
-        "Synchronizacja w czasie rzeczywistym z bazą SQLite",
+        "Pierwsza działająca wersja PWA naszej aplikacji zakupowej.",
+        "Podstawowy system zarządzania listami: przeglądanie, tworzenie, edycja i wyszukiwanie.",
+        "Połączenie interfejsu (TanStack Query) z autorskim API backendowym.",
+        "Uporządkowanie architektury projektu i komponentów interfejsu użytkownika.",
       ],
     },
   ];
