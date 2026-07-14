@@ -58,11 +58,14 @@ export function ItemSettingsOverlay({ listId, item }: ItemSettingsProps) {
 
   const updateItemMutation = useMutation({
     mutationFn: async () => {
+      const trimmedName = name.trim();
+      if (!trimmedName) throw new Error("Nazwa listy nie może być pusta");
+
       const response = await fetchWithGroup(`/api/shopping-lists/${listId}/items/${item.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name,
+          trimmedName,
           quantity: Number(quantity),
           unit,
           completed,

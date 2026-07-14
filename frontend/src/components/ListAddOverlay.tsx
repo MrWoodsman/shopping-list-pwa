@@ -23,10 +23,13 @@ export function ListAddOverlay({ children }: ListAddOverlayProps) {
 
   const addListMutation = useMutation({
     mutationFn: async ({ name }: { name: string }) => {
+      const trimmedName = name.trim();
+      if (!trimmedName) throw new Error("Nazwa listy nie może być pusta");
+
       const response = await fetchWithGroup(`/api/shopping-lists`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name }),
+        body: JSON.stringify({ trimmedName }),
       });
       if (!response.ok) throw new Error("Nie udało się utworzyć listy");
       return response.json();

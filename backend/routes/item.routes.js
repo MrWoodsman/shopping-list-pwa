@@ -112,7 +112,14 @@ router.post("/:listId/items", async (req, res) => {
   const groupId = req.headers["x-group-id"];
   if (!groupId) return res.status(401).json({ message: "Brak ID grupy" });
   const listId = req.params.listId;
-  const { name, quantity = 1, unit = "szt." } = req.body;
+
+  // 1. ZMIANA: Używamy .trim() od razu przy pobieraniu danych
+  const rawName = req.body.name || "";
+  const name = rawName.trim();
+  const { quantity = 1, unit = "szt." } = req.body;
+
+  // 2. DODATKOWA WALIDACJA: Jeśli po trimie nazwa jest pusta, przerywamy
+  if (!name) return res.status(400).json({ message: "Nazwa produktu nie może być pusta" });
 
   try {
     const list = await req.db.get(
@@ -122,10 +129,13 @@ router.post("/:listId/items", async (req, res) => {
     if (!list) return res.status(404).json({ message: "Nie znaleziono listy" });
 
     const id = randomUUID();
+
+    // 3. UŻYWAMY OCZYSZCZONEJ ZMIENNEJ 'name'
     await req.db.run(
       `INSERT INTO items (id, list_id, name, quantity, unit) VALUES (?, ?, ?, ?, ?)`,
       [id, listId, name, quantity, unit],
     );
+
     const newItem = { id, name, quantity, unit, completed: false };
 
     const itemsInRow = await req.db.get(
@@ -152,7 +162,11 @@ router.put("/:listId/items/:itemId", async (req, res) => {
 
   const listId = req.params.listId;
   const itemId = req.params.itemId;
-  const { completed, name, quantity, unit } = req.body;
+  const rawName = req.body.name || "";
+  const name = rawName.trim();
+  const { completed, quantity, unit } = req.body;
+
+  if (!name) return res.status(400).json({ message: "Nazwa produktu nie może być pusta" });
 
   try {
     const list = await req.db.get(
