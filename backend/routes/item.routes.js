@@ -156,17 +156,16 @@ router.post("/:listId/items", async (req, res) => {
 });
 
 // ZMIANA STATUSU (PUT)
+// ZMIANA STATUSU I EDYCJA (PUT)
 router.put("/:listId/items/:itemId", async (req, res) => {
   const groupId = req.headers["x-group-id"];
   if (!groupId) return res.status(401).json({ message: "Brak ID grupy" });
 
   const listId = req.params.listId;
   const itemId = req.params.itemId;
-  const rawName = req.body.name || "";
-  const name = rawName.trim();
-  const { completed, quantity, unit } = req.body;
 
-  if (!name) return res.status(400).json({ message: "Nazwa produktu nie może być pusta" });
+  // Pobieramy wszystko prosto z body, bez wczesnego trim() i blokowania
+  const { completed, quantity, unit, name } = req.body;
 
   try {
     const list = await req.db.get(
@@ -184,17 +183,23 @@ router.put("/:listId/items/:itemId", async (req, res) => {
     const updates = [];
     const params = [];
 
+    // 1. ZMIANA STATUSU (z checkboxa)
     if (typeof completed === "boolean") {
       updates.push(
         completed ? "completed_at = datetime('now','localtime')" : "completed_at = NULL",
       );
     }
 
-    if (typeof name === "string" && name.trim() !== "") {
+    // 2. ZMIANA NAZWY (z okna edycji - odpala się tylko gdy wysłano nazwę)
+    if (name !== undefined) {
+      const cleanName = name.trim();
+      if (!cleanName) return res.status(400).json({ message: "Nazwa produktu nie może być pusta" });
+
       updates.push("name = ?");
-      params.push(name.trim());
+      params.push(cleanName);
     }
 
+    // 3. ZMIANA ILOŚCI
     if (quantity !== undefined && quantity !== null && quantity !== "") {
       const numericQuantity = Number(quantity);
       if (Number.isNaN(numericQuantity)) {
@@ -204,11 +209,13 @@ router.put("/:listId/items/:itemId", async (req, res) => {
       params.push(numericQuantity);
     }
 
-    if (typeof unit === "string" && unit.trim() !== "") {
+    // 4. ZMIANA JEDNOSTKI
+    if (unit !== undefined) {
       updates.push("unit = ?");
       params.push(unit.trim());
     }
 
+    // Jeśli nie ma żadnych zmian do zapisania
     if (updates.length === 0) {
       const itemsInRow = await req.db.get(
         `SELECT COUNT(*) as cnt FROM items WHERE list_id = ? AND deleted_at IS NULL`,
@@ -231,9 +238,11 @@ router.put("/:listId/items/:itemId", async (req, res) => {
       });
     }
 
+    // Wykonanie aktualizacji
     params.push(itemId);
     await req.db.run(`UPDATE items SET ${updates.join(", ")} WHERE id = ?`, params);
 
+    // Pobranie zaktualizowanego przedmiotu
     const updatedItemRow = await req.db.get(
       `SELECT id, name, quantity, unit, completed_at FROM items WHERE id = ?`,
       [itemId],
@@ -246,6 +255,7 @@ router.put("/:listId/items/:itemId", async (req, res) => {
       completed: !!updatedItemRow.completed_at,
     };
 
+    // Podsumowanie listy
     const itemsInRow = await req.db.get(
       `SELECT COUNT(*) as cnt FROM items WHERE list_id = ? AND deleted_at IS NULL`,
       [listId],
