@@ -1,5 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { ROUTES } from "@/config/routes";
 import { motion, AnimatePresence } from "framer-motion";
 // UI
 import { Toaster } from "@/components/ui/sonner";
@@ -59,7 +60,7 @@ export function ShoppingScreen() {
           <BreadcrumbList className="flex-nowrap min-w-0 gap-1">
             <BreadcrumbItem className="shrink-0">
               <BreadcrumbLink asChild>
-                <Link to="/shopping-lists">Lista</Link>
+                <Link to={ROUTES.SHOPPING_LISTS}>Lista</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
 

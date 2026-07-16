@@ -1,6 +1,7 @@
+import React from "react";
+import { ROUTES } from "@/config/routes";
 import { ListChecks, ChefHat, Settings, Bot } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
-import React from "react";
 
 // Definicja Propsów
 interface NavItemProps {
@@ -32,19 +33,27 @@ export function BottomNav() {
   return (
     <nav className="border-t bg-background pt-3 pb-[max(8px,env(safe-area-inset-bottom))] px-4">
       <div className="flex justify-around items-center">
-        <BottomNavItem to="/shopping-lists" label="Listy" isActive={path.startsWith("/shopping")}>
+        <BottomNavItem
+          to={ROUTES.SHOPPING_LISTS}
+          label="Listy"
+          isActive={path.startsWith(ROUTES.SHOPPING_LISTS)}
+        >
           <ListChecks />
         </BottomNavItem>
 
-        <BottomNavItem to="/auto-list" label="Uzupełnianie" isActive={path === "/auto-list"}>
+        <BottomNavItem
+          to={ROUTES.AUTO_LIST}
+          label="Uzupełnianie"
+          isActive={path === ROUTES.AUTO_LIST}
+        >
           <Bot />
         </BottomNavItem>
 
-        <BottomNavItem to="/recipes" label="Przepisy" isActive={path === "/recipes"}>
+        <BottomNavItem to={ROUTES.RECIPES} label="Przepisy" isActive={path === ROUTES.RECIPES}>
           <ChefHat />
         </BottomNavItem>
 
-        <BottomNavItem to="/settings" label="Ustawienia" isActive={path === "/settings"}>
+        <BottomNavItem to={ROUTES.SETTINGS} label="Ustawienia" isActive={path === ROUTES.SETTINGS}>
           <Settings />
         </BottomNavItem>
       </div>

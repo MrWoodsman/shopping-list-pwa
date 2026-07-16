@@ -1,8 +1,14 @@
+import { useNavigate } from "react-router-dom";
+// ROUTES
+import { ROUTES } from "@/config/routes";
+// ICONS
+import { Package, Plus, Search } from "lucide-react";
+// UI
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ButtonGroup } from "@/components/ui/button-group";
+// COMPONENTS
 import { ListAddOverlay } from "../ListAddOverlay";
-import { Package, Plus, Search } from "lucide-react";
 
 type ShoppingListsNavbarProps = {
   inputVal: string;
@@ -10,6 +16,8 @@ type ShoppingListsNavbarProps = {
 };
 
 export function ShoppingListsNavbar({ inputVal, setInputVal }: ShoppingListsNavbarProps) {
+  const navigate = useNavigate();
+
   return (
     <div className="search-container flex gap-2 px-2 pt-[max(8px,env(safe-area-inset-top))]">
       <ButtonGroup aria-label="Button group" className="w-full">
@@ -25,7 +33,13 @@ export function ShoppingListsNavbar({ inputVal, setInputVal }: ShoppingListsNavb
           />
         </ButtonGroup>
         <div className="flex gap-2">
-          <Button variant="secondary" onClick={(e) => e.currentTarget.blur()}>
+          <Button
+            variant="secondary"
+            onClick={(e) => {
+              e.currentTarget.blur();
+              navigate(ROUTES.SHOPPING_ALL);
+            }}
+          >
             Razem <Package className="size-4" />
           </Button>
           <ListAddOverlay>

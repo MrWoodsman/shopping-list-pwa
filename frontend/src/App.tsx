@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ROUTES } from "@/config/routes";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useGroup } from "./hooks/useGroup";
 // COMPONENTS
@@ -11,6 +12,7 @@ import { ShoppingScreen } from "./pages/ShoppingScreen";
 import { SettingsScreen } from "./pages/SettingsScreen";
 import { RecipesScreen } from "./pages/RecipesScreen"; // (dopasuj ścieżkę)
 import { AutoListScreen } from "./pages/AutoListScreen";
+import { ShoppingAllScreen } from "./pages/ShoppingAllScreen";
 
 function App() {
   const { groupId, joinGroup, leaveGroup } = useGroup();
@@ -42,15 +44,16 @@ function App() {
   return (
     <Routes>
       {/* Magiczne przekierowanie - fizycznie zmienia URL i wpycha w AppLayout */}
-      <Route path="/" element={<Navigate to="/shopping-lists" replace />} />
+      <Route path="/" element={<Navigate to={ROUTES.SHOPPING_LISTS} replace />} />
 
       <Route element={<AppLayout />}>
-        <Route path="/shopping-lists" element={<ShoppingLists />} />
-        <Route path="/shopping/:id" element={<ShoppingScreen />} />
-        <Route path="/recipes" element={<RecipesScreen />} />
-        <Route path="/auto-list" element={<AutoListScreen />} />
+        <Route path={ROUTES.SHOPPING_LISTS} element={<ShoppingLists />} />
+        <Route path={ROUTES.SHOPPING_ALL} element={<ShoppingAllScreen />} />
+        <Route path={ROUTES.LIST_DETAIL(":id")} element={<ShoppingScreen />} />
+        <Route path={ROUTES.RECIPES} element={<RecipesScreen />} />
+        <Route path={ROUTES.AUTO_LIST} element={<AutoListScreen />} />
         <Route
-          path="/settings"
+          path={ROUTES.SETTINGS}
           element={<SettingsScreen groupId={groupId} onLeave={leaveGroup} />}
         />
       </Route>
