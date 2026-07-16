@@ -21,6 +21,13 @@ export function VersionBadge() {
   // 1. HISTORIA ZMIAN (Najnowsza wersja ZAWSZE musi być jako PIERWSZA w tablicy!)
   const changelog: Release[] = [
     {
+      version: "0.4.1",
+      date: "15.07.2026",
+      changes: [
+        "Naprawiono wyświetlanie fałszywych komunikatów o braku połączenia; aplikacja pokazuje teraz precyzyjne informacje o błędach.",
+      ],
+    },
+    {
       version: "0.4.0",
       date: "14.07.2026",
       changes: [
