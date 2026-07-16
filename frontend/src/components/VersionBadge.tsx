@@ -88,7 +88,7 @@ export function VersionBadge() {
         </Badge>
       </DialogTrigger>
 
-      <DialogContent className="max-w-[400px] rounded-2xl bg-background border-border">
+      <DialogContent className="max-w-100 rounded-2xl bg-background border-border">
         <DialogHeader className="text-left">
           <DialogTitle className="text-xl font-bold">Historia zmian</DialogTitle>
         </DialogHeader>
