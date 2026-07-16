@@ -10,6 +10,7 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { fetchWithGroup } from "@/utils/api";
+import { showErrorToast } from "@/utils/errorHandler";
 
 // DODANE: Definiujemy propsy dla komponentu
 interface ListAddOverlayProps {
@@ -31,7 +32,10 @@ export function ListAddOverlay({ children }: ListAddOverlayProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ trimmedName }),
       });
-      if (!response.ok) throw new Error("Nie udało się utworzyć listy");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Nie udało się utworzyć listy");
+      }
       return response.json();
     },
     onSuccess: () => {
@@ -39,6 +43,7 @@ export function ListAddOverlay({ children }: ListAddOverlayProps) {
       setNewListName("");
       setIsOpen(false);
     },
+    onError: showErrorToast,
   });
 
   return (

@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/drawer";
 import { EllipsisVertical, Trash2, Pencil, X } from "lucide-react";
 import { fetchWithGroup } from "@/utils/api";
+import { showErrorToast } from "@/utils/errorHandler";
 
 interface ListSettingsProps {
   listId: string | number;
@@ -30,13 +31,17 @@ export function ListSettingsOverlay({ listId, listName }: ListSettingsProps) {
       const response = await fetchWithGroup(`/api/shopping-lists/${listId}`, {
         method: "DELETE",
       });
-      if (!response.ok) throw new Error("Nie udało się usunąć listy");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Nie udało się usunąć listy");
+      }
       return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["shoppingLists"] });
       setIsOpen(false);
     },
+    onError: showErrorToast,
   });
 
   // MUTACJA: ZMIANA NAZWY LISTY
@@ -47,7 +52,10 @@ export function ListSettingsOverlay({ listId, listName }: ListSettingsProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: updatedName }),
       });
-      if (!response.ok) throw new Error("Nie udało się zmienić nazwy");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Nie udało się zmienić nazwy");
+      }
       return response.json();
     },
     onSuccess: () => {

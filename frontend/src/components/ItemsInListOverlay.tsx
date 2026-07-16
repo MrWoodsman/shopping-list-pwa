@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/drawer";
 import { Settings, CheckCheck, RotateCcw, Copy, Trash2, Trash } from "lucide-react";
 import { type ShoppingItem, type ShoppingListData } from "@shared/types";
+import { showErrorToast } from "@/utils/errorHandler";
 
 interface ItemsInListOverlayProps {
   listID: string;
@@ -45,7 +46,10 @@ export function ItemsInListOverlay({ listID, items = [] }: ItemsInListOverlayPro
       const res = await fetchWithGroup(`/api/shopping-lists/${listID}/items/mark-all`, {
         method: "PUT",
       });
-      if (!res.ok) throw new Error("Błąd oznaczania");
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || "Wystąpił nieznany błąd przy aktualizacji");
+      }
     },
     onMutate: async () => {
       await queryClient.cancelQueries({ queryKey: ["shoppingList", listID] });
@@ -64,10 +68,10 @@ export function ItemsInListOverlay({ listID, items = [] }: ItemsInListOverlayPro
       );
       return { previousData };
     },
-    onError: (_err, _variables, context) => {
+    onError: (err, _variables, context) => {
       if (context?.previousData)
         queryClient.setQueryData(["shoppingList", listID], context.previousData);
-      toast.error("Błąd: Nie udało się zaznaczyć wszystkiego.");
+      showErrorToast(err);
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey: ["shoppingList", listID] }),
     onSuccess: () => onSuccessAction("Wszystko zaznaczone jako kupione!"),
@@ -78,7 +82,12 @@ export function ItemsInListOverlay({ listID, items = [] }: ItemsInListOverlayPro
       const res = await fetchWithGroup(`/api/shopping-lists/${listID}/items/reset-all`, {
         method: "PUT",
       });
-      if (!res.ok) throw new Error("Błąd resetowania");
+      if (!res.ok) {
+        // Próbujemy wyciągnąć JSON z błędem od Twojego backendu
+        const errorData = await res.json().catch(() => ({}));
+        // Rzucamy Error z oryginalną wiadomością (lub domyślną, gdyby serwer padł całkowicie)
+        throw new Error(errorData.message || "Wystąpił nieznany błąd przy aktualizacji");
+      }
     },
     onMutate: async () => {
       await queryClient.cancelQueries({ queryKey: ["shoppingList", listID] });
@@ -97,10 +106,10 @@ export function ItemsInListOverlay({ listID, items = [] }: ItemsInListOverlayPro
       );
       return { previousData };
     },
-    onError: (_err, _variables, context) => {
+    onError: (err, _variables, context) => {
       if (context?.previousData)
         queryClient.setQueryData(["shoppingList", listID], context.previousData);
-      toast.error("Błąd: Nie udało się zresetować listy.");
+      showErrorToast(err);
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey: ["shoppingList", listID] }),
     onSuccess: () => onSuccessAction("Odznaczono wszystkie produkty."),
@@ -111,7 +120,12 @@ export function ItemsInListOverlay({ listID, items = [] }: ItemsInListOverlayPro
       const res = await fetchWithGroup(`/api/shopping-lists/${listID}/items/delete-completed`, {
         method: "DELETE",
       });
-      if (!res.ok) throw new Error("Błąd usuwania");
+      if (!res.ok) {
+        // Próbujemy wyciągnąć JSON z błędem od Twojego backendu
+        const errorData = await res.json().catch(() => ({}));
+        // Rzucamy Error z oryginalną wiadomością (lub domyślną, gdyby serwer padł całkowicie)
+        throw new Error(errorData.message || "Wystąpił nieznany błąd przy aktualizacji");
+      }
     },
     onMutate: async () => {
       await queryClient.cancelQueries({ queryKey: ["shoppingList", listID] });
@@ -132,10 +146,10 @@ export function ItemsInListOverlay({ listID, items = [] }: ItemsInListOverlayPro
       );
       return { previousData };
     },
-    onError: (_err, _variables, context) => {
+    onError: (err, _variables, context) => {
       if (context?.previousData)
         queryClient.setQueryData(["shoppingList", listID], context.previousData);
-      toast.error("Błąd: Nie udało się usunąć produktów.");
+      showErrorToast(err);
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey: ["shoppingList", listID] }),
     onSuccess: () => onSuccessAction("Usunięto kupione produkty."),
@@ -146,7 +160,13 @@ export function ItemsInListOverlay({ listID, items = [] }: ItemsInListOverlayPro
       const res = await fetchWithGroup(`/api/shopping-lists/${listID}/items/delete-all`, {
         method: "DELETE",
       });
-      if (!res.ok) throw new Error("Błąd czyszczenia");
+
+      if (!res.ok) {
+        // Próbujemy wyciągnąć JSON z błędem od Twojego backendu
+        const errorData = await res.json().catch(() => ({}));
+        // Rzucamy Error z oryginalną wiadomością (lub domyślną, gdyby serwer padł całkowicie)
+        throw new Error(errorData.message || "Wystąpił nieznany błąd przy aktualizacji");
+      }
     },
     onMutate: async () => {
       await queryClient.cancelQueries({ queryKey: ["shoppingList", listID] });
@@ -166,10 +186,10 @@ export function ItemsInListOverlay({ listID, items = [] }: ItemsInListOverlayPro
       );
       return { previousData };
     },
-    onError: (_err, _variables, context) => {
+    onError: (err, _variables, context) => {
       if (context?.previousData)
         queryClient.setQueryData(["shoppingList", listID], context.previousData);
-      toast.error("Błąd: Nie udało się wyczyścić listy.");
+      showErrorToast(err);
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey: ["shoppingList", listID] }),
     onSuccess: () => onSuccessAction("Lista została całkowicie wyczyszczona."),

@@ -11,6 +11,7 @@ import {
 import { fetchWithGroup } from "@/utils/api";
 import { Plus } from "lucide-react";
 import { Checkbox } from "./ui/checkbox";
+import { showErrorToast } from "@/utils/errorHandler";
 
 interface ItemAddOverlayProps {
   id: string;
@@ -38,7 +39,10 @@ export function ItemAddOverlay({ id }: ItemAddOverlayProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, quantity: qty, unit: un }),
       });
-      if (!response.ok) throw new Error("Nie udało się dodać produktu");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Nie udało się dodać produktu");
+      }
       return response.json();
     },
     onSuccess: () => {
@@ -54,6 +58,7 @@ export function ItemAddOverlay({ id }: ItemAddOverlayProps) {
         setQuantity("1");
       }
     },
+    onError: showErrorToast,
   });
 
   // Dodajemy e: React.FormEvent, żeby móc użyć preventDefault()
@@ -151,7 +156,7 @@ export function ItemAddOverlay({ id }: ItemAddOverlayProps) {
           <Button
             type="submit" // ZMIANA: Dodano typ submit
             className="w-full h-11 mt-2"
-            disabled={addItemMutation.isPending && !keepOpen} // Wyłączamy przycisk tylko, jeśli okienko ma się zamknąć
+            disabled={(addItemMutation.isPending && !keepOpen) || newItemName.length == 0} // Wyłączamy przycisk tylko, jeśli okienko ma się zamknąć
           >
             {addItemMutation.isPending && !keepOpen ? "Zapisywanie..." : "Zapisz produkt"}
           </Button>

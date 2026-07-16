@@ -13,6 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { EllipsisVertical, Trash2, Check } from "lucide-react";
 import { type ShoppingItem } from "@shared/types";
 import { fetchWithGroup } from "@/utils/api";
+import { showErrorToast } from "@/utils/errorHandler";
 
 interface ItemSettingsProps {
   listId: string;
@@ -45,7 +46,10 @@ export function ItemSettingsOverlay({ listId, item }: ItemSettingsProps) {
       const response = await fetchWithGroup(`/api/shopping-lists/${listId}/items/${item.id}`, {
         method: "DELETE",
       });
-      if (!response.ok) throw new Error("Nie udało się usunąć produktu");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Nie udało się usunąć produktu");
+      }
       return response.json();
     },
     onSuccess: () => {
@@ -54,6 +58,7 @@ export function ItemSettingsOverlay({ listId, item }: ItemSettingsProps) {
       queryClient.invalidateQueries({ queryKey: ["shoppingLists"] });
       setIsOpen(false);
     },
+    onError: showErrorToast,
   });
 
   const updateItemMutation = useMutation({
@@ -71,7 +76,11 @@ export function ItemSettingsOverlay({ listId, item }: ItemSettingsProps) {
           completed,
         }),
       });
-      if (!response.ok) throw new Error("Nie udało się zapisać zmian");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Nie udało się zapisać zmian");
+      }
+      return response.json();
       return response.json();
     },
     onSuccess: () => {
@@ -79,6 +88,7 @@ export function ItemSettingsOverlay({ listId, item }: ItemSettingsProps) {
       queryClient.invalidateQueries({ queryKey: ["shoppingLists"] });
       setIsOpen(false);
     },
+    onError: showErrorToast,
   });
 
   return (

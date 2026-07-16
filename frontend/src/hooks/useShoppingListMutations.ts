@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchWithGroup } from "@/utils/api";
-import { toast } from "sonner";
 import { type ShoppingListData } from "@shared/types";
+import { showErrorToast } from "@/utils/errorHandler";
 
 // TWOJA FUNKCJA STRZAŁKOWA ZACZYNA SIĘ TUTAJ:
 export const useToggleItemMutation = (id: string) => {
@@ -15,7 +15,12 @@ export const useToggleItemMutation = (id: string) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ completed }),
       });
-      if (!response.ok) throw new Error("Nie udało się zaktualizować statusu");
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Wystąpił nieznany błąd przy aktualizacji");
+      }
+
       return response.json();
     },
 
@@ -36,11 +41,9 @@ export const useToggleItemMutation = (id: string) => {
     },
 
     // KROK 2: Jeśli serwer odrzuci akcję lub braknie neta (Rollback)
-    onError: (_err, _newTodo, context) => {
+    onError: (err, _newTodo, context) => {
       queryClient.setQueryData(["shoppingList", id], context?.previousList);
-      toast.error("Brak połączenia. Cofnięto zmianę.", {
-        className: "bg-red-950! border-red-800! text-red-200!",
-      });
+      showErrorToast(err);
     },
 
     // KROK 3: Po wszystkim, niezależnie od wyniku, synchronizujemy dla pewności
