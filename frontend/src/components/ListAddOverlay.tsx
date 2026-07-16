@@ -30,7 +30,7 @@ export function ListAddOverlay({ children }: ListAddOverlayProps) {
       const response = await fetchWithGroup(`/api/shopping-lists`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ trimmedName }),
+        body: JSON.stringify({ name: trimmedName }),
       });
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
