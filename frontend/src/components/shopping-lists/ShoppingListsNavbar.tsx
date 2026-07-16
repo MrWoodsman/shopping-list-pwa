@@ -33,15 +33,19 @@ export function ShoppingListsNavbar({ inputVal, setInputVal }: ShoppingListsNavb
           />
         </ButtonGroup>
         <div className="flex gap-2">
-          <Button
-            variant="secondary"
-            onClick={(e) => {
-              e.currentTarget.blur();
-              navigate(ROUTES.SHOPPING_ALL);
-            }}
-          >
-            Razem <Package className="size-4" />
-          </Button>
+          {0! ? (
+            <Button
+              variant="secondary"
+              onClick={(e) => {
+                e.currentTarget.blur();
+                navigate(ROUTES.SHOPPING_ALL);
+              }}
+            >
+              Razem <Package className="size-4" />
+            </Button>
+          ) : (
+            ""
+          )}
           <ListAddOverlay>
             <Button variant="default" onClick={(e) => e.currentTarget.blur()}>
               Dodaj <Plus className="size-4" />
