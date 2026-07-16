@@ -6,6 +6,49 @@ const { randomUUID } = require("crypto");
 // 🔴 TRASY MASOWE (MUSZĄ BYĆ NA GÓRZE!)
 // ==============================================================
 
+// POBIERANIE WSZYSTKICH PRODUKTÓW ZE WSZYSTKICH LIST (AGREGACJA)
+router.get("/all/items", async (req, res) => {
+  const groupId = req.headers["x-group-id"];
+  if (!groupId) return res.status(401).json({ message: "Brak ID grupy" });
+
+  try {
+    // Używamy JOIN, żeby połączyć tabele 'items' (i) oraz 'lists' (l)
+    // Wyciągamy wszystko z produktu + nazwę listy jako 'list_name'
+    const items = await req.db.all(
+      `SELECT 
+          i.id, 
+          i.name, 
+          i.quantity, 
+          i.unit, 
+          i.completed_at, 
+          i.list_id, 
+          l.name as list_name 
+      FROM items i
+      JOIN lists l ON i.list_id = l.id
+      WHERE l.group_id = ? 
+          AND i.deleted_at IS NULL 
+          AND l.deleted_at IS NULL
+       ORDER BY i.completed_at ASC, i.name ASC`, // Najpierw niekupione, potem alfabetycznie
+      [groupId],
+    );
+
+    // Mapujemy wynik z bazy (zamieniamy completed_at na boolean 'completed')
+    const mappedItems = items.map((item) => ({
+      id: item.id,
+      name: item.name,
+      quantity: item.quantity,
+      unit: item.unit,
+      list_id: item.list_id,
+      list_name: item.list_name, // <--- Tutaj leci nazwa listy na frontend!
+      completed: !!item.completed_at,
+    }));
+
+    res.json(mappedItems);
+  } catch (error) {
+    res.status(500).json({ message: "Błąd pobierania wszystkich produktów", error: error.message });
+  }
+});
+
 // ZAZNACZ WSZYSTKO JAKO KUPIONE
 router.put("/:listId/items/mark-all", async (req, res) => {
   const groupId = req.headers["x-group-id"];
