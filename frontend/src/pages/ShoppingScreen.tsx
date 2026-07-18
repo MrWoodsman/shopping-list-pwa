@@ -26,7 +26,7 @@ import { ItemSettingsOverlay } from "@/components/overlay/items/ItemSettingsOver
 import { fetchWithGroup } from "@/api/api";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ItemsInListOverlay } from "@/components/overlay/items/ItemsInListOverlay";
-import { useToggleItemMutation } from "@/hooks/useShoppingListMutations";
+import { useToggleItemMutation } from "@/hooks/useItemMutations";
 
 export function ShoppingScreen() {
   const { id } = useParams();
