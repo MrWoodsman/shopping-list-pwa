@@ -9,7 +9,7 @@ const steps = [
   { title: "Szybki dostęp", desc: "Dodaj do ekranu głównego telefonu." },
 ];
 
-export function Onboarding({ onComplete }: { onComplete: () => void }) {
+export function OnBoardingOverlay({ onComplete }: { onComplete: () => void }) {
   const [currentStep, setCurrentStep] = useState(0);
 
   return (

@@ -12,8 +12,8 @@ import { Card, CardAction, CardDescription, CardHeader, CardTitle } from "@/comp
 import { Button } from "../ui/button";
 // TYPE
 import { type ShoppingListData } from "@shared/types";
-import { ListSettingsOverlay } from "../ListSettingsOverlay";
-import { ListAddOverlay } from "../ListAddOverlay";
+import { ListSettingsOverlay } from "../overlay/lists/ListSettingsOverlay";
+import { ListAddOverlay } from "../overlay/lists/ListAddOverlay";
 import { Plus } from "lucide-react";
 
 type ShoppingListsListProps = {

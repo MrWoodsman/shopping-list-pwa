@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
+import { Button } from "../../ui/button";
+import { Input } from "../../ui/input";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Drawer,
@@ -12,7 +12,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { EllipsisVertical, Trash2, Check } from "lucide-react";
 import { type ShoppingItem } from "@shared/types";
-import { fetchWithGroup } from "@/utils/api";
+import { fetchWithGroup } from "@/api/api";
 import { showErrorToast } from "@/utils/errorHandler";
 
 interface ItemSettingsProps {

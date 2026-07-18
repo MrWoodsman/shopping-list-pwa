@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button } from "./ui/button";
+import { Button } from "../../ui/button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Drawer,
@@ -9,7 +9,7 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { EllipsisVertical, Trash2, Pencil, X } from "lucide-react";
-import { fetchWithGroup } from "@/utils/api";
+import { fetchWithGroup } from "@/api/api";
 import { showErrorToast } from "@/utils/errorHandler";
 
 interface ListSettingsProps {

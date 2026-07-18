@@ -22,8 +22,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 // TYPES
 import { type ShoppingItem } from "@shared/types";
-import { ItemSettingsOverlay } from "@/components/ItemSettingsOverlay";
-import { fetchWithGroup } from "@/utils/api";
+import { ItemSettingsOverlay } from "@/components/overlay/items/ItemSettingsOverlay";
+import { fetchWithGroup } from "@/api/api";
 import { showErrorToast } from "@/utils/errorHandler";
 
 // UWAGA: Typ elementu musi teraz zawierać list_id z backendu!

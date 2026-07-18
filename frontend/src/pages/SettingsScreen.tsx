@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
-import { useTheme } from "@/components/ThemeProvider"; // Upewnij się, że ścieżka jest poprawna
+import { useTheme } from "@/components/core/ThemeProvider"; // Upewnij się, że ścieżka jest poprawna
 import { Sun, Moon, Monitor } from "lucide-react";
-import { VersionBadge } from "@/components/VersionBadge";
+import { VersionBadge } from "@/components/common/VersionBadge";
 
 export function SettingsScreen({ groupId, onLeave }: { groupId: string; onLeave: () => void }) {
   // Pobieramy aktualny motyw i funkcję do jego zmiany z naszego Providera

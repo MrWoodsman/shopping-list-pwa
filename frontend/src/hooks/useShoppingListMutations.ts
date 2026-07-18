@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchWithGroup } from "@/utils/api";
+import { fetchWithGroup } from "@/api/api";
 import { type ShoppingListData } from "@shared/types";
 import { showErrorToast } from "@/utils/errorHandler";
 

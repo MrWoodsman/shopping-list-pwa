@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ButtonGroup } from "@/components/ui/button-group";
 // COMPONENTS
-import { ListAddOverlay } from "../ListAddOverlay";
+import { ListAddOverlay } from "../overlay/lists/ListAddOverlay";
 
 type ShoppingListsNavbarProps = {
   inputVal: string;

@@ -3,10 +3,10 @@ import { ROUTES } from "@/config/routes";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useGroup } from "./hooks/useGroup";
 // COMPONENTS
-import { Onboarding } from "./components/Onboarding";
-import { AppLayout } from "./components/AppLayout";
+import { OnBoardingOverlay } from "./components/overlay/OnBoardingOverlay";
+import { AppLayout } from "./components/layout/AppLayout";
 // SCREENS
-import { ShoppingLists } from "./pages/ShoppingLists";
+import { ShoppingListsScreen } from "./pages/ShoppingListsScreen";
 import { HomeScreen } from "./pages/HomeScreen";
 import { ShoppingScreen } from "./pages/ShoppingScreen";
 import { SettingsScreen } from "./pages/SettingsScreen";
@@ -30,7 +30,7 @@ function App() {
   if (showOnboarding) {
     return (
       <div className="fixed inset-0 z-50 bg-background w-full h-full">
-        <Onboarding onComplete={handleCompleteOnboarding} />
+        <OnBoardingOverlay onComplete={handleCompleteOnboarding} />
       </div>
     );
   }
@@ -40,14 +40,13 @@ function App() {
     return <HomeScreen onJoin={joinGroup} />;
   }
 
-  // 3. WSZYSTKO JEST OK (Masz grupę): Ładujemy aplikację
   return (
     <Routes>
-      {/* Magiczne przekierowanie - fizycznie zmienia URL i wpycha w AppLayout */}
+      {/* Przekierowanie */}
       <Route path="/" element={<Navigate to={ROUTES.SHOPPING_LISTS} replace />} />
-
+      {/* Sciezki aplikacji */}
       <Route element={<AppLayout />}>
-        <Route path={ROUTES.SHOPPING_LISTS} element={<ShoppingLists />} />
+        <Route path={ROUTES.SHOPPING_LISTS} element={<ShoppingListsScreen />} />
         <Route path={ROUTES.SHOPPING_ALL} element={<ShoppingAllScreen />} />
         <Route path={ROUTES.LIST_DETAIL(":id")} element={<ShoppingScreen />} />
         <Route path={ROUTES.RECIPES} element={<RecipesScreen />} />

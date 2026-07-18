@@ -5,11 +5,11 @@ import { ShoppingListsList } from "@/components/shopping-lists/ShoppingListsList
 import { ShoppingListsNavbar } from "@/components/shopping-lists/ShoppingListsNavbar";
 // TYPES
 import { type ShoppingListData } from "@shared/types";
-import { fetchWithGroup } from "@/utils/api";
+import { fetchWithGroup } from "@/api/api";
 import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export function ShoppingLists() {
+export function ShoppingListsScreen() {
   const [searchInput, setSearchInput] = useState("");
 
   const { data, isLoading, error } = useQuery<ShoppingListData[]>({

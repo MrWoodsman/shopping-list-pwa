@@ -21,11 +21,11 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 // TYPES
 import { type ShoppingListData, type ShoppingItem } from "@shared/types";
-import { ItemAddOverlay } from "@/components/ItemAddOverlay";
-import { ItemSettingsOverlay } from "@/components/ItemSettingsOverlay";
-import { fetchWithGroup } from "@/utils/api";
+import { ItemAddOverlay } from "@/components/overlay/items/ItemAddOverlay";
+import { ItemSettingsOverlay } from "@/components/overlay/items/ItemSettingsOverlay";
+import { fetchWithGroup } from "@/api/api";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ItemsInListOverlay } from "@/components/ItemsInListOverlay";
+import { ItemsInListOverlay } from "@/components/overlay/items/ItemsInListOverlay";
 import { useToggleItemMutation } from "@/hooks/useShoppingListMutations";
 
 export function ShoppingScreen() {

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button } from "./ui/button";
+import { Button } from "../../ui/button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Drawer,
@@ -9,7 +9,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { fetchWithGroup } from "@/utils/api";
+import { fetchWithGroup } from "@/api/api";
 import { showErrorToast } from "@/utils/errorHandler";
 
 // DODANE: Definiujemy propsy dla komponentu

@@ -5,7 +5,7 @@ import "./index.css";
 import App from "./App.tsx";
 // TANSTACK QUERYY
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ThemeProvider } from "./components/ThemeProvider.tsx";
+import { ThemeProvider } from "./components/core/ThemeProvider.tsx";
 
 const queryClient = new QueryClient();
 
