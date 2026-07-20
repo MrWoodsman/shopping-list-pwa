@@ -31,3 +31,17 @@ export const addItemApi = async (listId: string, name: string, quantity: number,
 
   return response.json();
 };
+
+// USUWANIE PRZEDMIOTÓW
+export const deleteItemApi = async (listId: string, itemId: string) => {
+  const response = await fetchWithGroup(`/api/shopping-lists/${listId}/items/${itemId}`, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || "Nie udało się usunąć produktu");
+  }
+
+  return response.json();
+};

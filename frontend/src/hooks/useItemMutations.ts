@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { addItemApi, toggleItemApi } from "@/api/items";
+import { addItemApi, deleteItemApi, toggleItemApi } from "@/api/items";
 import { type ShoppingListData } from "@shared/types";
 import { showErrorToast } from "@/utils/errorHandler";
 
@@ -14,6 +14,22 @@ export const useAddItemMutation = (listId: string) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["shoppingList", listId] });
       queryClient.invalidateQueries({ queryKey: ["shoppingLists"] });
+    },
+    onError: showErrorToast,
+  });
+};
+
+// USUWANIE PRZEDMIOTÓW
+export const useDeleteItemMutation = (listId: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (itemId: string) => deleteItemApi(listId, itemId),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["shoppingList", listId] });
+      queryClient.invalidateQueries({ queryKey: ["shoppingLists"] });
+      // setIsOpen(false);
     },
     onError: showErrorToast,
   });

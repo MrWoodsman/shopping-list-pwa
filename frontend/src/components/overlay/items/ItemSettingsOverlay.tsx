@@ -14,6 +14,7 @@ import { EllipsisVertical, Trash2, Check } from "lucide-react";
 import { type ShoppingItem } from "@shared/types";
 import { fetchWithGroup } from "@/api/api";
 import { showErrorToast } from "@/utils/errorHandler";
+import { useDeleteItemMutation } from "@/hooks/useItemMutations";
 
 interface ItemSettingsProps {
   listId: string;
@@ -22,6 +23,7 @@ interface ItemSettingsProps {
 
 export function ItemSettingsOverlay({ listId, item }: ItemSettingsProps) {
   const queryClient = useQueryClient();
+  const deleteItemMutation = useDeleteItemMutation(listId);
   const [isOpen, setIsOpen] = useState(false);
   const [name, setName] = useState(item.name);
   const [quantity, setQuantity] = useState(String(item.quantity));
@@ -30,36 +32,19 @@ export function ItemSettingsOverlay({ listId, item }: ItemSettingsProps) {
   const fieldClass =
     "h-11 w-full rounded-lg border border-input bg-background px-3 text-base text-foreground outline-none focus:ring-2 focus:ring-primary";
 
-  // useEffect(() => {
-  //   if (isOpen) {
-  //     setName(item.name);
-  //     setQuantity(String(item.quantity));
-  //     setUnit(item.unit);
-  //     setCompleted(item.completed);
-  //   }
-  // }, [isOpen, item]);
-
   // MUTACJA DO USUWANIA PRODUKTU
-  const deleteItemMutation = useMutation({
-    mutationFn: async () => {
-      // Pamiętaj o użyciu odpowiedniego endpointu (DELETE)
-      const response = await fetchWithGroup(`/api/shopping-lists/${listId}/items/${item.id}`, {
-        method: "DELETE",
-      });
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || "Nie udało się usunąć produktu");
-      }
-      return response.json();
-    },
-    onSuccess: () => {
-      // Odświeżamy listę i zamykamy szufladę
-      queryClient.invalidateQueries({ queryKey: ["shoppingList", listId] });
-      queryClient.invalidateQueries({ queryKey: ["shoppingLists"] });
-      setIsOpen(false);
-    },
-    onError: showErrorToast,
-  });
+  // const deleteItemMutation = useMutation({
+  //   mutationFn: async () => {
+
+  //   },
+  //   onSuccess: () => {
+  //     // Odświeżamy listę i zamykamy szufladę
+  //     queryClient.invalidateQueries({ queryKey: ["shoppingList", listId] });
+  //     queryClient.invalidateQueries({ queryKey: ["shoppingLists"] });
+  //     setIsOpen(false);
+  //   },
+  //   onError: showErrorToast,
+  // });
 
   const updateItemMutation = useMutation({
     mutationFn: async () => {
@@ -181,7 +166,11 @@ export function ItemSettingsOverlay({ listId, item }: ItemSettingsProps) {
             variant="destructive"
             className="justify-start h-14 text-base mt-2"
             disabled={deleteItemMutation.isPending}
-            onClick={() => deleteItemMutation.mutate()}
+            onClick={() =>
+              deleteItemMutation.mutate(item.id, {
+                onSuccess: () => setIsOpen(false),
+              })
+            }
           >
             <Trash2 className="mr-3 size-5" />
             {deleteItemMutation.isPending ? "Usuwanie..." : "Usuń produkt"}
