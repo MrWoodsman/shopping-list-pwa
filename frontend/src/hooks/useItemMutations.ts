@@ -1,8 +1,25 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toggleItemApi } from "@/api/items";
+import { addItemApi, toggleItemApi } from "@/api/items";
 import { type ShoppingListData } from "@shared/types";
 import { showErrorToast } from "@/utils/errorHandler";
 
+// DODAWANIE PRZEDMIOTÓW
+export const useAddItemMutation = (listId: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ name, quantity, unit }: { name: string; quantity: number; unit: string }) =>
+      addItemApi(listId, name, quantity, unit),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["shoppingList", listId] });
+      queryClient.invalidateQueries({ queryKey: ["shoppingLists"] });
+    },
+    onError: showErrorToast,
+  });
+};
+
+// ZMIANA STANU KUPIENIA
 export const useToggleItemMutation = (id: string) => {
   const queryClient = useQueryClient();
 

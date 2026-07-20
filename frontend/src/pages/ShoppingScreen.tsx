@@ -74,7 +74,7 @@ export function ShoppingScreen() {
 
         <div className="flex items-center gap-1 shrink-0">
           <ItemsInListOverlay listID={id!} items={data?.items || []} />
-          <ItemAddOverlay id={id!} />
+          <ItemAddOverlay listId={id!} />
         </div>
       </div>
 

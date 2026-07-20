@@ -1,6 +1,5 @@
 import { useRef, useState } from "react";
 import { Button } from "../../ui/button";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Drawer,
   DrawerContent,
@@ -8,20 +7,20 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { fetchWithGroup } from "@/api/api";
 import { Plus } from "lucide-react";
 import { Checkbox } from "../../ui/checkbox";
-import { showErrorToast } from "@/utils/errorHandler";
+import { useAddItemMutation } from "@/hooks/useItemMutations";
 
 interface ItemAddOverlayProps {
-  id: string;
+  listId: string;
 }
 
 const UNITS = ["szt.", "kg", "g", "l", "ml", "opak."];
 
-export function ItemAddOverlay({ id }: ItemAddOverlayProps) {
-  const queryClient = useQueryClient();
+export function ItemAddOverlay({ listId }: ItemAddOverlayProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const addItemMutation = useAddItemMutation(listId);
 
   const [isOpen, setIsOpen] = useState(false);
   const [newItemName, setNewItemName] = useState("");
@@ -32,64 +31,39 @@ export function ItemAddOverlay({ id }: ItemAddOverlayProps) {
   const fieldClass =
     "h-11 w-full rounded-lg border border-input bg-background px-3 text-base text-foreground outline-none focus:ring-2 focus:ring-primary";
 
-  const addItemMutation = useMutation({
-    mutationFn: async ({ name, qty, un }: { name: string; qty: number; un: string }) => {
-      const response = await fetchWithGroup(`/api/shopping-lists/${id}/items`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, quantity: qty, unit: un }),
-      });
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || "Nie udało się dodać produktu");
-      }
-      return response.json();
-    },
-    onSuccess: () => {
-      // Odświeżamy dane w tle
-      queryClient.invalidateQueries({ queryKey: ["shoppingList", id] });
-      queryClient.invalidateQueries({ queryKey: ["shoppingLists"] });
-
-      // Zamykamy Drawer tylko, jeśli keepOpen jest wyłączone
-      // Jeśli jest włączone, formularz wyczyścił się już w handleSubmit!
-      if (!keepOpen) {
-        setIsOpen(false);
-        setNewItemName("");
-        setQuantity("1");
-      }
-    },
-    onError: showErrorToast,
-  });
-
   // Dodajemy e: React.FormEvent, żeby móc użyć preventDefault()
   const handleSubmit = (e?: React.FormEvent) => {
-    if (e) e.preventDefault(); // TO JEST KLUCZ! Zapobiega przeładowaniu i wymuszonemu zamknięciu klawiatury
-
+    if (e) e.preventDefault();
     if (newItemName.trim() === "") return;
 
-    // Kopiujemy dane przed wyczyszczeniem stanu
     const nameToSubmit = newItemName;
     const qtyToSubmit = parseFloat(quantity) || 1;
     const unitToSubmit = unit;
 
-    // OPTYMICZNE CZYSZCZENIE:
-    // Jeśli użytkownik chce dodać kolejny produkt, czyścimy ekran NATYCHMIAST.
-    // Telefon nawet nie zauważy przerwy, więc klawiatura zostanie na miejscu.
     if (keepOpen) {
       setNewItemName("");
       setQuantity("1");
-      // Utrzymujemy sztucznie focus, żeby klawiatura nie mignęła
       setTimeout(() => {
         inputRef.current?.focus();
       }, 10);
     }
 
-    // Wysyłamy dane do bazy w tle
-    addItemMutation.mutate({
-      name: nameToSubmit,
-      qty: qtyToSubmit,
-      un: unitToSubmit,
-    });
+    addItemMutation.mutate(
+      {
+        name: nameToSubmit,
+        quantity: qtyToSubmit,
+        unit: unitToSubmit,
+      },
+      {
+        onSuccess: () => {
+          if (!keepOpen) {
+            setIsOpen(false);
+            setNewItemName("");
+            setQuantity("1");
+          }
+        },
+      },
+    );
   };
 
   return (

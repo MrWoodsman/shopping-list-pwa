@@ -1,5 +1,6 @@
 import { fetchWithGroup } from "./api";
 
+// ZMIANA STANU PRZEDMIOTU
 export const toggleItemApi = async (listId: string, itemId: string, completed: boolean) => {
   const response = await fetchWithGroup(`/api/shopping-lists/${listId}/items/${itemId}`, {
     method: "PUT",
@@ -10,6 +11,22 @@ export const toggleItemApi = async (listId: string, itemId: string, completed: b
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
     throw new Error(errorData.message || "Wystąpił nieznany błąd przy aktualizacji");
+  }
+
+  return response.json();
+};
+
+// DODAWNIE PRZEDMIOTÓW
+export const addItemApi = async (listId: string, name: string, quantity: number, unit: string) => {
+  const response = await fetchWithGroup(`/api/shopping-lists/${listId}/items`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, quantity, unit }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || "Nie udało się dodać produktu");
   }
 
   return response.json();
