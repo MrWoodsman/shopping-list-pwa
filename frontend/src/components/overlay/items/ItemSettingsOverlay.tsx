@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Drawer,
   DrawerContent,
@@ -12,9 +11,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { EllipsisVertical, Trash2, Check } from "lucide-react";
 import { type ShoppingItem } from "@shared/types";
-import { fetchWithGroup } from "@/api/api";
-import { showErrorToast } from "@/utils/errorHandler";
-import { useDeleteItemMutation } from "@/hooks/useItemMutations";
+import { useDeleteItemMutation, useUpdateItemMutation } from "@/hooks/useItemMutations";
 
 interface ItemSettingsProps {
   listId: string;
@@ -22,8 +19,9 @@ interface ItemSettingsProps {
 }
 
 export function ItemSettingsOverlay({ listId, item }: ItemSettingsProps) {
-  const queryClient = useQueryClient();
   const deleteItemMutation = useDeleteItemMutation(listId);
+  const updateItemMutation = useUpdateItemMutation(listId);
+
   const [isOpen, setIsOpen] = useState(false);
   const [name, setName] = useState(item.name);
   const [quantity, setQuantity] = useState(String(item.quantity));
@@ -31,50 +29,6 @@ export function ItemSettingsOverlay({ listId, item }: ItemSettingsProps) {
   const [completed, setCompleted] = useState(item.completed);
   const fieldClass =
     "h-11 w-full rounded-lg border border-input bg-background px-3 text-base text-foreground outline-none focus:ring-2 focus:ring-primary";
-
-  // MUTACJA DO USUWANIA PRODUKTU
-  // const deleteItemMutation = useMutation({
-  //   mutationFn: async () => {
-
-  //   },
-  //   onSuccess: () => {
-  //     // Odświeżamy listę i zamykamy szufladę
-  //     queryClient.invalidateQueries({ queryKey: ["shoppingList", listId] });
-  //     queryClient.invalidateQueries({ queryKey: ["shoppingLists"] });
-  //     setIsOpen(false);
-  //   },
-  //   onError: showErrorToast,
-  // });
-
-  const updateItemMutation = useMutation({
-    mutationFn: async () => {
-      const trimmedName = name.trim();
-      if (!trimmedName) throw new Error("Nazwa listy nie może być pusta");
-
-      const response = await fetchWithGroup(`/api/shopping-lists/${listId}/items/${item.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          trimmedName,
-          quantity: Number(quantity),
-          unit,
-          completed,
-        }),
-      });
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || "Nie udało się zapisać zmian");
-      }
-      return response.json();
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["shoppingList", listId] });
-      queryClient.invalidateQueries({ queryKey: ["shoppingLists"] });
-      setIsOpen(false);
-    },
-    onError: showErrorToast,
-  });
 
   return (
     <Drawer open={isOpen} onOpenChange={setIsOpen}>
@@ -154,7 +108,24 @@ export function ItemSettingsOverlay({ listId, item }: ItemSettingsProps) {
 
           <Button
             className="justify-start h-14 text-base bg-primary"
-            onClick={() => updateItemMutation.mutate()}
+            onClick={() => {
+              const trimmedName = name.trim();
+              if (!trimmedName) return;
+              updateItemMutation.mutate(
+                {
+                  itemId: item.id,
+                  data: {
+                    name: trimmedName,
+                    quantity: Number(quantity),
+                    unit: unit,
+                    completed: completed,
+                  },
+                },
+                {
+                  onSuccess: () => setIsOpen(false),
+                },
+              );
+            }}
             disabled={updateItemMutation.isPending || name.trim() === ""}
           >
             <Check className="mr-3 size-5" />

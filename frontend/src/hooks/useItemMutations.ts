@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { addItemApi, deleteItemApi, toggleItemApi } from "@/api/items";
+import { addItemApi, deleteItemApi, toggleItemApi, updateItemApi } from "@/api/items";
 import { type ShoppingListData } from "@shared/types";
 import { showErrorToast } from "@/utils/errorHandler";
 
@@ -68,5 +68,27 @@ export const useToggleItemMutation = (id: string) => {
       queryClient.invalidateQueries({ queryKey: ["shoppingList", id] });
       queryClient.invalidateQueries({ queryKey: ["shoppingLists"] });
     },
+  });
+};
+
+// AKTUALIZACJA PRZEDMIOTU
+export const useUpdateItemMutation = (listId: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      itemId,
+      data,
+    }: {
+      itemId: string;
+      data: { name: string; quantity: number; unit: string; completed: boolean };
+    }) => updateItemApi(listId, itemId, data),
+
+    onSuccess: () => {
+      // Odświeżamy dane globalnie (dla obu kluczy!)
+      queryClient.invalidateQueries({ queryKey: ["shoppingList", listId] });
+      queryClient.invalidateQueries({ queryKey: ["shoppingLists"] });
+    },
+    onError: showErrorToast,
   });
 };
