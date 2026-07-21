@@ -1,5 +1,11 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { addItemApi, deleteItemApi, toggleItemApi, updateItemApi } from "@/api/items";
+import {
+  addItemApi,
+  deleteItemApi,
+  toggleItemApi,
+  universalToggleItemApi,
+  updateItemApi,
+} from "@/api/items";
 import { type ShoppingListData } from "@shared/types";
 import { showErrorToast } from "@/utils/errorHandler";
 
@@ -29,7 +35,6 @@ export const useDeleteItemMutation = (listId: string) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["shoppingList", listId] });
       queryClient.invalidateQueries({ queryKey: ["shoppingLists"] });
-      // setIsOpen(false);
     },
     onError: showErrorToast,
   });
@@ -40,7 +45,6 @@ export const useToggleItemMutation = (id: string) => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    // mutationFn jest teraz super krótkie!
     mutationFn: ({ itemId, completed }: { itemId: string; completed: boolean }) =>
       toggleItemApi(id, itemId, completed),
 
@@ -68,6 +72,28 @@ export const useToggleItemMutation = (id: string) => {
       queryClient.invalidateQueries({ queryKey: ["shoppingList", id] });
       queryClient.invalidateQueries({ queryKey: ["shoppingLists"] });
     },
+  });
+};
+
+// UNIWERSALNA ZMIANA STANU KUPIENIA
+export const useUniversalToggleItemMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      listId,
+      itemId,
+      completed,
+    }: {
+      listId: string;
+      itemId: string;
+      completed: boolean;
+    }) => universalToggleItemApi(listId, itemId, completed),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["shoppingItems", "all"] });
+      queryClient.invalidateQueries({ queryKey: ["shoppingList"] });
+    },
+    onError: showErrorToast,
   });
 };
 

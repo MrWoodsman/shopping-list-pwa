@@ -16,6 +16,26 @@ export const toggleItemApi = async (listId: string, itemId: string, completed: b
   return response.json();
 };
 
+// UNIWERSALNA ZMIANA STANU PRZEDMIOTU
+export const universalToggleItemApi = async (
+  listId: string,
+  itemId: string,
+  completed: boolean,
+) => {
+  const response = await fetchWithGroup(`/api/shopping-lists/${listId}/items/${itemId}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ completed }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || "Błąd aktualizacji statusu");
+  }
+
+  return response.json();
+};
+
 // DODAWNIE PRZEDMIOTÓW
 export const addItemApi = async (listId: string, name: string, quantity: number, unit: string) => {
   const response = await fetchWithGroup(`/api/shopping-lists/${listId}/items`, {

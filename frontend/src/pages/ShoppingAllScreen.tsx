@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { ROUTES } from "@/config/routes";
 import { motion, AnimatePresence } from "framer-motion";
 // UI
@@ -24,7 +24,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { type ShoppingItem } from "@shared/types";
 import { ItemSettingsOverlay } from "@/components/overlay/items/ItemSettingsOverlay";
 import { fetchWithGroup } from "@/api/api";
-import { showErrorToast } from "@/utils/errorHandler";
+import { useUniversalToggleItemMutation } from "@/hooks/useItemMutations";
 
 // UWAGA: Typ elementu musi teraz zawierać list_id z backendu!
 interface AggregateShoppingItem extends ShoppingItem {
@@ -33,10 +33,9 @@ interface AggregateShoppingItem extends ShoppingItem {
 }
 
 export function ShoppingAllScreen() {
-  const queryClient = useQueryClient();
+  const universalToggleItemMutation = useUniversalToggleItemMutation();
 
   // 1. POBIERANIE WSZYSTKICH PRODUKTÓW (z nowego endpointu)
-  // Endpoint np.: GET /api/shopping-lists/all/items
   const {
     data: items = [],
     isLoading,
@@ -49,36 +48,6 @@ export function ShoppingAllScreen() {
       return response.json();
     },
     refetchInterval: 3000,
-  });
-
-  // 2. LOKALNA MUTACJA DO ZAZNACZANIA (Bez optymistycznego UI dla uproszczenia)
-  // Używamy lokalnej mutacji, bo stary hook (useToggleItemMutation) wymagał jednego listID na start.
-  const toggleMutation = useMutation({
-    mutationFn: async ({
-      listId,
-      itemId,
-      completed,
-    }: {
-      listId: string;
-      itemId: string;
-      completed: boolean;
-    }) => {
-      const res = await fetchWithGroup(`/api/shopping-lists/${listId}/items/${itemId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ completed }),
-      });
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.message || "Błąd aktualizacji statusu");
-      }
-    },
-    onSuccess: () => {
-      // Odświeżamy widok zbiorczy ORAZ widoki pojedynczych list w tle
-      queryClient.invalidateQueries({ queryKey: ["shoppingItems", "all"] });
-      queryClient.invalidateQueries({ queryKey: ["shoppingList"] });
-    },
-    onError: showErrorToast,
   });
 
   if (isLoading) return <div className="p-4 text-neutral-500">Ładowanie produktów...</div>;
@@ -130,7 +99,11 @@ export function ShoppingAllScreen() {
                       listId={item.list_id} // KLUCZOWA ZMIANA! Bierzemy listId z samego produktu
                       item={item}
                       onToggle={(completed) =>
-                        toggleMutation.mutate({ listId: item.list_id, itemId: item.id, completed })
+                        universalToggleItemMutation.mutate({
+                          listId: item.list_id,
+                          itemId: item.id,
+                          completed,
+                        })
                       }
                     />
                   </motion.div>
@@ -157,7 +130,11 @@ export function ShoppingAllScreen() {
                       listId={item.list_id} // KLUCZOWA ZMIANA!
                       item={item}
                       onToggle={(completed) =>
-                        toggleMutation.mutate({ listId: item.list_id, itemId: item.id, completed })
+                        universalToggleItemMutation.mutate({
+                          listId: item.list_id,
+                          itemId: item.id,
+                          completed,
+                        })
                       }
                     />
                   </motion.div>

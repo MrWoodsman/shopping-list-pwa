@@ -81,12 +81,15 @@ export function ListSettingsOverlay({ listId, listName }: ListSettingsProps) {
                   className="flex-1 h-11"
                   disabled={renameListMutation.isPending || newName.trim() === ""}
                   onClick={() =>
-                    renameListMutation.mutate(newName, {
-                      onSuccess: () => {
-                        setIsEditingName(false);
-                        setIsOpen(false);
+                    renameListMutation.mutate(
+                      { listId, newName },
+                      {
+                        onSuccess: () => {
+                          setIsEditingName(false);
+                          setIsOpen(false);
+                        },
                       },
-                    })
+                    )
                   }
                 >
                   {renameListMutation.isPending ? "Zapisywanie..." : "Zapisz"}
