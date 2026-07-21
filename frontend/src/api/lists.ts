@@ -29,3 +29,19 @@ export const deleteListApi = async (listId: string) => {
 
   return response.json();
 };
+
+// ZMIANA NAZWY LISTY
+export const renameListApi = async (listId: string, updatedName: string) => {
+  const response = await fetchWithGroup(`/api/shopping-lists/${listId}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name: updatedName }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || "Nie udało się zmienić nazwy");
+  }
+
+  return response.json();
+};

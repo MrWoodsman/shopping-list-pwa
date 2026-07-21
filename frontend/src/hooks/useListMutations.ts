@@ -1,4 +1,4 @@
-import { addListApi, deleteListApi } from "@/api/lists";
+import { addListApi, deleteListApi, renameListApi } from "@/api/lists";
 import { showErrorToast } from "@/utils/errorHandler";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
@@ -27,5 +27,20 @@ export const useDeleteListMutation = () => {
       queryClient.invalidateQueries({ queryKey: ["shoppingLists"] });
     },
     onError: showErrorToast,
+  });
+};
+
+// ZMIANA NAZWY LISTY
+export const useRenameListMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ listId, newName }: { listId: string; newName: string }) =>
+      renameListApi(listId, newName),
+
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["shoppingLists"] });
+      queryClient.invalidateQueries({ queryKey: ["shoppingList", String(variables.listId)] });
+    },
   });
 };

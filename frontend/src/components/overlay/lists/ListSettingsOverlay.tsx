@@ -9,8 +9,7 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { EllipsisVertical, Trash2, Pencil, X } from "lucide-react";
-import { fetchWithGroup } from "@/api/api";
-import { useDeleteListMutation } from "@/hooks/useListMutations";
+import { useDeleteListMutation, useRenameListMutation } from "@/hooks/useListMutations";
 
 interface ListSettingsProps {
   listId: string;
@@ -18,37 +17,16 @@ interface ListSettingsProps {
 }
 
 export function ListSettingsOverlay({ listId, listName }: ListSettingsProps) {
+  // HOOKS
   const deleteListMutation = useDeleteListMutation();
-  const queryClient = useQueryClient();
+  const renameListMutation = useRenameListMutation();
+
   const [isOpen, setIsOpen] = useState(false);
 
   // Stany do edycji nazwy
   const [isEditingName, setIsEditingName] = useState(false);
   const [newName, setNewName] = useState(listName);
 
-  // MUTACJA: ZMIANA NAZWY LISTY
-  const renameListMutation = useMutation({
-    mutationFn: async (updatedName: string) => {
-      const response = await fetchWithGroup(`/api/shopping-lists/${listId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: updatedName }),
-      });
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || "Nie udało się zmienić nazwy");
-      }
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["shoppingLists"] });
-      queryClient.invalidateQueries({ queryKey: ["shoppingList", String(listId)] }); // W razie, gdybyśmy byli w środku tej listy
-      setIsEditingName(false);
-      setIsOpen(false);
-    },
-  });
-
-  // Resetowanie stanu, gdy szuflada się zamyka (żeby po ponownym otwarciu nie było widać formularza)
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open);
     if (!open) {
@@ -103,7 +81,14 @@ export function ListSettingsOverlay({ listId, listName }: ListSettingsProps) {
                 <Button
                   className="flex-1 h-11"
                   disabled={renameListMutation.isPending || newName.trim() === ""}
-                  onClick={() => renameListMutation.mutate(newName)}
+                  onClick={() =>
+                    renameListMutation.mutate(newName, {
+                      onSuccess: () => {
+                        setIsEditingName(false);
+                        setIsOpen(false);
+                      },
+                    })
+                  }
                 >
                   {renameListMutation.isPending ? "Zapisywanie..." : "Zapisz"}
                 </Button>
