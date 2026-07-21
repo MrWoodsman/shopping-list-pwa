@@ -19,7 +19,6 @@ export function ListAddOverlay({ children }: ListAddOverlayProps) {
   const [newListName, setNewListName] = useState("");
   const [isOpen, setIsOpen] = useState(false);
 
-  // WSPÓLNA FUNKCJA OBSŁUGUJĄCA WYSŁANIE
   const handleCreate = () => {
     const trimmedName = newListName.trim();
     if (!trimmedName) return;

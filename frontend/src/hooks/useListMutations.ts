@@ -1,4 +1,4 @@
-import { addListApi } from "@/api/lists";
+import { addListApi, deleteListApi } from "@/api/lists";
 import { showErrorToast } from "@/utils/errorHandler";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
@@ -8,6 +8,20 @@ export const useAddListMutation = () => {
 
   return useMutation({
     mutationFn: (name: string) => addListApi(name),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["shoppingLists"] });
+    },
+    onError: showErrorToast,
+  });
+};
+
+// USUWANIE LISTY
+export const useDeleteListMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (listId: string) => deleteListApi(listId),
 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["shoppingLists"] });

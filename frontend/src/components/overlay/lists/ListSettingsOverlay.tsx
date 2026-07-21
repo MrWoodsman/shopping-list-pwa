@@ -10,39 +10,21 @@ import {
 } from "@/components/ui/drawer";
 import { EllipsisVertical, Trash2, Pencil, X } from "lucide-react";
 import { fetchWithGroup } from "@/api/api";
-import { showErrorToast } from "@/utils/errorHandler";
+import { useDeleteListMutation } from "@/hooks/useListMutations";
 
 interface ListSettingsProps {
-  listId: string | number;
+  listId: string;
   listName: string;
 }
 
 export function ListSettingsOverlay({ listId, listName }: ListSettingsProps) {
+  const deleteListMutation = useDeleteListMutation();
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
 
   // Stany do edycji nazwy
   const [isEditingName, setIsEditingName] = useState(false);
   const [newName, setNewName] = useState(listName);
-
-  // MUTACJA: USUWANIE LISTY
-  const deleteListMutation = useMutation({
-    mutationFn: async () => {
-      const response = await fetchWithGroup(`/api/shopping-lists/${listId}`, {
-        method: "DELETE",
-      });
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || "Nie udało się usunąć listy");
-      }
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["shoppingLists"] });
-      setIsOpen(false);
-    },
-    onError: showErrorToast,
-  });
 
   // MUTACJA: ZMIANA NAZWY LISTY
   const renameListMutation = useMutation({
@@ -143,7 +125,11 @@ export function ListSettingsOverlay({ listId, listName }: ListSettingsProps) {
                 variant="destructive"
                 className="justify-start h-14 text-base mt-2"
                 disabled={deleteListMutation.isPending}
-                onClick={() => deleteListMutation.mutate()}
+                onClick={() =>
+                  deleteListMutation.mutate(listId, {
+                    onSuccess: () => setIsOpen(false),
+                  })
+                }
               >
                 <Trash2 className="mr-3 size-5" />
                 {deleteListMutation.isPending ? "Usuwanie..." : "Usuń listę"}
