@@ -25,8 +25,6 @@ import { ItemSettingsOverlay } from "@/components/overlay/items/ItemSettingsOver
 import { useUniversalToggleItemMutation } from "@/hooks/useItemMutations";
 import { useAllShoppingItemsQuery } from "@/hooks/useItems";
 
-// UWAGA: Typ elementu musi teraz zawierać list_id z backendu!
-
 export function ShoppingAllScreen() {
   const { data: items = [], isLoading, error } = useAllShoppingItemsQuery();
   const universalToggleItemMutation = useUniversalToggleItemMutation();

@@ -9,9 +9,9 @@ router.get("/", async (req, res) => {
   try {
     const lists = await req.db.all(
       `SELECT id, group_id as groupId, name, created_at as createdAt
-       FROM lists
-       WHERE group_id = ? AND deleted_at IS NULL
-       ORDER BY created_at DESC`,
+        FROM lists
+        WHERE group_id = ? AND deleted_at IS NULL
+        ORDER BY created_at DESC`,
       [groupId],
     );
 

@@ -1,3 +1,4 @@
+import type { ShoppingListData } from "@shared/types";
 import { fetchWithGroup } from "./api";
 
 // DODAWANIE LISTY
@@ -42,6 +43,15 @@ export const renameListApi = async (listId: string, updatedName: string) => {
     const errorData = await response.json().catch(() => ({}));
     throw new Error(errorData.message || "Nie udało się zmienić nazwy");
   }
+
+  return response.json();
+};
+
+// POBIERANIE WSZYSTKICH LIST
+export const fetchAllShoppingListsApi = async (): Promise<ShoppingListData[]> => {
+  const response = await fetchWithGroup("/api/shopping-lists");
+
+  if (!response.ok) throw new Error("Błąd pobierania");
 
   return response.json();
 };

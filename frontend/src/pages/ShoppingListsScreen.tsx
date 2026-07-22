@@ -1,26 +1,15 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 // COMPONENTS
 import { ShoppingListsList } from "@/components/shopping-lists/ShoppingListsList";
 import { ShoppingListsNavbar } from "@/components/shopping-lists/ShoppingListsNavbar";
 // TYPES
-import { type ShoppingListData } from "@shared/types";
-import { fetchWithGroup } from "@/api/api";
 import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAllShoppingListsQuery } from "@/hooks/useLists";
 
 export function ShoppingListsScreen() {
+  const { data, isLoading, error } = useAllShoppingListsQuery();
   const [searchInput, setSearchInput] = useState("");
-
-  const { data, isLoading, error } = useQuery<ShoppingListData[]>({
-    queryKey: ["shoppingLists"],
-    queryFn: async () => {
-      const response = await fetchWithGroup("/api/shopping-lists");
-      if (!response.ok) throw new Error("Błąd pobierania");
-      return response.json();
-    },
-    refetchInterval: 5000,
-  });
 
   return (
     <div className="w-full h-full flex flex-col gap-2">
