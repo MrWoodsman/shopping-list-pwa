@@ -10,6 +10,7 @@ export const useAllShoppingListsQuery = () => {
   });
 };
 
+// POBIERANIE WYBRANEJ LISTY
 export const useShoppingListQuery = (listId: string) => {
   return useQuery({
     queryKey: ["shoppingList", listId],
