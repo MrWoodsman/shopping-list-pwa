@@ -91,8 +91,5 @@ export const fetchAllShoppingItemsApi = async (): Promise<AggregateShoppingItem[
   const response = await fetchWithGroup(`/api/shopping-lists/all/items`);
   if (!response.ok) throw new Error("Błąd pobierania wszystkich produktów");
 
-  const data = await response.json();
-  console.log("Co zwraca API:", data); // <--- TUTAJ
-
-  return data;
+  return response.json();
 };
