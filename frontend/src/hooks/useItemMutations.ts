@@ -34,7 +34,7 @@ export const useDeleteItemMutation = (listId: string) => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (itemId: string) => deleteItemApi(listId, itemId),
+    mutationFn: (itemId: string) => deleteItemApi(itemId),
 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["shoppingList", listId] });
@@ -50,7 +50,7 @@ export const useToggleItemMutation = (id: string) => {
 
   return useMutation({
     mutationFn: ({ itemId, completed }: { itemId: string; completed: boolean }) =>
-      toggleItemApi(id, itemId, completed),
+      toggleItemApi(itemId, completed),
 
     onMutate: async ({ itemId, completed }) => {
       await queryClient.cancelQueries({ queryKey: ["shoppingList", id] });
@@ -84,15 +84,10 @@ export const useUniversalToggleItemMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({
-      listId,
-      itemId,
-      completed,
-    }: {
-      listId: string;
-      itemId: string;
-      completed: boolean;
-    }) => universalToggleItemApi(listId, itemId, completed),
+    // ZMIANA: Wywalamy listId z argumentów
+    mutationFn: async ({ itemId, completed }: { itemId: string; completed: boolean }) =>
+      universalToggleItemApi(itemId, completed), // <--- Tutaj podajemy tylko 2 argumenty!
+
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["shoppingItems", "all"] });
       queryClient.invalidateQueries({ queryKey: ["shoppingList"] });
@@ -112,10 +107,9 @@ export const useUpdateItemMutation = (listId: string) => {
     }: {
       itemId: string;
       data: { name: string; quantity: number; unit: string; completed: boolean };
-    }) => updateItemApi(listId, itemId, data),
+    }) => updateItemApi(itemId, data),
 
     onSuccess: () => {
-      // Odświeżamy dane globalnie (dla obu kluczy!)
       queryClient.invalidateQueries({ queryKey: ["shoppingList", listId] });
       queryClient.invalidateQueries({ queryKey: ["shoppingLists"] });
     },

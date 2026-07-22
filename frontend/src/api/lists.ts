@@ -3,7 +3,7 @@ import { fetchWithGroup } from "./api";
 
 // DODAWANIE LISTY
 export const addListApi = async (name: string) => {
-  const response = await fetchWithGroup(`/api/shopping-lists`, {
+  const response = await fetchWithGroup(`/api/v1/lists`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ name: name }),
@@ -19,7 +19,7 @@ export const addListApi = async (name: string) => {
 
 // USUWANIE LISTY
 export const deleteListApi = async (listId: string) => {
-  const response = await fetchWithGroup(`/api/shopping-lists/${listId}`, {
+  const response = await fetchWithGroup(`/api/v1/lists/${listId}`, {
     method: "DELETE",
   });
 
@@ -33,7 +33,7 @@ export const deleteListApi = async (listId: string) => {
 
 // ZMIANA NAZWY LISTY
 export const renameListApi = async (listId: string, updatedName: string) => {
-  const response = await fetchWithGroup(`/api/shopping-lists/${listId}`, {
+  const response = await fetchWithGroup(`/api/v1/lists/${listId}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ name: updatedName }),
@@ -49,7 +49,7 @@ export const renameListApi = async (listId: string, updatedName: string) => {
 
 // POBIERANIE WSZYSTKICH LIST
 export const fetchAllShoppingListsApi = async (): Promise<ShoppingListData[]> => {
-  const response = await fetchWithGroup("/api/shopping-lists");
+  const response = await fetchWithGroup("/api/v1/lists");
 
   if (!response.ok) throw new Error("Błąd pobierania");
 
@@ -58,7 +58,7 @@ export const fetchAllShoppingListsApi = async (): Promise<ShoppingListData[]> =>
 
 // POBRANIE WYBRANEJ LISTY
 export const fetchShoppingListApi = async (listId: string): Promise<ShoppingListData> => {
-  const response = await fetchWithGroup(`/api/shopping-lists/${listId}`);
+  const response = await fetchWithGroup(`/api/v1/lists/${listId}`);
 
   if (!response.ok) throw new Error("Błąd pobierania");
 

@@ -2,8 +2,8 @@ import type { AggregateShoppingItem } from "@shared/types";
 import { fetchWithGroup } from "./api";
 
 // ZMIANA STANU PRZEDMIOTU
-export const toggleItemApi = async (listId: string, itemId: string, completed: boolean) => {
-  const response = await fetchWithGroup(`/api/shopping-lists/${listId}/items/${itemId}`, {
+export const toggleItemApi = async (itemId: string, completed: boolean) => {
+  const response = await fetchWithGroup(`/api/v1/items/${itemId}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ completed }),
@@ -18,12 +18,8 @@ export const toggleItemApi = async (listId: string, itemId: string, completed: b
 };
 
 // UNIWERSALNA ZMIANA STANU PRZEDMIOTU
-export const universalToggleItemApi = async (
-  listId: string,
-  itemId: string,
-  completed: boolean,
-) => {
-  const response = await fetchWithGroup(`/api/shopping-lists/${listId}/items/${itemId}`, {
+export const universalToggleItemApi = async (itemId: string, completed: boolean) => {
+  const response = await fetchWithGroup(`/api/v1/items/${itemId}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ completed }),
@@ -37,9 +33,9 @@ export const universalToggleItemApi = async (
   return response.json();
 };
 
-// DODAWNIE PRZEDMIOTÓW
+// DODAWNIE PRZEDMIOTÓW (Zostaje w podkategorii list!)
 export const addItemApi = async (listId: string, name: string, quantity: number, unit: string) => {
-  const response = await fetchWithGroup(`/api/shopping-lists/${listId}/items`, {
+  const response = await fetchWithGroup(`/api/v1/lists/${listId}/items`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ name, quantity, unit }),
@@ -54,8 +50,8 @@ export const addItemApi = async (listId: string, name: string, quantity: number,
 };
 
 // USUWANIE PRZEDMIOTÓW
-export const deleteItemApi = async (listId: string, itemId: string) => {
-  const response = await fetchWithGroup(`/api/shopping-lists/${listId}/items/${itemId}`, {
+export const deleteItemApi = async (itemId: string) => {
+  const response = await fetchWithGroup(`/api/v1/items/${itemId}`, {
     method: "DELETE",
   });
 
@@ -69,14 +65,13 @@ export const deleteItemApi = async (listId: string, itemId: string) => {
 
 // AKTUALIZACJA PRZEDMIOTÓW
 export const updateItemApi = async (
-  listId: string,
   itemId: string,
   data: { name: string; quantity: number; unit: string; completed: boolean },
 ) => {
-  const response = await fetchWithGroup(`/api/shopping-lists/${listId}/items/${itemId}`, {
+  const response = await fetchWithGroup(`/api/v1/items/${itemId}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data), // Wysyłamy całą paczkę naraz!
+    body: JSON.stringify(data),
   });
 
   if (!response.ok) {
@@ -88,7 +83,7 @@ export const updateItemApi = async (
 
 // POBIERANIE WSZYSTKICH PRZEDMIOTÓW DLA GRUPY
 export const fetchAllShoppingItemsApi = async (): Promise<AggregateShoppingItem[]> => {
-  const response = await fetchWithGroup(`/api/shopping-lists/all/items`);
+  const response = await fetchWithGroup(`/api/v1/items`);
   if (!response.ok) throw new Error("Błąd pobierania wszystkich produktów");
 
   return response.json();
@@ -98,7 +93,7 @@ export const fetchAllShoppingItemsApi = async (): Promise<AggregateShoppingItem[
 
 // ZAZNACZENIE WSZYSTKICH PRODUKTOW
 export const markAllItemsApi = async (listID: string) => {
-  const res = await fetchWithGroup(`/api/shopping-lists/${listID}/items/mark-all`, {
+  const res = await fetchWithGroup(`/api/v1/lists/${listID}/items/mark-all`, {
     method: "PUT",
   });
   if (!res.ok) {
@@ -109,7 +104,7 @@ export const markAllItemsApi = async (listID: string) => {
 
 // ODZNACZNEIE WSZYSTKICH PRODUKTOW
 export const resetAllItemsApi = async (listID: string) => {
-  const res = await fetchWithGroup(`/api/shopping-lists/${listID}/items/reset-all`, {
+  const res = await fetchWithGroup(`/api/v1/lists/${listID}/items/reset-all`, {
     method: "PUT",
   });
   if (!res.ok) {
@@ -120,7 +115,7 @@ export const resetAllItemsApi = async (listID: string) => {
 
 // USUWANIE WSZYSTKICH UKONCZONYCH
 export const deleteCompletedItemsApi = async (listID: string) => {
-  const res = await fetchWithGroup(`/api/shopping-lists/${listID}/items/delete-completed`, {
+  const res = await fetchWithGroup(`/api/v1/lists/${listID}/items/delete-completed`, {
     method: "DELETE",
   });
   if (!res.ok) {
@@ -131,7 +126,7 @@ export const deleteCompletedItemsApi = async (listID: string) => {
 
 // USUWANIE WSZYSTKICH PRODUKTOW Z LISTY
 export const deleteAllItemsApi = async (listID: string) => {
-  const res = await fetchWithGroup(`/api/shopping-lists/${listID}/items/delete-all`, {
+  const res = await fetchWithGroup(`/api/v1/lists/${listID}/items/delete-all`, {
     method: "DELETE",
   });
   if (!res.ok) {
