@@ -1,7 +1,11 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   addItemApi,
+  deleteAllItemsApi,
+  deleteCompletedItemsApi,
   deleteItemApi,
+  markAllItemsApi,
+  resetAllItemsApi,
   toggleItemApi,
   universalToggleItemApi,
   updateItemApi,
@@ -116,5 +120,126 @@ export const useUpdateItemMutation = (listId: string) => {
       queryClient.invalidateQueries({ queryKey: ["shoppingLists"] });
     },
     onError: showErrorToast,
+  });
+};
+
+// === ZMIANY DLA CAŁYCH LIST ===
+
+export const useMarkAllMutation = (listID: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => markAllItemsApi(listID),
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: ["shoppingList", listID] });
+      const previousData = queryClient.getQueryData<ShoppingListData>(["shoppingList", listID]);
+      queryClient.setQueryData(
+        ["shoppingList", listID],
+        (oldData: ShoppingListData | undefined) => {
+          if (!oldData) return oldData;
+          return {
+            ...oldData,
+            items: oldData.items.map((item) => ({ ...item, completed: true })),
+            completedCount: oldData.items.length,
+          };
+        },
+      );
+      return { previousData };
+    },
+    onError: (err, _variables, context) => {
+      if (context?.previousData)
+        queryClient.setQueryData(["shoppingList", listID], context.previousData);
+      showErrorToast(err);
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ["shoppingList", listID] }),
+  });
+};
+
+export const useResetAllMutation = (listID: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => resetAllItemsApi(listID),
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: ["shoppingList", listID] });
+      const previousData = queryClient.getQueryData<ShoppingListData>(["shoppingList", listID]);
+      queryClient.setQueryData(
+        ["shoppingList", listID],
+        (oldData: ShoppingListData | undefined) => {
+          if (!oldData) return oldData;
+          return {
+            ...oldData,
+            items: oldData.items.map((item) => ({ ...item, completed: false })),
+            completedCount: 0,
+          };
+        },
+      );
+      return { previousData };
+    },
+    onError: (err, _variables, context) => {
+      if (context?.previousData)
+        queryClient.setQueryData(["shoppingList", listID], context.previousData);
+      showErrorToast(err);
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ["shoppingList", listID] }),
+  });
+};
+
+export const useDeleteCompletedMutation = (listID: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => deleteCompletedItemsApi(listID),
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: ["shoppingList", listID] });
+      const previousData = queryClient.getQueryData<ShoppingListData>(["shoppingList", listID]);
+      queryClient.setQueryData(
+        ["shoppingList", listID],
+        (oldData: ShoppingListData | undefined) => {
+          if (!oldData) return oldData;
+          const remainingItems = oldData.items.filter((item) => !item.completed);
+          return {
+            ...oldData,
+            items: remainingItems,
+            itemsIn: remainingItems.length,
+            completedCount: 0,
+          };
+        },
+      );
+      return { previousData };
+    },
+    onError: (err, _variables, context) => {
+      if (context?.previousData)
+        queryClient.setQueryData(["shoppingList", listID], context.previousData);
+      showErrorToast(err);
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ["shoppingList", listID] }),
+  });
+};
+
+export const useDeleteAllMutation = (listID: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => deleteAllItemsApi(listID),
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: ["shoppingList", listID] });
+      const previousData = queryClient.getQueryData<ShoppingListData>(["shoppingList", listID]);
+      queryClient.setQueryData(
+        ["shoppingList", listID],
+        (oldData: ShoppingListData | undefined) => {
+          if (!oldData) return oldData;
+          return {
+            ...oldData,
+            items: [],
+            itemsIn: 0,
+            completedCount: 0,
+          };
+        },
+      );
+      return { previousData };
+    },
+    onError: (err, _variables, context) => {
+      if (context?.previousData)
+        queryClient.setQueryData(["shoppingList", listID], context.previousData);
+      showErrorToast(err);
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ["shoppingList", listID] }),
   });
 };

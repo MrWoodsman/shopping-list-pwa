@@ -55,3 +55,12 @@ export const fetchAllShoppingListsApi = async (): Promise<ShoppingListData[]> =>
 
   return response.json();
 };
+
+// POBRANIE WYBRANEJ LISTY
+export const fetchShoppingListApi = async (listId: string): Promise<ShoppingListData> => {
+  const response = await fetchWithGroup(`/api/shopping-lists/${listId}`);
+
+  if (!response.ok) throw new Error("Błąd pobierania");
+
+  return response.json();
+};

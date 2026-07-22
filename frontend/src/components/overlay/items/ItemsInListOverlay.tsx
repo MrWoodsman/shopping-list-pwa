@@ -1,7 +1,5 @@
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { fetchWithGroup } from "@/api/api";
 import { Button } from "../../ui/button";
 import {
   Drawer,
@@ -11,8 +9,15 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { Settings, CheckCheck, RotateCcw, Copy, Trash2, Trash } from "lucide-react";
-import { type ShoppingItem, type ShoppingListData } from "@shared/types";
-import { showErrorToast } from "@/utils/errorHandler";
+import { type ShoppingItem } from "@shared/types";
+
+// IMPORTUJEMY NOWE HOOKI
+import {
+  useMarkAllMutation,
+  useResetAllMutation,
+  useDeleteCompletedMutation,
+  useDeleteAllMutation,
+} from "@/hooks/useItemMutations";
 
 interface ItemsInListOverlayProps {
   listID: string;
@@ -21,7 +26,6 @@ interface ItemsInListOverlayProps {
 
 export function ItemsInListOverlay({ listID, items = [] }: ItemsInListOverlayProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const queryClient = useQueryClient();
 
   const totalItems = items.length;
   const completedItems = items.filter((item) => item.completed).length;
@@ -37,165 +41,11 @@ export function ItemsInListOverlay({ listID, items = [] }: ItemsInListOverlayPro
     setIsOpen(false);
   };
 
-  // ==========================================
-  // MUTACJE Z OPTYMISTYCZNYM UI (Teraz używają ShoppingListData!)
-  // ==========================================
-
-  const markAllMutation = useMutation({
-    mutationFn: async () => {
-      const res = await fetchWithGroup(`/api/shopping-lists/${listID}/items/mark-all`, {
-        method: "PUT",
-      });
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.message || "Wystąpił nieznany błąd przy aktualizacji");
-      }
-    },
-    onMutate: async () => {
-      await queryClient.cancelQueries({ queryKey: ["shoppingList", listID] });
-      const previousData = queryClient.getQueryData<ShoppingListData>(["shoppingList", listID]);
-
-      queryClient.setQueryData(
-        ["shoppingList", listID],
-        (oldData: ShoppingListData | undefined) => {
-          if (!oldData) return oldData;
-          return {
-            ...oldData,
-            items: oldData.items.map((item) => ({ ...item, completed: true })),
-            completedCount: oldData.items.length, // Optymistycznie aktualizujemy licznik!
-          };
-        },
-      );
-      return { previousData };
-    },
-    onError: (err, _variables, context) => {
-      if (context?.previousData)
-        queryClient.setQueryData(["shoppingList", listID], context.previousData);
-      showErrorToast(err);
-    },
-    onSettled: () => queryClient.invalidateQueries({ queryKey: ["shoppingList", listID] }),
-    onSuccess: () => onSuccessAction("Wszystko zaznaczone jako kupione!"),
-  });
-
-  const resetAllMutation = useMutation({
-    mutationFn: async () => {
-      const res = await fetchWithGroup(`/api/shopping-lists/${listID}/items/reset-all`, {
-        method: "PUT",
-      });
-      if (!res.ok) {
-        // Próbujemy wyciągnąć JSON z błędem od Twojego backendu
-        const errorData = await res.json().catch(() => ({}));
-        // Rzucamy Error z oryginalną wiadomością (lub domyślną, gdyby serwer padł całkowicie)
-        throw new Error(errorData.message || "Wystąpił nieznany błąd przy aktualizacji");
-      }
-    },
-    onMutate: async () => {
-      await queryClient.cancelQueries({ queryKey: ["shoppingList", listID] });
-      const previousData = queryClient.getQueryData<ShoppingListData>(["shoppingList", listID]);
-
-      queryClient.setQueryData(
-        ["shoppingList", listID],
-        (oldData: ShoppingListData | undefined) => {
-          if (!oldData) return oldData;
-          return {
-            ...oldData,
-            items: oldData.items.map((item) => ({ ...item, completed: false })),
-            completedCount: 0, // Optymistycznie zerujemy licznik
-          };
-        },
-      );
-      return { previousData };
-    },
-    onError: (err, _variables, context) => {
-      if (context?.previousData)
-        queryClient.setQueryData(["shoppingList", listID], context.previousData);
-      showErrorToast(err);
-    },
-    onSettled: () => queryClient.invalidateQueries({ queryKey: ["shoppingList", listID] }),
-    onSuccess: () => onSuccessAction("Odznaczono wszystkie produkty."),
-  });
-
-  const deleteCompletedMutation = useMutation({
-    mutationFn: async () => {
-      const res = await fetchWithGroup(`/api/shopping-lists/${listID}/items/delete-completed`, {
-        method: "DELETE",
-      });
-      if (!res.ok) {
-        // Próbujemy wyciągnąć JSON z błędem od Twojego backendu
-        const errorData = await res.json().catch(() => ({}));
-        // Rzucamy Error z oryginalną wiadomością (lub domyślną, gdyby serwer padł całkowicie)
-        throw new Error(errorData.message || "Wystąpił nieznany błąd przy aktualizacji");
-      }
-    },
-    onMutate: async () => {
-      await queryClient.cancelQueries({ queryKey: ["shoppingList", listID] });
-      const previousData = queryClient.getQueryData<ShoppingListData>(["shoppingList", listID]);
-
-      queryClient.setQueryData(
-        ["shoppingList", listID],
-        (oldData: ShoppingListData | undefined) => {
-          if (!oldData) return oldData;
-          const remainingItems = oldData.items.filter((item) => !item.completed);
-          return {
-            ...oldData,
-            items: remainingItems,
-            itemsIn: remainingItems.length, // Zmniejszamy całkowitą liczbę produktów
-            completedCount: 0, // Usuwamy kupione, więc licznik wynosi 0
-          };
-        },
-      );
-      return { previousData };
-    },
-    onError: (err, _variables, context) => {
-      if (context?.previousData)
-        queryClient.setQueryData(["shoppingList", listID], context.previousData);
-      showErrorToast(err);
-    },
-    onSettled: () => queryClient.invalidateQueries({ queryKey: ["shoppingList", listID] }),
-    onSuccess: () => onSuccessAction("Usunięto kupione produkty."),
-  });
-
-  const deleteAllMutation = useMutation({
-    mutationFn: async () => {
-      const res = await fetchWithGroup(`/api/shopping-lists/${listID}/items/delete-all`, {
-        method: "DELETE",
-      });
-
-      if (!res.ok) {
-        // Próbujemy wyciągnąć JSON z błędem od Twojego backendu
-        const errorData = await res.json().catch(() => ({}));
-        // Rzucamy Error z oryginalną wiadomością (lub domyślną, gdyby serwer padł całkowicie)
-        throw new Error(errorData.message || "Wystąpił nieznany błąd przy aktualizacji");
-      }
-    },
-    onMutate: async () => {
-      await queryClient.cancelQueries({ queryKey: ["shoppingList", listID] });
-      const previousData = queryClient.getQueryData<ShoppingListData>(["shoppingList", listID]);
-
-      queryClient.setQueryData(
-        ["shoppingList", listID],
-        (oldData: ShoppingListData | undefined) => {
-          if (!oldData) return oldData;
-          return {
-            ...oldData,
-            items: [],
-            itemsIn: 0,
-            completedCount: 0,
-          };
-        },
-      );
-      return { previousData };
-    },
-    onError: (err, _variables, context) => {
-      if (context?.previousData)
-        queryClient.setQueryData(["shoppingList", listID], context.previousData);
-      showErrorToast(err);
-    },
-    onSettled: () => queryClient.invalidateQueries({ queryKey: ["shoppingList", listID] }),
-    onSuccess: () => onSuccessAction("Lista została całkowicie wyczyszczona."),
-  });
-
-  // ==========================================
+  // INICJALIZACJA HOOKÓW
+  const markAllMutation = useMarkAllMutation(listID);
+  const resetAllMutation = useResetAllMutation(listID);
+  const deleteCompletedMutation = useDeleteCompletedMutation(listID);
+  const deleteAllMutation = useDeleteAllMutation(listID);
 
   const handleCopyList = () => {
     if (isListEmpty) {
@@ -255,7 +105,11 @@ export function ItemsInListOverlay({ listID, items = [] }: ItemsInListOverlayPro
             <Button
               variant="ghost"
               className="justify-start h-13 rounded-none border-b border-border/50 font-medium"
-              onClick={() => markAllMutation.mutate()}
+              onClick={() =>
+                markAllMutation.mutate(undefined, {
+                  onSuccess: () => onSuccessAction("Wszystko zaznaczone jako kupione!"),
+                })
+              }
               disabled={markAllMutation.isPending || isEverythingBought}
             >
               <CheckCheck className="mr-3 size-5 text-primary" />
@@ -265,7 +119,11 @@ export function ItemsInListOverlay({ listID, items = [] }: ItemsInListOverlayPro
             <Button
               variant="ghost"
               className="justify-start h-13 rounded-none border-b border-border/50 font-medium"
-              onClick={() => resetAllMutation.mutate()}
+              onClick={() =>
+                resetAllMutation.mutate(undefined, {
+                  onSuccess: () => onSuccessAction("Odznaczono wszystkie produkty."),
+                })
+              }
               disabled={resetAllMutation.isPending || isNothingBought}
             >
               <RotateCcw className="mr-3 size-5 text-primary" />
@@ -292,7 +150,11 @@ export function ItemsInListOverlay({ listID, items = [] }: ItemsInListOverlayPro
               <Button
                 variant="ghost"
                 className="justify-start h-13 rounded-none border-b border-destructive/10 text-destructive hover:bg-destructive/20 hover:text-destructive font-medium"
-                onClick={() => deleteCompletedMutation.mutate()}
+                onClick={() =>
+                  deleteCompletedMutation.mutate(undefined, {
+                    onSuccess: () => onSuccessAction("Usunięto kupione produkty."),
+                  })
+                }
                 disabled={deleteCompletedMutation.isPending || isNothingBought}
               >
                 <Trash2 className="mr-3 size-5" />
@@ -302,7 +164,11 @@ export function ItemsInListOverlay({ listID, items = [] }: ItemsInListOverlayPro
               <Button
                 variant="ghost"
                 className="justify-start h-13 rounded-none text-destructive hover:bg-destructive/20 hover:text-destructive font-medium"
-                onClick={() => deleteAllMutation.mutate()}
+                onClick={() =>
+                  deleteAllMutation.mutate(undefined, {
+                    onSuccess: () => onSuccessAction("Lista została całkowicie wyczyszczona."),
+                  })
+                }
                 disabled={deleteAllMutation.isPending || isListEmpty}
               >
                 <Trash className="mr-3 size-5" />

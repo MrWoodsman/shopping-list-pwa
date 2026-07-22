@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { fetchAllShoppingListsApi } from "@/api/lists";
+import { fetchAllShoppingListsApi, fetchShoppingListApi } from "@/api/lists";
 
 // POBIERANIE WSZYSTKICH LIST DLA GRUPY
 export const useAllShoppingListsQuery = () => {
@@ -7,5 +7,13 @@ export const useAllShoppingListsQuery = () => {
     queryKey: ["shoppingLists"],
     queryFn: fetchAllShoppingListsApi,
     refetchInterval: 5000,
+  });
+};
+
+export const useShoppingListQuery = (listId: string) => {
+  return useQuery({
+    queryKey: ["shoppingList", listId],
+    queryFn: () => fetchShoppingListApi(listId),
+    refetchInterval: 3000,
   });
 };

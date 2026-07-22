@@ -1,5 +1,4 @@
 import { useParams, Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
 import { ROUTES } from "@/config/routes";
 import { motion, AnimatePresence } from "framer-motion";
 // UI
@@ -20,30 +19,19 @@ import {
 } from "@/components/ui/accordion";
 import { Card, CardContent } from "@/components/ui/card";
 // TYPES
-import { type ShoppingListData, type ShoppingItem } from "@shared/types";
+import { type ShoppingItem } from "@shared/types";
 import { ItemAddOverlay } from "@/components/overlay/items/ItemAddOverlay";
 import { ItemSettingsOverlay } from "@/components/overlay/items/ItemSettingsOverlay";
-import { fetchWithGroup } from "@/api/api";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ItemsInListOverlay } from "@/components/overlay/items/ItemsInListOverlay";
 import { useToggleItemMutation } from "@/hooks/useItemMutations";
+import { useShoppingListQuery } from "@/hooks/useLists";
 
 export function ShoppingScreen() {
-  const { id } = useParams();
+  const { id } = useParams() as { id: string };
 
+  const { data, isLoading, error } = useShoppingListQuery(id);
   const toggleItemMutation = useToggleItemMutation(id!);
-
-  // 1. POBIERANIE DANYCH LISTY
-  const { data, isLoading, error } = useQuery<ShoppingListData>({
-    queryKey: ["shoppingList", id],
-    queryFn: async () => {
-      const response = await fetchWithGroup(`/api/shopping-lists/${id}`);
-      if (!response.ok) throw new Error("Błąd pobierania");
-      return response.json();
-    },
-    enabled: !!id,
-    refetchInterval: 3000,
-  });
 
   if (isLoading) return <div>Ładowanie szczegółów...</div>;
   if (error || !data) return <div>Nie znaleziono listy.</div>;

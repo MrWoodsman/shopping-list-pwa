@@ -93,3 +93,49 @@ export const fetchAllShoppingItemsApi = async (): Promise<AggregateShoppingItem[
 
   return response.json();
 };
+
+// === ZMIANY DLA CAŁYCH LIST ===
+
+// ZAZNACZENIE WSZYSTKICH PRODUKTOW
+export const markAllItemsApi = async (listID: string) => {
+  const res = await fetchWithGroup(`/api/shopping-lists/${listID}/items/mark-all`, {
+    method: "PUT",
+  });
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.message || "Wystąpił nieznany błąd przy aktualizacji");
+  }
+};
+
+// ODZNACZNEIE WSZYSTKICH PRODUKTOW
+export const resetAllItemsApi = async (listID: string) => {
+  const res = await fetchWithGroup(`/api/shopping-lists/${listID}/items/reset-all`, {
+    method: "PUT",
+  });
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.message || "Wystąpił nieznany błąd przy aktualizacji");
+  }
+};
+
+// USUWANIE WSZYSTKICH UKONCZONYCH
+export const deleteCompletedItemsApi = async (listID: string) => {
+  const res = await fetchWithGroup(`/api/shopping-lists/${listID}/items/delete-completed`, {
+    method: "DELETE",
+  });
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.message || "Wystąpił nieznany błąd przy aktualizacji");
+  }
+};
+
+// USUWANIE WSZYSTKICH PRODUKTOW Z LISTY
+export const deleteAllItemsApi = async (listID: string) => {
+  const res = await fetchWithGroup(`/api/shopping-lists/${listID}/items/delete-all`, {
+    method: "DELETE",
+  });
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.message || "Wystąpił nieznany błąd przy aktualizacji");
+  }
+};
