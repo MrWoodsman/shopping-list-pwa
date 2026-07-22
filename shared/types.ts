@@ -14,3 +14,8 @@ export interface ShoppingItem {
   unit: string;
   completed: boolean;
 }
+
+export interface AggregateShoppingItem extends ShoppingItem {
+  list_id: string;
+  list_name?: string;
+}

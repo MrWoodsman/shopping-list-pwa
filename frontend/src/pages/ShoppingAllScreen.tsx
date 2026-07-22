@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
 import { ROUTES } from "@/config/routes";
 import { motion, AnimatePresence } from "framer-motion";
 // UI
@@ -21,34 +20,16 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 // TYPES
-import { type ShoppingItem } from "@shared/types";
+import type { ShoppingItem } from "@shared/types";
 import { ItemSettingsOverlay } from "@/components/overlay/items/ItemSettingsOverlay";
-import { fetchWithGroup } from "@/api/api";
 import { useUniversalToggleItemMutation } from "@/hooks/useItemMutations";
+import { useAllShoppingItemsQuery } from "@/hooks/useItems";
 
 // UWAGA: Typ elementu musi teraz zawierać list_id z backendu!
-interface AggregateShoppingItem extends ShoppingItem {
-  list_id: string;
-  // opcjonalnie możesz też zwracać list_name z backendu, żeby wyświetlić z jakiej to listy
-}
 
 export function ShoppingAllScreen() {
+  const { data: items = [], isLoading, error } = useAllShoppingItemsQuery();
   const universalToggleItemMutation = useUniversalToggleItemMutation();
-
-  // 1. POBIERANIE WSZYSTKICH PRODUKTÓW (z nowego endpointu)
-  const {
-    data: items = [],
-    isLoading,
-    error,
-  } = useQuery<AggregateShoppingItem[]>({
-    queryKey: ["shoppingItems", "all"],
-    queryFn: async () => {
-      const response = await fetchWithGroup(`/api/shopping-lists/all/items`);
-      if (!response.ok) throw new Error("Błąd pobierania wszystkich produktów");
-      return response.json();
-    },
-    refetchInterval: 3000,
-  });
 
   if (isLoading) return <div className="p-4 text-neutral-500">Ładowanie produktów...</div>;
   if (error) return <div className="p-4 text-red-500">Nie udało się załadować produktów.</div>;
@@ -74,8 +55,6 @@ export function ShoppingAllScreen() {
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
-
-        {/* USUNIĘTO: ItemAddOverlay i ItemsInListOverlay (nie mają tu sensu) */}
       </div>
 
       {/* CONTENT */}
@@ -96,7 +75,7 @@ export function ShoppingAllScreen() {
                     style={{ overflow: "hidden" }}
                   >
                     <ItemCard
-                      listId={item.list_id} // KLUCZOWA ZMIANA! Bierzemy listId z samego produktu
+                      listId={item.list_id}
                       item={item}
                       onToggle={(completed) =>
                         universalToggleItemMutation.mutate({

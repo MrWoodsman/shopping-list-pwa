@@ -1,3 +1,4 @@
+import type { AggregateShoppingItem } from "@shared/types";
 import { fetchWithGroup } from "./api";
 
 // ZMIANA STANU PRZEDMIOTU
@@ -83,4 +84,15 @@ export const updateItemApi = async (
     throw new Error(errorData.message || "Nie udało się zapisać zmian");
   }
   return response.json();
+};
+
+// POBIERANIE WSZYSTKICH PRZEDMIOTÓW DLA GRUPY
+export const fetchAllShoppingItemsApi = async (): Promise<AggregateShoppingItem[]> => {
+  const response = await fetchWithGroup(`/api/shopping-lists/all/items`);
+  if (!response.ok) throw new Error("Błąd pobierania wszystkich produktów");
+
+  const data = await response.json();
+  console.log("Co zwraca API:", data); // <--- TUTAJ
+
+  return data;
 };
