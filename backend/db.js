@@ -48,6 +48,22 @@ async function initDB() {
     )
   `);
 
+  await db.exec(`
+    CREATE TABLE IF NOT EXISTS recipes (
+      id TEXT PRIMARY KEY,
+      group_id TEXT,
+      name TEXT,
+      description TEXT,
+      image_url TEXT,
+      created_at DATETIME DEFAULT (datetime('now','localtime')),
+      last_update DATETIME DEFAULT (datetime('now','localtime')),
+      deleted_at DATETIME DEFAULT NULL,
+      time_to_make INTEGER,
+      is_global BOOLEAN DEFAULT 0,
+      FOREIGN KEY (group_id) REFERENCES groups(id)
+    )
+    `);
+
   console.log("Baza danych SQLite została załadowana i tabele są gotowe!");
   return db;
 }

@@ -5,6 +5,7 @@ const { initDB } = require("./db");
 // IMPORT ROUTEROW (Nowe ścieżki!)
 const listsRoutes = require("./routes/v1/lists.routes");
 const itemsRoutes = require("./routes/v1/items.routes");
+const recipesRoutes = require("./routes/v1/recipes.routes");
 
 const app = express();
 app.use(express.json());
@@ -38,6 +39,7 @@ async function startServer() {
 
     app.use("/api/v1/lists", listsRoutes);
     app.use("/api/v1/items", itemsRoutes);
+    app.use("/api/v1/recipes", recipesRoutes);
 
     app.get("/api/test", (req, res) => {
       res.json({ message: "Działa V1!" });
