@@ -37,6 +37,8 @@ async function startServer() {
       }
     });
 
+    app.use("/images", express.static(path.join(__dirname, "uploads")));
+
     app.use("/api/v1/lists", listsRoutes);
     app.use("/api/v1/items", itemsRoutes);
     app.use("/api/v1/recipes", recipesRoutes);

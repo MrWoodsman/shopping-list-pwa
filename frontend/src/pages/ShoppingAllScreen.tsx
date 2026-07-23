@@ -77,7 +77,6 @@ export function ShoppingAllScreen() {
                       item={item}
                       onToggle={(completed) =>
                         universalToggleItemMutation.mutate({
-                          listId: item.list_id,
                           itemId: item.id,
                           completed,
                         })
@@ -104,11 +103,10 @@ export function ShoppingAllScreen() {
                     style={{ overflow: "hidden" }}
                   >
                     <ItemCard
-                      listId={item.list_id} // KLUCZOWA ZMIANA!
+                      listId={item.list_id}
                       item={item}
                       onToggle={(completed) =>
                         universalToggleItemMutation.mutate({
-                          listId: item.list_id,
                           itemId: item.id,
                           completed,
                         })
