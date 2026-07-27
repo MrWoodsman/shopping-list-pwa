@@ -1,6 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { ArrowLeft, Camera, Clock, Globe, Lock, Save, Send, Plus, Trash2 } from "lucide-react";
 
 export function RecipeEditorScreen() {
@@ -14,7 +21,7 @@ export function RecipeEditorScreen() {
   const [isGlobal, setIsGlobal] = useState(false);
   const [imagePreview] = useState<string | null>(null);
 
-  // Bezpieczna inicjalizacja stanu bez błędu "impure function"
+  // Bezpieczna inicjalizacja stanu
   const [ingredients, setIngredients] = useState(() => [
     { id: Date.now().toString() + Math.random().toString(), name: "", quantity: "", unit: "" },
   ]);
@@ -66,244 +73,248 @@ export function RecipeEditorScreen() {
   };
 
   return (
-    <>
-      <div className="w-full h-dvh flex flex-col bg-background">
-        {/* 1. Górny pasek nawigacji */}
-        <div className="flex items-center justify-between p-4 border-b border-border/40 shrink-0 bg-background pt-[max(8px,env(safe-area-inset-top))]">
-          <Button variant="ghost" size="icon" onClick={handleBack} className="-ml-2">
-            <ArrowLeft size={22} />
-          </Button>
-          <h1 className="font-semibold text-lg">Edytor przepisu</h1>
-          <div className="w-10" />
+    <div className="w-full h-dvh flex flex-col bg-background overflow-hidden">
+      {/* 1. Górny pasek nawigacji */}
+      <div className="flex items-center justify-between p-4 border-b border-border/40 shrink-0 bg-background pt-[max(12px,env(safe-area-inset-top))]">
+        <Button variant="ghost" size="icon" onClick={handleBack} className="-ml-2">
+          <ArrowLeft size={22} />
+        </Button>
+        <h1 className="font-semibold text-lg">Edytor przepisu</h1>
+        <div className="w-10" />
+      </div>
+
+      {/* 2. Główny kontener z formularzem (przewijany, z odpowiednim zapasem na dole) */}
+      <div className="flex-1 flex flex-col gap-6 overflow-y-auto px-4 pt-4 pb-6">
+        {/* --- SEKCJA: PODSTAWY --- */}
+        <div className="flex flex-col gap-4">
+          {/* Zdjęcie */}
+          <div className="w-full aspect-video bg-secondary/30 rounded-xl border-2 border-dashed border-border/60 flex flex-col items-center justify-center gap-2 overflow-hidden relative cursor-pointer hover:bg-secondary/50 transition-colors">
+            {imagePreview ? (
+              <img src={imagePreview} alt="Podgląd" className="w-full h-full object-cover" />
+            ) : (
+              <>
+                <div className="bg-background p-3 rounded-full shadow-sm border border-border/50">
+                  <Camera className="text-muted-foreground" size={24} />
+                </div>
+                <span className="text-sm font-medium text-muted-foreground">
+                  Dodaj zdjęcie potrawy
+                </span>
+              </>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-medium text-foreground/80 pl-1">Nazwa przepisu</label>
+            <input
+              type="text"
+              placeholder="np. Spaghetti Bolognese"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full bg-secondary/20 border border-border/50 rounded-lg px-4 py-3 text-base focus:outline-none focus:ring-1 focus:ring-primary/50"
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-medium text-foreground/80 pl-1">Krótki opis</label>
+            <textarea
+              placeholder="Napisz coś o tym przepisie..."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={4}
+              className="w-full bg-secondary/20 border border-border/50 rounded-lg px-4 py-3 text-base focus:outline-none focus:ring-1 focus:ring-primary/50 resize-none"
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-medium text-foreground/80 pl-1">
+              Czas przygotowania (min)
+            </label>
+            <div className="relative">
+              <Clock
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                size={18}
+              />
+              <input
+                type="number"
+                placeholder="np. 45"
+                value={timeToMake}
+                onChange={(e) => setTimeToMake(e.target.value)}
+                className="w-full bg-secondary/20 border border-border/50 rounded-lg pl-10 pr-4 py-3 text-base focus:outline-none focus:ring-1 focus:ring-primary/50"
+              />
+            </div>
+          </div>
         </div>
 
-        {/* 2. Główny kontener z formularzem (przewijany) */}
-        <div className="flex-1 flex flex-col gap-6 overflow-y-auto px-4 pt-4 pb-4 sm:pb-28">
-          {/* --- SEKCJA: PODSTAWY --- */}
-          <div className="flex flex-col gap-4">
-            {/* Zdjęcie */}
-            <div className="w-full aspect-video bg-secondary/30 rounded-xl border-2 border-dashed border-border/60 flex flex-col items-center justify-center gap-2 overflow-hidden relative cursor-pointer hover:bg-secondary/50 transition-colors">
-              {imagePreview ? (
-                <img src={imagePreview} alt="Podgląd" className="w-full h-full object-cover" />
-              ) : (
-                <>
-                  <div className="bg-background p-3 rounded-full shadow-sm border border-border/50">
-                    <Camera className="text-muted-foreground" size={24} />
-                  </div>
-                  <span className="text-sm font-medium text-muted-foreground">
-                    Dodaj zdjęcie potrawy
-                  </span>
-                </>
-              )}
-            </div>
+        <hr className="border-border/50" />
 
-            <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-medium text-foreground/80 pl-1">Nazwa przepisu</label>
-              <input
-                type="text"
-                placeholder="np. Spaghetti Bolognese"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full bg-secondary/20 border border-border/50 rounded-lg px-4 py-3 text-base focus:outline-none focus:ring-1 focus:ring-primary/50"
-              />
-            </div>
+        {/* --- SEKCJA: SKŁADNIKI --- */}
+        <div className="flex flex-col gap-3">
+          <h2 className="font-semibold text-lg">Składniki</h2>
 
-            <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-medium text-foreground/80 pl-1">Krótki opis</label>
-              <textarea
-                placeholder="Napisz coś o tym przepisie..."
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                rows={4}
-                className="w-full bg-secondary/20 border border-border/50 rounded-lg px-4 py-3 text-base focus:outline-none focus:ring-1 focus:ring-primary/50 resize-none"
-              />
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-medium text-foreground/80 pl-1">
-                Czas przygotowania (min)
-              </label>
-              <div className="relative">
-                <Clock
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-                  size={18}
-                />
+          <div className="flex flex-col gap-2">
+            {ingredients.map((ing) => (
+              <div
+                key={ing.id}
+                className="grid grid-cols-1 gap-2 rounded-xl border border-border/50 bg-secondary/10 p-3"
+              >
                 <input
-                  type="number"
-                  placeholder="np. 45"
-                  value={timeToMake}
-                  onChange={(e) => setTimeToMake(e.target.value)}
-                  className="w-full bg-secondary/20 border border-border/50 rounded-lg pl-10 pr-4 py-3 text-base focus:outline-none focus:ring-1 focus:ring-primary/50"
+                  type="text"
+                  placeholder="Nazwa (np. Mleko)"
+                  value={ing.name}
+                  onChange={(e) => updateIngredient(ing.id, "name", e.target.value)}
+                  className="w-full min-w-0 bg-background border border-border/50 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary/50"
+                />
+
+                <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] gap-2 items-center">
+                  <input
+                    type="number"
+                    placeholder="Ilość"
+                    value={ing.quantity}
+                    onChange={(e) => updateIngredient(ing.id, "quantity", e.target.value)}
+                    className="w-full h-11 min-w-11 bg-background border border-border/50 rounded-lg px-2.5 text-sm text-center focus:outline-none focus:ring-1 focus:ring-primary/50"
+                  />
+
+                  {/* Shadcn Select z wymuszoną wysokością h-11 */}
+                  <Select
+                    value={ing.unit}
+                    onValueChange={(val) => updateIngredient(ing.id, "unit", val)}
+                  >
+                    <SelectTrigger className="w-full h-11 min-h-11 bg-background border-border/50 text-sm">
+                      <SelectValue placeholder="Jednostka" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {UNITS.map((unit) => (
+                        <SelectItem className="h-11" key={unit} value={unit}>
+                          {unit}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => removeIngredient(ing.id)}
+                    disabled={ingredients.length === 1}
+                    className="h-11 w-11 justify-self-end disabled:opacity-30 bg-destructive/25 border-2 border-destructive/25 text-red-500 hover:text-red-500 hover:bg-red-500/10 shrink-0"
+                  >
+                    <Trash2 size={18} />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <Button
+            variant="outline"
+            className="w-full gap-2 border-dashed border-2 mt-1"
+            onClick={addIngredient}
+          >
+            <Plus size={16} /> Dodaj kolejny składnik
+          </Button>
+        </div>
+
+        <hr className="border-border/50" />
+
+        {/* --- SEKCJA: KROKI --- */}
+        <div className="flex flex-col gap-3">
+          <h2 className="font-semibold text-lg">Kroki przygotowania</h2>
+
+          <div className="flex flex-col gap-4">
+            {steps.map((step, index) => (
+              <div
+                key={step.id}
+                className="flex flex-col gap-2 p-3 bg-secondary/10 border border-border/50 rounded-xl relative"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-sm text-muted-foreground bg-background px-2 py-1 rounded-md border border-border/50">
+                    Krok {index + 1}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => removeStep(step.id)}
+                    disabled={steps.length === 1}
+                    className="h-8 w-8 disabled:opacity-30 bg-destructive/25 border-2 border-destructive/25 text-red-500 hover:text-red-500 hover:bg-red-500/10"
+                  >
+                    <Trash2 size={16} />
+                  </Button>
+                </div>
+
+                <input
+                  type="text"
+                  placeholder="Tytuł kroku (opcjonalnie)"
+                  value={step.title}
+                  onChange={(e) => updateStep(step.id, "title", e.target.value)}
+                  className="w-full bg-secondary/20 border border-border/50 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary/50 font-medium"
+                />
+                <textarea
+                  placeholder="Opisz, co należy zrobić..."
+                  value={step.description}
+                  onChange={(e) => updateStep(step.id, "description", e.target.value)}
+                  rows={5}
+                  className="w-full bg-secondary/20 border border-border/50 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary/50 resize-none"
                 />
               </div>
-            </div>
+            ))}
           </div>
 
-          <hr className="border-border/50" />
-
-          {/* --- SEKCJA: SKŁADNIKI --- */}
-          <div className="flex flex-col gap-3">
-            <h2 className="font-semibold text-lg">Składniki</h2>
-
-            <div className="flex flex-col gap-2">
-              {ingredients.map((ing) => (
-                <div
-                  key={ing.id}
-                  className="grid grid-cols-1 gap-2 rounded-xl border border-border/50 bg-secondary/10 p-3"
-                >
-                  <input
-                    type="text"
-                    placeholder="Nazwa (np. Mleko)"
-                    value={ing.name}
-                    onChange={(e) => updateIngredient(ing.id, "name", e.target.value)}
-                    className="w-full min-w-0 bg-background border border-border/50 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary/50"
-                  />
-                  <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] gap-2 items-center">
-                    <input
-                      type="number"
-                      placeholder="Ilość"
-                      value={ing.quantity}
-                      onChange={(e) => updateIngredient(ing.id, "quantity", e.target.value)}
-                      className="w-full min-w-0 bg-background border border-border/50 rounded-lg px-2 py-2.5 text-sm text-center focus:outline-none focus:ring-1 focus:ring-primary/50"
-                    />
-                    <select
-                      value={ing.unit}
-                      onChange={(e) => updateIngredient(ing.id, "unit", e.target.value)}
-                      className="w-full min-w-0 bg-background border border-border/50 rounded-lg px-2 py-2.5 text-sm text-center focus:outline-none focus:ring-1 focus:ring-primary/50"
-                    >
-                      <option value="" disabled>
-                        Jednostka
-                      </option>
-                      {UNITS.map((unit) => (
-                        <option key={unit} value={unit}>
-                          {unit}
-                        </option>
-                      ))}
-                    </select>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => removeIngredient(ing.id)}
-                      disabled={ingredients.length === 1}
-                      className="h-11 w-11 justify-self-end bg-destructive/25 border-2 border-destructive/25 text-destructive hover:text-red-500 hover:bg-red-500/10 shrink-0"
-                    >
-                      <Trash2 size={18} />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <Button
-              variant="outline"
-              className="w-full gap-2 border-dashed border-2 mt-1"
-              onClick={addIngredient}
-            >
-              <Plus size={16} /> Dodaj kolejny składnik
-            </Button>
-          </div>
-
-          <hr className="border-border/50" />
-
-          {/* --- SEKCJA: KROKI --- */}
-          <div className="flex flex-col gap-3">
-            <h2 className="font-semibold text-lg">Kroki przygotowania</h2>
-
-            <div className="flex flex-col gap-4">
-              {steps.map((step, index) => (
-                <div
-                  key={step.id}
-                  className="flex flex-col gap-2 p-3 bg-secondary/10 border border-border/50 rounded-xl relative"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-sm text-muted-foreground bg-background px-2 py-1 rounded-md border border-border/50">
-                      Krok {index + 1}
-                    </span>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => removeStep(step.id)}
-                      disabled={steps.length === 1}
-                      className="h-8 w-8 text-red-400 hover:text-red-500 hover:bg-red-500/10"
-                    >
-                      <Trash2 size={16} />
-                    </Button>
-                  </div>
-
-                  <input
-                    type="text"
-                    placeholder="Tytuł kroku (opcjonalnie)"
-                    value={step.title}
-                    onChange={(e) => updateStep(step.id, "title", e.target.value)}
-                    className="w-full bg-secondary/20 border border-border/50 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary/50 font-medium"
-                  />
-                  <textarea
-                    placeholder="Opisz, co należy zrobić..."
-                    value={step.description}
-                    onChange={(e) => updateStep(step.id, "description", e.target.value)}
-                    rows={5}
-                    className="w-full bg-secondary/20 border border-border/50 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary/50 resize-none"
-                  />
-                </div>
-              ))}
-            </div>
-
-            <Button
-              variant="outline"
-              className="w-full gap-2 border-dashed border-2 mt-1"
-              onClick={addStep}
-            >
-              <Plus size={16} /> Dodaj kolejny krok
-            </Button>
-          </div>
-
-          {/* Widoczność */}
-          <div className="flex flex-col gap-1.5 mt-2">
-            <label className="text-sm font-medium text-foreground/80 pl-1">Widoczność</label>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setIsGlobal(false)}
-                className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg border transition-all ${!isGlobal ? "bg-neutral-600 border-neutral-500 text-white shadow-sm" : "bg-secondary/20 border-border/50 text-muted-foreground"}`}
-              >
-                <Lock size={16} /> Tylko dla mnie
-              </button>
-              <button
-                onClick={() => setIsGlobal(true)}
-                className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg border transition-all ${isGlobal ? "bg-blue-500 border-blue-400 text-white shadow-sm" : "bg-secondary/20 border-border/50 text-muted-foreground"}`}
-              >
-                <Globe size={16} /> Globalny
-              </button>
-            </div>
-          </div>
+          <Button
+            variant="outline"
+            className="w-full gap-2 border-dashed border-2 mt-1"
+            onClick={addStep}
+          >
+            <Plus size={16} /> Dodaj kolejny krok
+          </Button>
         </div>
-        {/* 3. Dolny pasek akcji */}
-        <div className="shrink-0 border-t border-border/50 bg-background p-4 pb-[max(16px,env(safe-area-inset-bottom))]">
-          <div className="flex gap-3">
-            <Button
-              variant="secondary"
-              className="flex-1 h-12 flex items-center gap-2"
-              onClick={() =>
-                console.log("Zapisuję jako szkic:", {
-                  name,
-                  description,
-                  timeToMake,
-                  isGlobal,
-                  ingredients,
-                  steps,
-                })
-              }
+
+        {/* Widoczność */}
+        <div className="flex flex-col gap-1.5 mt-2">
+          <label className="text-sm font-medium text-foreground/80 pl-1">Widoczność</label>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setIsGlobal(false)}
+              className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg border transition-all ${!isGlobal ? "bg-neutral-600 border-neutral-500 text-white shadow-sm" : "bg-secondary/20 border-border/50 text-muted-foreground"}`}
             >
-              <Save size={18} /> Zapisz szkic
-            </Button>
-            <Button
-              className="flex-1 h-12 flex items-center gap-2 bg-primary text-primary-foreground"
-              onClick={() => console.log("Publikuję przepis...")}
+              <Lock size={16} /> Tylko dla mnie
+            </button>
+            <button
+              onClick={() => setIsGlobal(true)}
+              className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg border transition-all ${isGlobal ? "bg-blue-500 border-blue-400 text-white shadow-sm" : "bg-secondary/20 border-border/50 text-muted-foreground"}`}
             >
-              <Send size={18} /> Opublikuj
-            </Button>
+              <Globe size={16} /> Globalny
+            </button>
           </div>
         </div>
       </div>
-    </>
+
+      {/* 3. Dolny pasek akcji (Bezpiecznie zakotwiczony na dole flexboxa) */}
+      <div className="shrink-0 border-t border-border/50 bg-background p-4 pb-[max(16px,env(safe-area-inset-bottom))] shadow-md">
+        <div className="flex gap-3">
+          <Button
+            variant="secondary"
+            className="flex-1 h-12 flex items-center gap-2"
+            onClick={() =>
+              console.log("Zapisuję jako szkic:", {
+                name,
+                description,
+                timeToMake,
+                isGlobal,
+                ingredients,
+                steps,
+              })
+            }
+          >
+            <Save size={18} /> Zapisz szkic
+          </Button>
+          <Button
+            className="flex-1 h-12 flex items-center gap-2 bg-primary text-primary-foreground"
+            onClick={() => console.log("Publikuję przepis...")}
+          >
+            <Send size={18} /> Opublikuj
+          </Button>
+        </div>
+      </div>
+    </div>
   );
 }
