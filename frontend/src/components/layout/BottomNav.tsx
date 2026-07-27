@@ -49,7 +49,11 @@ export function BottomNav() {
           <Bot />
         </BottomNavItem>
 
-        <BottomNavItem to={ROUTES.RECIPES} label="Przepisy" isActive={path === ROUTES.RECIPES}>
+        <BottomNavItem
+          to={ROUTES.RECIPES}
+          label="Przepisy"
+          isActive={path.startsWith(ROUTES.RECIPES)}
+        >
           <ChefHat />
         </BottomNavItem>
 

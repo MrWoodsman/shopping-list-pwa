@@ -48,7 +48,7 @@ export function RecipesDraftsScreen() {
             <div className="flex justify-between items-center w-full">
               <h1 className="font-semibold text-lg leading-none tracking-tight">Szkice</h1>
               <span className="text-[11px] font-bold bg-background text-muted-foreground px-2 py-0.5 rounded-full border border-border/50 shadow-sm">
-                {filteredDrafts.length}
+                {drafts.length}
               </span>
             </div>
             <p className="text-[13px] text-muted-foreground leading-relaxed pr-2">

@@ -14,6 +14,7 @@ import { RecipesScreen } from "./pages/RecipesScreen"; // (dopasuj ścieżkę)
 import { AutoListScreen } from "./pages/AutoListScreen";
 import { ShoppingAllScreen } from "./pages/ShoppingAllScreen";
 import { RecipesDraftsScreen } from "./pages/RecipesDraftsScreen";
+import { RecipeEditorScreen } from "./pages/RecipeEditorScreen";
 
 function App() {
   const { groupId, joinGroup, leaveGroup } = useGroup();
@@ -46,12 +47,15 @@ function App() {
       {/* Przekierowanie */}
       <Route path="/" element={<Navigate to={ROUTES.SHOPPING_LISTS} replace />} />
       {/* Sciezki aplikacji */}
+      <Route path={ROUTES.RECIPES_EDITOR} element={<RecipeEditorScreen />} />
       <Route element={<AppLayout />}>
         <Route path={ROUTES.SHOPPING_LISTS} element={<ShoppingListsScreen />} />
         <Route path={ROUTES.SHOPPING_ALL} element={<ShoppingAllScreen />} />
         <Route path={ROUTES.LIST_DETAIL(":id")} element={<ShoppingScreen />} />
+
         <Route path={ROUTES.RECIPES} element={<RecipesScreen />} />
         <Route path={ROUTES.RECIPES_DRAFTS} element={<RecipesDraftsScreen />} />
+
         <Route path={ROUTES.AUTO_LIST} element={<AutoListScreen />} />
         <Route
           path={ROUTES.SETTINGS}

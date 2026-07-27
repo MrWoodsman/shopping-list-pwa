@@ -36,7 +36,7 @@ export function RecipesListNavbar({ inputVal, setInputVal }: RecipesListsNavbarP
         </ButtonGroup>
         <div className="flex gap-2">
           <RecipeAddOverlay
-            onAddNew={() => console.log("Otwieram formularz nowego przepisu...")}
+            onAddNew={() => navigate(ROUTES.RECIPES_EDITOR)}
             onOpenDrafts={() => navigate(ROUTES.RECIPES_DRAFTS)}
           >
             <Button variant="default" size={"icon"} onClick={(e) => e.currentTarget.blur()}>
