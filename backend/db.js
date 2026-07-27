@@ -60,9 +60,12 @@ async function initDB() {
       deleted_at DATETIME DEFAULT NULL,
       time_to_make INTEGER,
       is_global BOOLEAN DEFAULT 0,
+      status TEXT DEFAULT 'draft',
       FOREIGN KEY (group_id) REFERENCES groups(id)
     )
-    `);
+  `);
+
+  // DODANIE WARTOSCI
 
   console.log("Baza danych SQLite została załadowana i tabele są gotowe!");
   return db;

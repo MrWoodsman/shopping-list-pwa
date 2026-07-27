@@ -30,5 +30,6 @@ export interface RecipeItem {
   is_global: boolean | number;
   created_at?: string;
   last_update?: string;
+  status: string;
   group_id?: string;
 }

@@ -13,6 +13,7 @@ import { SettingsScreen } from "./pages/SettingsScreen";
 import { RecipesScreen } from "./pages/RecipesScreen"; // (dopasuj ścieżkę)
 import { AutoListScreen } from "./pages/AutoListScreen";
 import { ShoppingAllScreen } from "./pages/ShoppingAllScreen";
+import { RecipesDraftsScreen } from "./pages/RecipesDraftsScreen";
 
 function App() {
   const { groupId, joinGroup, leaveGroup } = useGroup();
@@ -50,6 +51,7 @@ function App() {
         <Route path={ROUTES.SHOPPING_ALL} element={<ShoppingAllScreen />} />
         <Route path={ROUTES.LIST_DETAIL(":id")} element={<ShoppingScreen />} />
         <Route path={ROUTES.RECIPES} element={<RecipesScreen />} />
+        <Route path={ROUTES.RECIPES_DRAFTS} element={<RecipesDraftsScreen />} />
         <Route path={ROUTES.AUTO_LIST} element={<AutoListScreen />} />
         <Route
           path={ROUTES.SETTINGS}

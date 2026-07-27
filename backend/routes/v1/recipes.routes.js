@@ -24,7 +24,7 @@ router.get("/", async (req, res) => {
   try {
     const recipes = await req.db.all(
       `SELECT 
-          id, name, description, image_url, time_to_make, is_global, created_at, last_update
+          id, name, description, image_url, time_to_make, is_global, created_at, last_update, status
         FROM recipes 
         WHERE (group_id = ? OR is_global = 1) 
           AND deleted_at IS NULL
@@ -59,10 +59,21 @@ router.post("/", upload.single("image"), async (req, res) => {
     const id = randomUUID();
     const isGlobalValue = is_global === "true" || is_global === true ? 1 : 0;
 
+    const finalStatus = status || "draft";
+
     await req.db.run(
-      `INSERT INTO recipes (id, group_id, name, description, image_url, time_to_make, is_global) 
-        VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [id, groupId, name.trim(), description || "", imageUrl, time_to_make || 0, isGlobalValue],
+      `INSERT INTO recipes (id, group_id, name, description, image_url, time_to_make, is_global, status) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        id,
+        groupId,
+        name.trim(),
+        description || "",
+        imageUrl,
+        time_to_make || 0,
+        isGlobalValue,
+        finalStatus,
+      ],
     );
 
     res.status(201).json({ message: "Dodano przepis", id, imageUrl });

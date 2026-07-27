@@ -7,6 +7,12 @@ export function RecipesScreen() {
   const { data, isLoading, error } = useAllRecipesQuery();
   const [searchVal, setSearchVal] = useState("");
 
+  // Filtrujemy tylko szkice i aplikujemy wyszukiwarkę
+  const published = data?.filter((item) => item.status === "published") || [];
+  const filteredPublished = published.filter((item) =>
+    item.name.toUpperCase().includes(searchVal.toUpperCase()),
+  );
+
   if (isLoading) return <div className="p-4 text-neutral-500">Ładowanie przepisów...</div>;
   if (error) return <div className="p-4 text-red-500">Nie udało się załadować przepisów!</div>;
 
@@ -14,7 +20,7 @@ export function RecipesScreen() {
     <div className="w-full h-full flex flex-col gap-2">
       <RecipesListNavbar inputVal={searchVal} setInputVal={setSearchVal} />
       <div className="content flex flex-col px-2 pb-2 gap-2 overflow-y-auto">
-        {data
+        {filteredPublished
           ?.filter((item) => item.name.toUpperCase().includes(searchVal.toUpperCase()))
           .map((recipe) => (
             <div

@@ -1,12 +1,13 @@
-// import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 // ICONS
-import { Plus, Search } from "lucide-react";
+import { Pencil, Search, Funnel } from "lucide-react";
 // UI
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ButtonGroup } from "@/components/ui/button-group";
 // COMPONENTS
-import { ListAddOverlay } from "../overlay/lists/ListAddOverlay";
+import { RecipeAddOverlay } from "../overlay/recipes/RecipeAddOverlay";
+import { ROUTES } from "@/config/routes";
 
 type RecipesListsNavbarProps = {
   inputVal: string;
@@ -14,7 +15,7 @@ type RecipesListsNavbarProps = {
 };
 
 export function RecipesListNavbar({ inputVal, setInputVal }: RecipesListsNavbarProps) {
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
 
   return (
     <div className="search-container flex gap-2 px-2 pt-[max(8px,env(safe-area-inset-top))]">
@@ -29,13 +30,19 @@ export function RecipesListNavbar({ inputVal, setInputVal }: RecipesListsNavbarP
             onInput={(e) => setInputVal(e.currentTarget.value)}
             placeholder="Szukaj"
           />
+          <Button variant={"outline"} size={"icon"}>
+            <Funnel className="size-4" />{" "}
+          </Button>
         </ButtonGroup>
         <div className="flex gap-2">
-          <ListAddOverlay>
-            <Button variant="default" onClick={(e) => e.currentTarget.blur()}>
-              Stwórz <Plus className="size-4" />
+          <RecipeAddOverlay
+            onAddNew={() => console.log("Otwieram formularz nowego przepisu...")}
+            onOpenDrafts={() => navigate(ROUTES.RECIPES_DRAFTS)}
+          >
+            <Button variant="default" size={"icon"} onClick={(e) => e.currentTarget.blur()}>
+              <Pencil className="size-4" />
             </Button>
-          </ListAddOverlay>
+          </RecipeAddOverlay>
         </div>
       </ButtonGroup>
     </div>

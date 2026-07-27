@@ -4,6 +4,7 @@ export const ROUTES = {
   SHOPPING_ALL: "/shopping/all",
   AUTO_LIST: "/auto-list",
   RECIPES: "/recipes",
+  RECIPES_DRAFTS: "/recipes/drafts",
   SETTINGS: "/settings",
 
   // SCIEZKI DYNAMICZNE
