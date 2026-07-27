@@ -10,6 +10,9 @@ export default defineConfig({
     react(),
     tailwindcss(),
     VitePWA({
+      devOptions: {
+        enabled: true,
+      },
       registerType: "autoUpdate", // automatycznie odświeża apkę, jak zmienisz kod
       manifest: {
         name: "Lista Zakupów", // możesz zmienić np. na "ZeroWaste"
@@ -42,6 +45,8 @@ export default defineConfig({
     },
   },
   server: {
+    host: "0.0.0.0",
+    port: 5173,
     allowedHosts: ["dev.mrwoodsman.pl"],
     proxy: {
       "/api": {
