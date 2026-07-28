@@ -48,6 +48,7 @@ async function initDB() {
     )
   `);
 
+  // Tworzeymy tabele Przepisów
   await db.exec(`
     CREATE TABLE IF NOT EXISTS recipes (
       id TEXT PRIMARY KEY,
@@ -65,7 +66,30 @@ async function initDB() {
     )
   `);
 
-  // DODANIE WARTOSCI
+  // Tworzymy tabele składników
+  await db.exec(`
+  CREATE TABLE IF NOT EXISTS ingredients (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      recipe_id TEXT NOT NULL,
+      name TEXT NOT NULL,
+      quantity REAL,
+      unit TEXT,
+      FOREIGN KEY (recipe_id) REFERENCES recipes(id) ON DELETE CASCADE
+  );
+`);
+
+  // Tworzymy tabele krokó
+  await db.exec(`
+  CREATE TABLE IF NOT EXISTS steps (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      recipe_id TEXT NOT NULL,
+      "order" INTEGER NOT NULL,
+      title TEXT,
+      description TEXT,
+      image_url TEXT,
+      FOREIGN KEY (recipe_id) REFERENCES recipes(id) ON DELETE CASCADE
+  );
+`);
 
   console.log("Baza danych SQLite została załadowana i tabele są gotowe!");
   return db;

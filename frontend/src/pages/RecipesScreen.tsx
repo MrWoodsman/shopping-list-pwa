@@ -1,9 +1,12 @@
 import { RecipesListNavbar } from "@/components/recipes/RecipesListNavbar";
+import { ROUTES } from "@/config/routes";
 import { useAllRecipesQuery } from "@/hooks/useRecipes";
 import { Globe } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export function RecipesScreen() {
+  const navigate = useNavigate();
   const { data, isLoading, error } = useAllRecipesQuery();
   const [searchVal, setSearchVal] = useState("");
 
@@ -24,6 +27,7 @@ export function RecipesScreen() {
           ?.filter((item) => item.name.toUpperCase().includes(searchVal.toUpperCase()))
           .map((recipe) => (
             <div
+              onClick={() => navigate(ROUTES.RECIPES_VIEW(recipe.id))}
               key={recipe.id}
               className="relative border border-foreground/20 p-2 rounded-lg flex flex-col gap-2"
             >

@@ -24,12 +24,25 @@ export interface AggregateShoppingItem extends ShoppingItem {
 export interface RecipeItem {
   id: string;
   name: string;
+  group_id?: string;
   description: string;
-  image_url: string;
   time_to_make: number;
   is_global: boolean | number;
-  created_at?: string;
-  last_update?: string;
-  status: string;
-  group_id?: string;
+  status: "draft" | "published";
+  image_url?: string | null;
+
+  // DODAJ TE DWA POLA TUTAJ:
+  ingredients?: Array<{
+    id?: string;
+    name: string;
+    quantity: number;
+    unit: string;
+  }>;
+  steps?: Array<{
+    id?: string;
+    order: number;
+    title?: string;
+    description: string;
+    image_url?: string | null;
+  }>;
 }

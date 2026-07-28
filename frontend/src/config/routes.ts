@@ -4,6 +4,7 @@ export const ROUTES = {
   SHOPPING_ALL: "/shopping/all",
   AUTO_LIST: "/auto-list",
   RECIPES: "/recipes",
+  RECIPES_VIEW: (id: string) => `/recipes/view/${id}`,
   RECIPES_EDITOR: "/recipes/editor",
   RECIPES_DRAFTS: "/recipes/drafts",
   SETTINGS: "/settings",

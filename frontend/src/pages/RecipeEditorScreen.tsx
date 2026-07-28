@@ -1,320 +1,286 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { ArrowLeft, Camera, Clock, Globe, Lock, Save, Send, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, Globe, Lock, Save, Send } from "lucide-react";
+import type { RecipeItem } from "@shared/types";
+
+// --- IMPORTY SUB-KOMPONENTÓW ---
+import { RecipeBasicInfo } from "@/components/recipe-editor/RecipeBasicInfo";
+import { RecipeIngredientsForm } from "@/components/recipe-editor/RecipeIngredientsForm";
+import { RecipeStepsForm } from "@/components/recipe-editor/RecipeStepsForm";
+import { ConfirmModal } from "@/components/overlay/ConfirmModal";
+
+// --- HOOKI API ---
+import { useCreateRecipeMutation, useUpdateRecipeMutation } from "@/hooks/useRecipeMutations";
+import { useRecipeDetailsQuery } from "@/hooks/useRecipes";
 
 export function RecipeEditorScreen() {
   const navigate = useNavigate();
-  const UNITS = ["szt.", "kg", "g", "l", "ml", "opak."];
 
-  // Podstawowe informacje
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [timeToMake, setTimeToMake] = useState("");
-  const [isGlobal, setIsGlobal] = useState(false);
-  const [imagePreview] = useState<string | null>(null);
+  // 1. SPRAWDZAMY CZY JESTEŚMY W TRYBIE EDYCJI
+  const [searchParams] = useSearchParams();
+  const recipeId = searchParams.get("id");
+  const isEditing = Boolean(recipeId);
 
-  // Bezpieczna inicjalizacja stanu
-  const [ingredients, setIngredients] = useState(() => [
-    { id: Date.now().toString() + Math.random().toString(), name: "", quantity: "", unit: "" },
-  ]);
+  // 2. POBIERANIE DANYCH I MUTACJE
+  const { data: existingRecipe, isLoading: isLoadingRecipe } = useRecipeDetailsQuery(recipeId);
 
-  const [steps, setSteps] = useState(() => [
-    { id: Date.now().toString() + Math.random().toString(), title: "", description: "" },
-  ]);
+  const { mutate: createRecipe, isPending: isCreating } = useCreateRecipeMutation();
+  const { mutate: updateRecipe, isPending: isUpdating } = useUpdateRecipeMutation();
 
-  // --- FUNKCJE DLA SKŁADNIKÓW ---
-  const addIngredient = () => {
+  const isPending = isCreating || isUpdating;
+
+  // 3. STANY FORMULARZA
+  const [name, setName] = useState(() => existingRecipe?.name || "");
+  const [description, setDescription] = useState(() => existingRecipe?.description || "");
+  const [timeToMake, setTimeToMake] = useState(
+    () => existingRecipe?.time_to_make?.toString() || "",
+  );
+  const [isGlobal, setIsGlobal] = useState(
+    () => existingRecipe?.is_global === 1 || existingRecipe?.is_global === true,
+  );
+
+  const [imagePreview, setImagePreview] = useState<string | null>(
+    () => existingRecipe?.image_url || null,
+  );
+  const [imageFile, setImageFile] = useState<File | null>(null);
+
+  const [ingredients, setIngredients] = useState(() => {
+    const recipe = existingRecipe as RecipeItem;
+    if (recipe?.ingredients && recipe.ingredients.length > 0) {
+      return recipe.ingredients.map((ing) => ({
+        id: ing.id ? ing.id.toString() : Date.now().toString() + Math.random().toString(),
+        name: ing.name || "",
+        quantity: ing.quantity?.toString() || "",
+        unit: ing.unit || "",
+      }));
+    }
+    return [
+      { id: Date.now().toString() + Math.random().toString(), name: "", quantity: "", unit: "" },
+    ];
+  });
+
+  const [steps, setSteps] = useState(() => {
+    const recipe = existingRecipe as RecipeItem;
+    if (recipe?.steps && recipe.steps.length > 0) {
+      return recipe.steps.map((step) => ({
+        id: step.id ? step.id.toString() : Date.now().toString() + Math.random().toString(),
+        title: step.title || "",
+        description: step.description || "",
+      }));
+    }
+    return [{ id: Date.now().toString() + Math.random().toString(), title: "", description: "" }];
+  });
+
+  // LOGIKA SKŁADNIKÓW I KROKÓW
+  const addIngredient = () =>
     setIngredients([
       ...ingredients,
       { id: Date.now().toString() + Math.random().toString(), name: "", quantity: "", unit: "" },
     ]);
-  };
-
-  const updateIngredient = (id: string, field: string, value: string) => {
+  const updateIngredient = (id: string, field: string, value: string) =>
     setIngredients(ingredients.map((ing) => (ing.id === id ? { ...ing, [field]: value } : ing)));
-  };
+  const removeIngredient = (id: string) =>
+    ingredients.length > 1 && setIngredients(ingredients.filter((ing) => ing.id !== id));
 
-  const removeIngredient = (id: string) => {
-    if (ingredients.length > 1) {
-      setIngredients(ingredients.filter((ing) => ing.id !== id));
-    }
-  };
-
-  // --- FUNKCJE DLA KROKÓW ---
-  const addStep = () => {
-    setSteps([...steps, { id: Math.random().toString(36.2), title: "", description: "" }]);
-  };
-
-  const updateStep = (id: string, field: string, value: string) => {
+  const addStep = () =>
+    setSteps([
+      ...steps,
+      { id: Date.now().toString() + Math.random().toString(), title: "", description: "" },
+    ]);
+  const updateStep = (id: string, field: string, value: string) =>
     setSteps(steps.map((step) => (step.id === id ? { ...step, [field]: value } : step)));
-  };
+  const removeStep = (id: string) =>
+    steps.length > 1 && setSteps(steps.filter((step) => step.id !== id));
 
-  const removeStep = (id: string) => {
-    if (steps.length > 1) {
-      setSteps(steps.filter((step) => step.id !== id));
+  // BEZPIECZEŃSTWO I GESTY
+  const hasUnsavedChanges = name.trim() !== "" || ingredients[0].name.trim() !== "";
+  const [showExitDialog, setShowExitDialog] = useState(false);
+
+  useEffect(() => {
+    if (!hasUnsavedChanges) return;
+
+    window.history.pushState(null, "", window.location.href);
+
+    const handlePopState = () => {
+      window.history.pushState(null, "", window.location.href);
+      setShowExitDialog(true);
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [hasUnsavedChanges]);
+
+  const handleBackClick = () => {
+    if (hasUnsavedChanges) {
+      setShowExitDialog(true);
+    } else {
+      navigate(-1);
     }
   };
 
-  // --- BEZPIECZNY POWRÓT ---
-  const handleBack = () => {
-    if (name.trim() !== "" || ingredients[0].name !== "") {
-      const confirmLeave = window.confirm("Masz niezapisane zmiany. Czy na pewno chcesz wyjść?");
-      if (!confirmLeave) return;
-    }
-    navigate(-1);
+  const confirmExit = () => {
+    setShowExitDialog(false);
+    navigate(-2);
   };
+
+  // 5. WYSYŁKA DO BACKENDU (Tworzenie vs Aktualizacja)
+  const handleSave = (status: "published" | "draft") => {
+    if (!name.trim()) {
+      alert("Nazwa przepisu jest wymagana!");
+      return;
+    }
+
+    const finalIngredients = ingredients
+      .filter((ing) => ing.name.trim() !== "")
+      .map((ing) => ({
+        name: ing.name.trim(),
+        quantity: Number(ing.quantity) || 0,
+        unit: ing.unit,
+      }));
+
+    const finalSteps = steps
+      .filter((step) => step.description.trim() !== "")
+      .map((step, index) => ({
+        order: index + 1,
+        title: step.title.trim(),
+        description: step.description.trim(),
+      }));
+
+    const formData = new FormData();
+    formData.append("name", name.trim());
+    formData.append("description", description.trim());
+    formData.append("time_to_make", timeToMake.toString());
+    formData.append("is_global", isGlobal ? "true" : "false");
+    formData.append("status", status);
+    formData.append("ingredients", JSON.stringify(finalIngredients));
+    formData.append("steps", JSON.stringify(finalSteps));
+
+    if (imageFile) {
+      formData.append("image", imageFile);
+    }
+
+    if (isEditing && recipeId) {
+      // AKTUALIZACJA (PUT)
+      updateRecipe(
+        { id: recipeId, formData },
+        {
+          onSuccess: () => navigate("/recipes", { replace: true }),
+        },
+      );
+    } else {
+      // TWORZENIE (POST)
+      createRecipe(formData, {
+        onSuccess: () => navigate("/recipes", { replace: true }),
+      });
+    }
+  };
+
+  // Ekran ładowania na czas pobierania danych z bazy w trybie edycji
+  if (isEditing && isLoadingRecipe) {
+    return (
+      <div className="w-full h-dvh flex items-center justify-center text-muted-foreground">
+        Pobieranie przepisu...
+      </div>
+    );
+  }
 
   return (
-    <div className="w-full h-dvh flex flex-col bg-background overflow-hidden">
-      {/* 1. Górny pasek nawigacji */}
-      <div className="flex items-center justify-between p-4 border-b border-border/40 shrink-0 bg-background pt-[max(12px,env(safe-area-inset-top))]">
-        <Button variant="ghost" size="icon" onClick={handleBack} className="-ml-2">
-          <ArrowLeft size={22} />
-        </Button>
-        <h1 className="font-semibold text-lg">Edytor przepisu</h1>
-        <div className="w-10" />
-      </div>
+    <>
+      <div className="w-full h-dvh flex flex-col bg-background overflow-hidden relative">
+        {/* Górny Pasek */}
+        <div className="flex items-center justify-between p-4 border-b border-border/40 shrink-0 bg-background pt-[max(12px,env(safe-area-inset-top))]">
+          <Button variant="ghost" size="icon" onClick={handleBackClick} className="-ml-2">
+            <ArrowLeft size={22} />
+          </Button>
+          <h1 className="font-semibold text-lg">{isEditing ? "Edytuj przepis" : "Nowy przepis"}</h1>
+          <div className="w-10" />
+        </div>
 
-      {/* 2. Główny kontener z formularzem (przewijany, z odpowiednim zapasem na dole) */}
-      <div className="flex-1 flex flex-col gap-6 overflow-y-auto px-4 pt-4 pb-6">
-        {/* --- SEKCJA: PODSTAWY --- */}
-        <div className="flex flex-col gap-4">
-          {/* Zdjęcie */}
-          <div className="w-full aspect-video bg-secondary/30 rounded-xl border-2 border-dashed border-border/60 flex flex-col items-center justify-center gap-2 overflow-hidden relative cursor-pointer hover:bg-secondary/50 transition-colors">
-            {imagePreview ? (
-              <img src={imagePreview} alt="Podgląd" className="w-full h-full object-cover" />
-            ) : (
-              <>
-                <div className="bg-background p-3 rounded-full shadow-sm border border-border/50">
-                  <Camera className="text-muted-foreground" size={24} />
-                </div>
-                <span className="text-sm font-medium text-muted-foreground">
-                  Dodaj zdjęcie potrawy
-                </span>
-              </>
-            )}
-          </div>
+        {/* Zawartość formularza */}
+        <div className="flex-1 flex flex-col gap-6 overflow-y-auto px-4 pt-4 pb-6">
+          <RecipeBasicInfo
+            name={name}
+            setName={setName}
+            description={description}
+            setDescription={setDescription}
+            timeToMake={timeToMake}
+            setTimeToMake={setTimeToMake}
+            imagePreview={imagePreview}
+            setImagePreview={setImagePreview}
+            setImageFile={setImageFile}
+          />
 
-          <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-foreground/80 pl-1">Nazwa przepisu</label>
-            <input
-              type="text"
-              placeholder="np. Spaghetti Bolognese"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full bg-secondary/20 border border-border/50 rounded-lg px-4 py-3 text-base focus:outline-none focus:ring-1 focus:ring-primary/50"
-            />
-          </div>
+          <hr className="border-border/50" />
 
-          <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-foreground/80 pl-1">Krótki opis</label>
-            <textarea
-              placeholder="Napisz coś o tym przepisie..."
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={4}
-              className="w-full bg-secondary/20 border border-border/50 rounded-lg px-4 py-3 text-base focus:outline-none focus:ring-1 focus:ring-primary/50 resize-none"
-            />
-          </div>
+          <RecipeIngredientsForm
+            ingredients={ingredients}
+            addIngredient={addIngredient}
+            updateIngredient={updateIngredient}
+            removeIngredient={removeIngredient}
+          />
 
-          <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-foreground/80 pl-1">
-              Czas przygotowania (min)
-            </label>
-            <div className="relative">
-              <Clock
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-                size={18}
-              />
-              <input
-                type="number"
-                placeholder="np. 45"
-                value={timeToMake}
-                onChange={(e) => setTimeToMake(e.target.value)}
-                className="w-full bg-secondary/20 border border-border/50 rounded-lg pl-10 pr-4 py-3 text-base focus:outline-none focus:ring-1 focus:ring-primary/50"
-              />
+          <hr className="border-border/50" />
+
+          <RecipeStepsForm
+            steps={steps}
+            addStep={addStep}
+            updateStep={updateStep}
+            removeStep={removeStep}
+          />
+
+          {/* Widoczność */}
+          <div className="flex flex-col gap-1.5 mt-2">
+            <label className="text-sm font-medium text-foreground/80 pl-1">Widoczność</label>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setIsGlobal(false)}
+                className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg border transition-all ${!isGlobal ? "bg-neutral-600 border-neutral-500 text-white shadow-sm" : "bg-secondary/20 border-border/50 text-muted-foreground"}`}
+              >
+                <Lock size={16} /> Tylko dla mnie
+              </button>
+              <button
+                onClick={() => setIsGlobal(true)}
+                className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg border transition-all ${isGlobal ? "bg-blue-500 border-blue-400 text-white shadow-sm" : "bg-secondary/20 border-border/50 text-muted-foreground"}`}
+              >
+                <Globe size={16} /> Globalny
+              </button>
             </div>
           </div>
         </div>
 
-        <hr className="border-border/50" />
-
-        {/* --- SEKCJA: SKŁADNIKI --- */}
-        <div className="flex flex-col gap-3">
-          <h2 className="font-semibold text-lg">Składniki</h2>
-
-          <div className="flex flex-col gap-2">
-            {ingredients.map((ing) => (
-              <div
-                key={ing.id}
-                className="grid grid-cols-1 gap-2 rounded-xl border border-border/50 bg-secondary/10 p-3"
-              >
-                <input
-                  type="text"
-                  placeholder="Nazwa (np. Mleko)"
-                  value={ing.name}
-                  onChange={(e) => updateIngredient(ing.id, "name", e.target.value)}
-                  className="w-full min-w-0 bg-background border border-border/50 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary/50"
-                />
-
-                <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] gap-2 items-center">
-                  <input
-                    type="number"
-                    placeholder="Ilość"
-                    value={ing.quantity}
-                    onChange={(e) => updateIngredient(ing.id, "quantity", e.target.value)}
-                    className="w-full h-11 min-w-11 bg-background border border-border/50 rounded-lg px-2.5 text-sm text-center focus:outline-none focus:ring-1 focus:ring-primary/50"
-                  />
-
-                  {/* Shadcn Select z wymuszoną wysokością h-11 */}
-                  <Select
-                    value={ing.unit}
-                    onValueChange={(val) => updateIngredient(ing.id, "unit", val)}
-                  >
-                    <SelectTrigger className="w-full h-11 min-h-11 bg-background border-border/50 text-sm">
-                      <SelectValue placeholder="Jednostka" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {UNITS.map((unit) => (
-                        <SelectItem className="h-11" key={unit} value={unit}>
-                          {unit}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => removeIngredient(ing.id)}
-                    disabled={ingredients.length === 1}
-                    className="h-11 w-11 justify-self-end disabled:opacity-30 bg-destructive/25 border-2 border-destructive/25 text-red-500 hover:text-red-500 hover:bg-red-500/10 shrink-0"
-                  >
-                    <Trash2 size={18} />
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <Button
-            variant="outline"
-            className="w-full gap-2 border-dashed border-2 mt-1"
-            onClick={addIngredient}
-          >
-            <Plus size={16} /> Dodaj kolejny składnik
-          </Button>
-        </div>
-
-        <hr className="border-border/50" />
-
-        {/* --- SEKCJA: KROKI --- */}
-        <div className="flex flex-col gap-3">
-          <h2 className="font-semibold text-lg">Kroki przygotowania</h2>
-
-          <div className="flex flex-col gap-4">
-            {steps.map((step, index) => (
-              <div
-                key={step.id}
-                className="flex flex-col gap-2 p-3 bg-secondary/10 border border-border/50 rounded-xl relative"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-sm text-muted-foreground bg-background px-2 py-1 rounded-md border border-border/50">
-                    Krok {index + 1}
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => removeStep(step.id)}
-                    disabled={steps.length === 1}
-                    className="h-8 w-8 disabled:opacity-30 bg-destructive/25 border-2 border-destructive/25 text-red-500 hover:text-red-500 hover:bg-red-500/10"
-                  >
-                    <Trash2 size={16} />
-                  </Button>
-                </div>
-
-                <input
-                  type="text"
-                  placeholder="Tytuł kroku (opcjonalnie)"
-                  value={step.title}
-                  onChange={(e) => updateStep(step.id, "title", e.target.value)}
-                  className="w-full bg-secondary/20 border border-border/50 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary/50 font-medium"
-                />
-                <textarea
-                  placeholder="Opisz, co należy zrobić..."
-                  value={step.description}
-                  onChange={(e) => updateStep(step.id, "description", e.target.value)}
-                  rows={5}
-                  className="w-full bg-secondary/20 border border-border/50 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary/50 resize-none"
-                />
-              </div>
-            ))}
-          </div>
-
-          <Button
-            variant="outline"
-            className="w-full gap-2 border-dashed border-2 mt-1"
-            onClick={addStep}
-          >
-            <Plus size={16} /> Dodaj kolejny krok
-          </Button>
-        </div>
-
-        {/* Widoczność */}
-        <div className="flex flex-col gap-1.5 mt-2">
-          <label className="text-sm font-medium text-foreground/80 pl-1">Widoczność</label>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setIsGlobal(false)}
-              className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg border transition-all ${!isGlobal ? "bg-neutral-600 border-neutral-500 text-white shadow-sm" : "bg-secondary/20 border-border/50 text-muted-foreground"}`}
+        {/* Dolny pasek akcji */}
+        <div className="shrink-0 border-t border-border/50 bg-background p-4 pb-[max(16px,env(safe-area-inset-bottom))] shadow-md">
+          <div className="flex gap-3">
+            <Button
+              variant="secondary"
+              className="flex-1 h-12 flex items-center gap-2"
+              onClick={() => handleSave("draft")}
+              disabled={isPending}
             >
-              <Lock size={16} /> Tylko dla mnie
-            </button>
-            <button
-              onClick={() => setIsGlobal(true)}
-              className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg border transition-all ${isGlobal ? "bg-blue-500 border-blue-400 text-white shadow-sm" : "bg-secondary/20 border-border/50 text-muted-foreground"}`}
+              <Save size={18} /> Zapisz szkic
+            </Button>
+            <Button
+              className="flex-1 h-12 flex items-center gap-2 bg-primary text-primary-foreground"
+              onClick={() => handleSave("published")}
+              disabled={isPending}
             >
-              <Globe size={16} /> Globalny
-            </button>
+              <Send size={18} /> {isPending ? "Zapisywanie..." : "Opublikuj"}
+            </Button>
           </div>
         </div>
       </div>
 
-      {/* 3. Dolny pasek akcji (Bezpiecznie zakotwiczony na dole flexboxa) */}
-      <div className="shrink-0 border-t border-border/50 bg-background p-4 pb-[max(16px,env(safe-area-inset-bottom))] shadow-md">
-        <div className="flex gap-3">
-          <Button
-            variant="secondary"
-            className="flex-1 h-12 flex items-center gap-2"
-            onClick={() =>
-              console.log("Zapisuję jako szkic:", {
-                name,
-                description,
-                timeToMake,
-                isGlobal,
-                ingredients,
-                steps,
-              })
-            }
-          >
-            <Save size={18} /> Zapisz szkic
-          </Button>
-          <Button
-            className="flex-1 h-12 flex items-center gap-2 bg-primary text-primary-foreground"
-            onClick={() => console.log("Publikuję przepis...")}
-          >
-            <Send size={18} /> Opublikuj
-          </Button>
-        </div>
-      </div>
-    </div>
+      <ConfirmModal
+        isOpen={showExitDialog}
+        onOpenChange={setShowExitDialog}
+        onConfirm={confirmExit}
+        title="Niezapisane zmiany"
+        description="Masz niezapisane zmiany w przepisie. Czy na pewno chcesz wyjść bez zapisywania? Cała Twoja praca przepadnie."
+        cancelText="Wróć do edycji"
+        confirmText="Tak, wyjdź"
+        confirmVariant="destructive"
+      />
+    </>
   );
 }

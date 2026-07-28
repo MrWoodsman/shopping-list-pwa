@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dices, Clock, Info } from "lucide-react";
+import { ROUTES } from "@/config/routes";
 
 interface HomeScreenProps {
   onJoin: (id: string) => void;
@@ -49,7 +50,7 @@ export function HomeScreen({ onJoin }: HomeScreenProps) {
     setRecentGroups(updatedRecents);
 
     onJoin(normalizedId);
-    navigate("/shopping-lists", { replace: true });
+    navigate(ROUTES.HOME, { replace: true });
   };
 
   const handleJoin = () => executeJoin(groupId);

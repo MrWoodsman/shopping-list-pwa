@@ -2,7 +2,6 @@ import { useParams, Link } from "react-router-dom";
 import { ROUTES } from "@/config/routes";
 import { motion, AnimatePresence } from "framer-motion";
 // UI
-import { Toaster } from "@/components/ui/sonner";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -126,12 +125,6 @@ export function ShoppingScreen() {
           </AccordionItem>
         </Accordion>
       </div>
-      <Toaster
-        position="top-center"
-        toastOptions={{
-          style: { marginTop: "env(safe-area-inset-top)" },
-        }}
-      />
     </div>
   );
 }
