@@ -26,7 +26,7 @@ router.get("/", async (req, res) => {
   try {
     const recipes = await req.db.all(
       `SELECT 
-          id, name, description, image_url, time_to_make, is_global, created_at, last_update, status
+          id, name, description, image_url, time_to_make, is_global, created_at, last_update, status, group_id
         FROM recipes 
         WHERE (group_id = ? OR is_global = 1) 
           AND deleted_at IS NULL

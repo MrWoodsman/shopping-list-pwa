@@ -2,11 +2,28 @@ import { RecipesListNavbar } from "@/components/recipes/RecipesListNavbar";
 import { ROUTES } from "@/config/routes";
 import { useAllRecipesQuery } from "@/hooks/useRecipes";
 import type { RecipeItem } from "@shared/types";
-import { Globe } from "lucide-react";
+import { Edit, Globe, ShoppingCart, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+// NEW
+import { MoreVertical, Clock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Card, CardContent } from "@/components/ui/card";
+import { useGroup } from "@/hooks/useGroup";
+import { ConfirmModal } from "@/components/overlay/ConfirmModal";
+import { useDeleteRecipeMutation } from "@/hooks/useRecipeMutations";
 
 export function RecipesScreen() {
+  // STAN MODALA
+  const [recipeToDelete, setRecipeToDelete] = useState<RecipeItem | null>(null);
+  const { mutate: deleteRecipe, isPending: isDeleting } = useDeleteRecipeMutation();
+
   const { data, isLoading, error } = useAllRecipesQuery();
   const [searchVal, setSearchVal] = useState("");
 
@@ -19,47 +36,137 @@ export function RecipesScreen() {
   if (error) return <div className="p-4 text-red-500">Nie udało się załadować przepisów!</div>;
 
   return (
-    <div className="w-full h-full flex flex-col gap-2">
-      <RecipesListNavbar inputVal={searchVal} setInputVal={setSearchVal} />
+    <>
+      <div className="w-full h-full flex flex-col gap-2">
+        <RecipesListNavbar inputVal={searchVal} setInputVal={setSearchVal} />
 
-      <div className="content flex-1 flex flex-col px-2 pb-2 gap-2 overflow-y-auto">
-        {displayedRecipes.length > 0 ? (
-          displayedRecipes.map((recipe) => <RecipeCard recipe={recipe} />)
-        ) : (
-          <RecipesNoFound />
-        )}
+        <div className="content flex-1 flex flex-col px-2 pb-2 gap-2 overflow-y-auto">
+          {displayedRecipes.length > 0 ? (
+            displayedRecipes.map((recipe) => (
+              <RecipeCard key={recipe.id} recipe={recipe} setRecipeToDelete={setRecipeToDelete} />
+            ))
+          ) : (
+            <RecipesNoFound />
+          )}
+        </div>
       </div>
-    </div>
+      {/* MODAL POTWIERDZENIA USUNIĘCIA */}
+      <ConfirmModal
+        isOpen={!!recipeToDelete}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) setRecipeToDelete(null);
+        }}
+        title="Usuwanie przepisu"
+        description={`Czy na pewno chcesz usunąć przepis "${recipeToDelete?.name}"? Tej operacji nie można cofnąć.`}
+        confirmText={isDeleting ? "Usuwanie..." : "Usuń przepis"}
+        confirmVariant="destructive"
+        onConfirm={() => {
+          if (!recipeToDelete) return;
+
+          deleteRecipe(recipeToDelete.id, {
+            onSuccess: () => {
+              setRecipeToDelete(null);
+            },
+          });
+        }}
+      />
+    </>
   );
 }
 
-function RecipeCard({ recipe }: { recipe: RecipeItem }) {
+function RecipeCard({
+  recipe,
+  setRecipeToDelete,
+}: {
+  recipe: RecipeItem;
+  setRecipeToDelete: (recipe: RecipeItem) => void;
+}) {
+  const { groupId } = useGroup();
   const navigate = useNavigate();
 
   return (
-    <div
-      onClick={() => navigate(ROUTES.RECIPES_VIEW(recipe.id))}
+    <Card
       key={recipe.id}
-      className="relative border border-foreground/20 p-2 rounded-lg flex flex-col gap-2 cursor-pointer hover:bg-secondary/10 transition-colors shrink-0"
+      onClick={() => navigate(ROUTES.RECIPES_VIEW(recipe.id))}
+      className="group relative flex flex-col overflow-hidden cursor-pointer transition-all hover:shadow-md hover:border-primary/30 pt-0 pb-0"
     >
-      <h1 className="text-md font-semibold">{recipe.name}</h1>
-      <div className="lane-wrap flex justify-between">
-        <h2 className="text-sm font-normal text-foreground/75">{recipe.description}</h2>
-        <h2 className="text-sm font-normal">{recipe.time_to_make}min</h2>
-      </div>
-      <div className="w-full aspect-video bg-foreground/10 flex items-center justify-center rounded-sm overflow-hidden">
+      {/* SEKCJA ZDJĘCIA (Przeniesiona na górę dla lepszego efektu) */}
+      <div className="relative aspect-video w-full overflow-hidden bg-muted">
         <img
-          src={`${recipe.image_url}`}
+          src={recipe.image_url || ""}
           alt={`Zdjęcie przedstawiające ${recipe.name}`}
-          className="rounded-sm w-full h-full object-cover aspect-video"
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
+        {/* Global Badge nałożony ładnie na zdjęcie */}
+        {recipe.is_global && (
+          <div className="absolute top-2 left-2 bg-blue-600/90 backdrop-blur-sm px-2 py-1 rounded-md shadow-sm flex items-center gap-1">
+            <Globe className="text-white" size={14} />
+            <span className="text-[10px] font-bold text-white uppercase tracking-wider">
+              Global
+            </span>
+          </div>
+        )}
       </div>
-      {recipe.is_global ? (
-        <div className="global-badge absolute top-0 right-3 bg-blue-500 border-t-0 border border-blue-600/50 p-1 rounded-b-lg z-10 shadow-sm">
-          <Globe className="text-white" size={18} />
+
+      {/* SEKCJA TEKSTU I AKCJI */}
+      <CardContent className="p-4 pt-0 flex flex-col grow gap-2">
+        {/* Nagłówek: Tytuł + Przycisk opcji */}
+        <div className="flex items-start justify-between gap-4">
+          <h3 className="font-semibold text-lg leading-tight line-clamp-2">{recipe.name}</h3>
+
+          {/* Menu 3 kropki (Dropdown) */}
+          {/* UWAGA: e.stopPropagation() jest tu kluczowe, żeby kliknięcie w kropki nie przeniosło nas do przepisu! */}
+          <div onClick={(e) => e.stopPropagation()} className="-mt-1 -mr-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                >
+                  <MoreVertical size={18} />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                {recipe.group_id == groupId && (
+                  <>
+                    <DropdownMenuItem
+                      onClick={() => navigate(`${ROUTES.RECIPES_EDITOR}?id=${recipe.id}`)}
+                    >
+                      <Edit size={16} />
+                      Edytuj przepis
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setRecipeToDelete(recipe);
+                      }}
+                      className="text-destructive focus:bg-destructive focus:text-destructive-foreground"
+                    >
+                      <Trash2 size={16} />
+                      Usuń przepis
+                    </DropdownMenuItem>
+                  </>
+                )}
+                <DropdownMenuItem onClick={() => console.log("Dodawnie składników do listy")}>
+                  <ShoppingCart size={16} />
+                  Dodaj składniki do listy
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
-      ) : null}
-    </div>
+
+        {/* Opis */}
+        <p className="text-sm text-muted-foreground line-clamp-2 grow">{recipe.description}</p>
+
+        {/* Czas przygotowania */}
+        <div className="flex items-center gap-1.5 text-sm font-medium text-foreground/80 mt-1">
+          <Clock size={16} className="text-muted-foreground" />
+          <span>{recipe.time_to_make} min</span>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 

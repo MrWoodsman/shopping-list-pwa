@@ -33,8 +33,8 @@ export function RecipeViewScreen() {
 
   // STAN MODALA
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-
   const { mutate: deleteRecipe, isPending: isDeleting } = useDeleteRecipeMutation();
+
   const { data, isLoading, error } = useRecipeDetailsQuery(recipeId);
 
   if (isLoading) {
