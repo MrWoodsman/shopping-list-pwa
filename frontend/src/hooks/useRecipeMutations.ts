@@ -24,7 +24,8 @@ export const useUpdateRecipeMutation = () => {
     mutationFn: ({ id, formData }: { id: string; formData: FormData }) =>
       updateRecipeApi({ id, formData }),
 
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["recipe", variables.id] });
       queryClient.invalidateQueries({ queryKey: ["recipes"] });
     },
     onError: showErrorToast,
@@ -37,7 +38,8 @@ export const useDeleteRecipeMutation = () => {
 
   return useMutation({
     mutationFn: (id: string) => deleteRecipeApi(id),
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["recipe", variables] });
       queryClient.invalidateQueries({ queryKey: ["recipes"] });
     },
     onError: showErrorToast,

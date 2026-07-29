@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 // POBIERANIE WSZYSTKICH PRZEPISÓW DOSTPENYCH DLA GRUPY [GLOBAL + LOCAL DLA GRUPY]
 export const useAllRecipesQuery = () => {
   return useQuery({
-    queryKey: ["recipesAll"],
+    queryKey: ["recipes"],
     queryFn: fetchAllRecipesApi,
     refetchInterval: 5000,
   });
