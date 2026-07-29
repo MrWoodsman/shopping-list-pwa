@@ -277,4 +277,41 @@ router.put("/:id", upload.single("image"), async (req, res) => {
   }
 });
 
+// DELETE /api/v1/recipes/:id -> Usuwanie przepisu
+router.delete("/:id", async (req, res) => {
+  const { id } = req.params;
+  const groupId = req.headers["x-group-id"];
+  if (!groupId) return res.status(401).json({ message: "Brak ID grupy" });
+
+  try {
+    const recipe = await req.db.get("SELECT * FROM recipes WHERE id = ? AND group_id = ?", [
+      id,
+      groupId,
+    ]);
+    if (!recipe) {
+      return res.status(404).json({ message: "Nie znaleziono przepisu lub brak uprawnień" });
+    }
+
+    // Opcjonalnie: usuwamy plik zdjęcia z dysku, jeśli istniał
+    if (recipe.image_url) {
+      const imagePath = path.join(__dirname, "..", "..", recipe.image_url);
+      fs.unlink(imagePath, () => {});
+    }
+
+    // Baza danych dzięki kluczom obcym z 'ON DELETE CASCADE' automatycznie usunie
+    // powiązane składniki i kroki, albo usuwamy je jawnie w transakcji:
+    await req.db.run("BEGIN TRANSACTION");
+    await req.db.run("DELETE FROM ingredients WHERE recipe_id = ?", [id]);
+    await req.db.run("DELETE FROM steps WHERE recipe_id = ?", [id]);
+    await req.db.run("DELETE FROM recipes WHERE id = ?", [id]);
+    await req.db.run("COMMIT");
+
+    res.json({ message: "Pomyślnie usunięto przepis" });
+  } catch (error) {
+    await req.db.run("ROLLBACK");
+    console.error("Błąd przy usuwaniu przepisu:", error);
+    res.status(500).json({ message: "Błąd serwera przy usuwaniu przepisu", error: error.message });
+  }
+});
+
 module.exports = router;
