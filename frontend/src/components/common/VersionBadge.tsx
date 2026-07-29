@@ -20,6 +20,21 @@ export function VersionBadge() {
 
   // 1. HISTORIA ZMIAN (Najnowsza wersja ZAWSZE musi być jako PIERWSZA w tablicy!)
   const changelog: Release[] = [
+    // {
+    //   version: "0.6.0",
+    //   date: "29.07.2026",
+    //   changes: [
+    //     "Opcja importowania składników z przepisu prosto do listy",
+    //   ],
+    // },
+    {
+      version: "0.5.0",
+      date: "29.07.2026",
+      changes: [
+        "Dodanie modułu przepisów, z możliwościa tworzenia przepisów",
+        "Poprawienie UI na elementach do wybierania",
+      ],
+    },
     {
       version: "0.4.1",
       date: "15.07.2026",
