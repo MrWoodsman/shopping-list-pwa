@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Globe, Lock, Save, Send } from "lucide-react";
+import { ArrowLeft, Globe, Lock, Save, Loader2 } from "lucide-react";
 import type { RecipeItem } from "@shared/types";
 
 // --- IMPORTY SUB-KOMPONENTÓW ---
@@ -13,6 +13,15 @@ import { ConfirmModal } from "@/components/overlay/ConfirmModal";
 // --- HOOKI API ---
 import { useCreateRecipeMutation, useUpdateRecipeMutation } from "@/hooks/useRecipeMutations";
 import { useRecipeDetailsQuery } from "@/hooks/useRecipes";
+import { ROUTES } from "@/config/routes";
+
+// --- KOMPONENTY MENU ---
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export function RecipeEditorScreen() {
   const navigate = useNavigate();
@@ -35,9 +44,6 @@ export function RecipeEditorScreen() {
   const [description, setDescription] = useState(() => existingRecipe?.description || "");
   const [timeToMake, setTimeToMake] = useState(
     () => existingRecipe?.time_to_make?.toString() || "",
-  );
-  const [isGlobal, setIsGlobal] = useState(
-    () => existingRecipe?.is_global === 1 || existingRecipe?.is_global === true,
   );
 
   const [imagePreview, setImagePreview] = useState<string | null>(
@@ -93,18 +99,35 @@ export function RecipeEditorScreen() {
   const removeStep = (id: string) =>
     steps.length > 1 && setSteps(steps.filter((step) => step.id !== id));
 
-  // BEZPIECZEŃSTWO I GESTY
-  const hasUnsavedChanges = name.trim() !== "" || ingredients[0].name.trim() !== "";
+  // 4. BEZPIECZEŃSTWO (MĄDRE SPRAWDZANIE ZMIAN)
   const [showExitDialog, setShowExitDialog] = useState(false);
 
+  // Zamiast useRef używamy useState do trzymania początkowego stanu
+  const [initialFormState, setInitialFormState] = useState<string | null>(null);
+  // Flaga, żeby zapisać stan tylko raz
+  const isInitialized = useRef(false);
+
   useEffect(() => {
-    if (!hasUnsavedChanges) return;
+    // Kiedy skończymy pobierać dane i jeszcze nie zainicjowaliśmy stanu
+    if (!isLoadingRecipe && !isInitialized.current) {
+      setInitialFormState(JSON.stringify({ name, description, timeToMake, ingredients, steps }));
+      isInitialized.current = true; // Zabezpieczamy, żeby nie nadpisywało się przy każdym wpisywaniu!
+    }
+  }, [isLoadingRecipe, name, description, timeToMake, ingredients, steps]);
 
-    window.history.pushState(null, "", window.location.href);
+  const currentFormState = JSON.stringify({ name, description, timeToMake, ingredients, steps });
 
+  // Teraz React nie będzie krzyczał, bo initialFormState to zwykły stan, a nie ref
+  const hasUnsavedChanges =
+    (initialFormState !== null && currentFormState !== initialFormState) || imageFile !== null;
+
+  useEffect(() => {
+    // Usunęliśmy nieużywane 'e' z argumentów, więc TS będzie szczęśliwy
     const handlePopState = () => {
-      window.history.pushState(null, "", window.location.href);
-      setShowExitDialog(true);
+      if (hasUnsavedChanges) {
+        window.history.pushState(null, "", window.location.href);
+        setShowExitDialog(true);
+      }
     };
 
     window.addEventListener("popstate", handlePopState);
@@ -121,11 +144,11 @@ export function RecipeEditorScreen() {
 
   const confirmExit = () => {
     setShowExitDialog(false);
-    navigate(-2);
+    navigate(ROUTES.RECIPES, { replace: true });
   };
 
-  // 5. WYSYŁKA DO BACKENDU (Tworzenie vs Aktualizacja)
-  const handleSave = (status: "published" | "draft") => {
+  // 5. ZAPISYWANIE (Teraz przyjmuje wybrany tryb z DropdownMenu)
+  const handleSave = (mode: "draft" | "private" | "global") => {
     if (!name.trim()) {
       alert("Nazwa przepisu jest wymagana!");
       return;
@@ -147,6 +170,9 @@ export function RecipeEditorScreen() {
         description: step.description.trim(),
       }));
 
+    const status = mode === "draft" ? "draft" : "published";
+    const isGlobal = mode === "global";
+
     const formData = new FormData();
     formData.append("name", name.trim());
     formData.append("description", description.trim());
@@ -161,22 +187,17 @@ export function RecipeEditorScreen() {
     }
 
     if (isEditing && recipeId) {
-      // AKTUALIZACJA (PUT)
       updateRecipe(
         { id: recipeId, formData },
-        {
-          onSuccess: () => navigate("/recipes", { replace: true }),
-        },
+        { onSuccess: () => navigate(ROUTES.RECIPES, { replace: true }) },
       );
     } else {
-      // TWORZENIE (POST)
       createRecipe(formData, {
-        onSuccess: () => navigate("/recipes", { replace: true }),
+        onSuccess: () => navigate(ROUTES.RECIPES, { replace: true }),
       });
     }
   };
 
-  // Ekran ładowania na czas pobierania danych z bazy w trybie edycji
   if (isEditing && isLoadingRecipe) {
     return (
       <div className="w-full h-dvh flex items-center justify-center text-muted-foreground">
@@ -188,17 +209,78 @@ export function RecipeEditorScreen() {
   return (
     <>
       <div className="w-full h-dvh flex flex-col bg-background overflow-hidden relative">
-        {/* Górny Pasek */}
+        {/* GÓRNY PASEK Z MENU ZAPISU */}
         <div className="flex items-center justify-between p-4 border-b border-border/40 shrink-0 bg-background pt-[max(12px,env(safe-area-inset-top))]">
           <Button variant="ghost" size="icon" onClick={handleBackClick} className="-ml-2">
             <ArrowLeft size={22} />
           </Button>
-          <h1 className="font-semibold text-lg">{isEditing ? "Edytuj przepis" : "Nowy przepis"}</h1>
-          <div className="w-10" />
+
+          <h1 className="font-semibold text-lg truncate px-2 text-center flex-1">
+            {isEditing ? "Edytuj przepis" : "Nowy przepis"}
+          </h1>
+
+          {/* KWADRATOWY PRZYCISK ZAPISU OTWIERAJĄCY MENU */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                disabled={isPending}
+                size="icon"
+                className="h-10 w-10 rounded-xl shadow-sm bg-primary text-primary-foreground"
+              >
+                {isPending ? <Loader2 size={20} className="animate-spin" /> : <Save size={20} />}
+              </Button>
+            </DropdownMenuTrigger>
+
+            {/* DRAWER / MENU OPCJI ZAPISU */}
+            <DropdownMenuContent align="end" className="w-64 p-2 rounded-xl">
+              <div className="px-2 py-1.5 mb-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Wybierz sposób zapisu
+              </div>
+
+              <DropdownMenuItem
+                onClick={() => handleSave("draft")}
+                className="flex gap-3 p-3 cursor-pointer rounded-lg hover:bg-secondary"
+              >
+                <div className="bg-secondary/50 p-2 rounded-md">
+                  <Save size={18} className="text-foreground" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-semibold text-sm">Zapisz jako szkic</span>
+                  <span className="text-xs text-muted-foreground">Widoczne tylko dla Ciebie</span>
+                </div>
+              </DropdownMenuItem>
+
+              <DropdownMenuItem
+                onClick={() => handleSave("private")}
+                className="flex gap-3 p-3 cursor-pointer rounded-lg hover:bg-secondary"
+              >
+                <div className="bg-emerald-500/10 p-2 rounded-md">
+                  <Lock size={18} className="text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-semibold text-sm">Opublikuj prywatnie</span>
+                  <span className="text-xs text-muted-foreground">Tylko dla Twojej grupy</span>
+                </div>
+              </DropdownMenuItem>
+
+              <DropdownMenuItem
+                onClick={() => handleSave("global")}
+                className="flex gap-3 p-3 cursor-pointer rounded-lg hover:bg-secondary"
+              >
+                <div className="bg-blue-500/10 p-2 rounded-md">
+                  <Globe size={18} className="text-blue-600 dark:text-blue-400" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-semibold text-sm">Opublikuj globalnie</span>
+                  <span className="text-xs text-muted-foreground">Dla wszystkich w aplikacji</span>
+                </div>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
-        {/* Zawartość formularza */}
-        <div className="flex-1 flex flex-col gap-6 overflow-y-auto px-4 pt-4 pb-6">
+        {/* ZAWARTOŚĆ FORMULARZA (już bez kafelków na dole) */}
+        <div className="flex-1 flex flex-col gap-6 overflow-y-auto px-4 pt-4 pb-12">
           <RecipeBasicInfo
             name={name}
             setName={setName}
@@ -228,46 +310,6 @@ export function RecipeEditorScreen() {
             updateStep={updateStep}
             removeStep={removeStep}
           />
-
-          {/* Widoczność */}
-          <div className="flex flex-col gap-1.5 mt-2">
-            <label className="text-sm font-medium text-foreground/80 pl-1">Widoczność</label>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setIsGlobal(false)}
-                className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg border transition-all ${!isGlobal ? "bg-neutral-600 border-neutral-500 text-white shadow-sm" : "bg-secondary/20 border-border/50 text-muted-foreground"}`}
-              >
-                <Lock size={16} /> Tylko dla mnie
-              </button>
-              <button
-                onClick={() => setIsGlobal(true)}
-                className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg border transition-all ${isGlobal ? "bg-blue-500 border-blue-400 text-white shadow-sm" : "bg-secondary/20 border-border/50 text-muted-foreground"}`}
-              >
-                <Globe size={16} /> Globalny
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Dolny pasek akcji */}
-        <div className="shrink-0 border-t border-border/50 bg-background p-4 pb-[max(16px,env(safe-area-inset-bottom))] shadow-md">
-          <div className="flex gap-3">
-            <Button
-              variant="secondary"
-              className="flex-1 h-12 flex items-center gap-2"
-              onClick={() => handleSave("draft")}
-              disabled={isPending}
-            >
-              <Save size={18} /> Zapisz szkic
-            </Button>
-            <Button
-              className="flex-1 h-12 flex items-center gap-2 bg-primary text-primary-foreground"
-              onClick={() => handleSave("published")}
-              disabled={isPending}
-            >
-              <Send size={18} /> {isPending ? "Zapisywanie..." : "Opublikuj"}
-            </Button>
-          </div>
         </div>
       </div>
 
@@ -276,7 +318,7 @@ export function RecipeEditorScreen() {
         onOpenChange={setShowExitDialog}
         onConfirm={confirmExit}
         title="Niezapisane zmiany"
-        description="Masz niezapisane zmiany w przepisie. Czy na pewno chcesz wyjść bez zapisywania? Cała Twoja praca przepadnie."
+        description="Wykryto zmiany w formularzu. Czy na pewno chcesz wyjść bez zapisywania? Twoja praca przepadnie."
         cancelText="Wróć do edycji"
         confirmText="Tak, wyjdź"
         confirmVariant="destructive"
