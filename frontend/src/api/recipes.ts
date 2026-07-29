@@ -60,3 +60,17 @@ export const updateRecipeApi = async ({ id, formData }: { id: string; formData: 
 
   return response.json();
 };
+
+// USUWANIE PRZEPISU
+export const deleteRecipeApi = async (id: string) => {
+  const response = await fetchWithGroup(`/api/v1/recipes/${id}`, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || "Wystąpił błąd podczas usuwania przepisu");
+  }
+
+  return response.json();
+};
