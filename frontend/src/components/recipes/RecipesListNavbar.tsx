@@ -12,9 +12,10 @@ import { ROUTES } from "@/config/routes";
 type RecipesListsNavbarProps = {
   inputVal: string;
   setInputVal: (val: string) => void;
+  draftsCount?: number;
 };
 
-export function RecipesListNavbar({ inputVal, setInputVal }: RecipesListsNavbarProps) {
+export function RecipesListNavbar({ inputVal, setInputVal, draftsCount }: RecipesListsNavbarProps) {
   const navigate = useNavigate();
 
   return (
@@ -38,6 +39,7 @@ export function RecipesListNavbar({ inputVal, setInputVal }: RecipesListsNavbarP
           <RecipeAddOverlay
             onAddNew={() => navigate(ROUTES.RECIPES_EDITOR)}
             onOpenDrafts={() => navigate(ROUTES.RECIPES_DRAFTS)}
+            draftsCount={draftsCount}
           >
             <Button variant="default" size={"icon"} onClick={(e) => e.currentTarget.blur()}>
               <MoreVerticalIcon className="size-4" />

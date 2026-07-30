@@ -27,6 +27,8 @@ export function RecipesScreen() {
   const { data, isLoading, error } = useAllRecipesQuery();
   const [searchVal, setSearchVal] = useState("");
 
+  const draftsCount = data?.filter((recipe) => recipe.status === "draft").length || 0;
+
   const published = data?.filter((item) => item.status === "published") || [];
   const displayedRecipes = published.filter((item) =>
     item.name.toUpperCase().includes(searchVal.toUpperCase()),
@@ -38,7 +40,11 @@ export function RecipesScreen() {
   return (
     <>
       <div className="w-full h-full flex flex-col gap-2">
-        <RecipesListNavbar inputVal={searchVal} setInputVal={setSearchVal} />
+        <RecipesListNavbar
+          inputVal={searchVal}
+          setInputVal={setSearchVal}
+          draftsCount={draftsCount}
+        />
 
         <div className="content flex-1 flex flex-col px-2 pb-2 gap-2 overflow-y-auto">
           {displayedRecipes.length > 0 ? (

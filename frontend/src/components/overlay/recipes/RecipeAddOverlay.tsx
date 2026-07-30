@@ -70,7 +70,7 @@ export function RecipeAddOverlay({
             </div>
             {/* ZNACZEK LICZNIKA SZKICÓW */}
             {draftsCount > 0 && (
-              <span className="bg-primary/10 text-primary text-xs font-bold px-2 py-0.5 rounded-full flex items-center justify-center min-w-6">
+              <span className="bg-primary/10 text-primary text-xs font-bold px-2 aspect-square py-0.5 rounded-full flex items-center justify-center min-w-6">
                 {draftsCount}
               </span>
             )}
