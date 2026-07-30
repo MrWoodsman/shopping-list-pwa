@@ -28,6 +28,15 @@ export function VersionBadge() {
     //   ],
     // },
     {
+      version: "0.51.0",
+      date: "29.07.2026",
+      changes: [
+        "Dodanie informacji o tym że przepis jest twój",
+        "Ulepszenie UI overlaya dla lepszej czytelności, wraz z wyświetlaniem ilości przepisów do dokończenia",
+        "Naprawiono otwieranie się pustego formularza podczas edycji przepisu",
+      ],
+    },
+    {
       version: "0.5.0",
       date: "29.07.2026",
       changes: [
