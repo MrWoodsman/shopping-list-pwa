@@ -28,8 +28,13 @@ export function VersionBadge() {
     //   ],
     // },
     {
+      version: "0.51.1",
+      date: "30.07.2026",
+      changes: ["Naprawienie błędu podczas próby zapisania przepisu ze zdjęciem"],
+    },
+    {
       version: "0.51.0",
-      date: "29.07.2026",
+      date: "30.07.2026",
       changes: [
         "Dodanie informacji o tym że przepis jest twój",
         "Ulepszenie UI overlaya dla lepszej czytelności, wraz z wyświetlaniem ilości przepisów do dokończenia",
