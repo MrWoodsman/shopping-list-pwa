@@ -16,6 +16,14 @@ async function startServer() {
   try {
     db = await initDB();
 
+    // TWORZENIE FODLERU DO PRZECHOWYWANIA ZDJEC
+    const fs = require("fs");
+    const uploadDir = path.join(__dirname, "uploads", "recipes");
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+      console.log("Utworzono brakujący katalog na zdjęcia: uploads/recipes");
+    }
+
     app.use((req, res, next) => {
       req.db = db;
       next();
