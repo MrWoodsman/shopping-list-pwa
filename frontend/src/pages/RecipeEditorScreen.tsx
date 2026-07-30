@@ -39,7 +39,7 @@ export function RecipeEditorScreen() {
 
   const isPending = isCreating || isUpdating;
 
-  // 3. STANY FORMULARZA
+  // 3. STANY FORMULARZA (Inicjalizacja na starcie - często jest pusta, bo dane się ładują)
   const [name, setName] = useState(() => existingRecipe?.name || "");
   const [description, setDescription] = useState(() => existingRecipe?.description || "");
   const [timeToMake, setTimeToMake] = useState(
@@ -99,30 +99,61 @@ export function RecipeEditorScreen() {
   const removeStep = (id: string) =>
     steps.length > 1 && setSteps(steps.filter((step) => step.id !== id));
 
-  // 4. BEZPIECZEŃSTWO (MĄDRE SPRAWDZANIE ZMIAN)
+  // 4. SYNCHRONIZACJA DANYCH Z BACKENDEM I BEZPIECZEŃSTWO
   const [showExitDialog, setShowExitDialog] = useState(false);
-
-  // Zamiast useRef używamy useState do trzymania początkowego stanu
   const [initialFormState, setInitialFormState] = useState<string | null>(null);
-  // Flaga, żeby zapisać stan tylko raz
-  const isInitialized = useRef(false);
+  const isDataLoaded = useRef(false);
 
+  // NAPRAWA PUSTEGO FORMULARZA: Aktualizacja pól po pobraniu danych z serwera
+  // NAPRAWA PUSTEGO FORMULARZA: Aktualizacja pól po pobraniu danych z serwera
   useEffect(() => {
-    // Kiedy skończymy pobierać dane i jeszcze nie zainicjowaliśmy stanu
-    if (!isLoadingRecipe && !isInitialized.current) {
-      setInitialFormState(JSON.stringify({ name, description, timeToMake, ingredients, steps }));
-      isInitialized.current = true; // Zabezpieczamy, żeby nie nadpisywało się przy każdym wpisywaniu!
+    if (isEditing && existingRecipe && !isLoadingRecipe && !isDataLoaded.current) {
+      isDataLoaded.current = true; // Zablokuj kolejne nadpisania OD RAZU
+
+      // Opóźnienie 0ms uspokaja linter, oddzielając to od cyklu renderowania
+      setTimeout(() => {
+        setName(existingRecipe.name || "");
+        setDescription(existingRecipe.description || "");
+        setTimeToMake(existingRecipe.time_to_make?.toString() || "");
+        setImagePreview(existingRecipe.image_url || null);
+
+        if (existingRecipe.ingredients && existingRecipe.ingredients.length > 0) {
+          setIngredients(
+            existingRecipe.ingredients.map((ing) => ({
+              id: ing.id ? ing.id.toString() : Date.now().toString() + Math.random().toString(),
+              name: ing.name || "",
+              quantity: ing.quantity?.toString() || "",
+              unit: ing.unit || "",
+            })),
+          );
+        }
+
+        if (existingRecipe.steps && existingRecipe.steps.length > 0) {
+          setSteps(
+            existingRecipe.steps.map((step) => ({
+              id: step.id ? step.id.toString() : Date.now().toString() + Math.random().toString(),
+              title: step.title || "",
+              description: step.description || "",
+            })),
+          );
+        }
+      }, 0);
     }
-  }, [isLoadingRecipe, name, description, timeToMake, ingredients, steps]);
+  }, [isEditing, existingRecipe, isLoadingRecipe]);
 
   const currentFormState = JSON.stringify({ name, description, timeToMake, ingredients, steps });
 
-  // Teraz React nie będzie krzyczał, bo initialFormState to zwykły stan, a nie ref
+  // Ustawienie punktu odniesienia do wykrywania niezapisanych zmian
+  useEffect(() => {
+    if (!isLoadingRecipe && initialFormState === null && (isDataLoaded.current || !isEditing)) {
+      setInitialFormState(currentFormState);
+    }
+  }, [isLoadingRecipe, initialFormState, isEditing, currentFormState]);
+
   const hasUnsavedChanges =
     (initialFormState !== null && currentFormState !== initialFormState) || imageFile !== null;
 
   useEffect(() => {
-    // Usunęliśmy nieużywane 'e' z argumentów, więc TS będzie szczęśliwy
     const handlePopState = () => {
       if (hasUnsavedChanges) {
         window.history.pushState(null, "", window.location.href);
@@ -279,7 +310,7 @@ export function RecipeEditorScreen() {
           </DropdownMenu>
         </div>
 
-        {/* ZAWARTOŚĆ FORMULARZA (już bez kafelków na dole) */}
+        {/* ZAWARTOŚĆ FORMULARZA */}
         <div className="flex-1 flex flex-col gap-6 overflow-y-auto px-4 pt-4 pb-12">
           <RecipeBasicInfo
             name={name}
