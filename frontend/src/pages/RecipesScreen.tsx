@@ -2,7 +2,7 @@ import { RecipesListNavbar } from "@/components/recipes/RecipesListNavbar";
 import { ROUTES } from "@/config/routes";
 import { useAllRecipesQuery } from "@/hooks/useRecipes";
 import type { RecipeItem } from "@shared/types";
-import { Edit, Globe, ShoppingCart, Trash2 } from "lucide-react";
+import { CrownIcon, Edit, Globe, ShoppingCart, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 // NEW
@@ -98,14 +98,24 @@ function RecipeCard({
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
         {/* Global Badge nałożony ładnie na zdjęcie */}
-        {recipe.is_global && (
-          <div className="absolute top-2 left-2 bg-blue-600/90 backdrop-blur-sm px-2 py-1 rounded-md shadow-sm flex items-center gap-1">
-            <Globe className="text-white" size={14} />
-            <span className="text-[10px] font-bold text-white uppercase tracking-wider">
-              Global
-            </span>
-          </div>
-        )}
+        <div className="badge-pos absolute top-2 left-2 flex gap-2">
+          {recipe.is_global && (
+            <div className=" bg-blue-600/90 backdrop-blur-sm px-2 py-1 rounded-md shadow-sm flex items-center gap-1">
+              <Globe className="text-white" size={14} />
+              <span className="text-[10px] font-bold text-white uppercase tracking-wider">
+                Global
+              </span>
+            </div>
+          )}
+          {recipe.group_id == groupId && (
+            <div className=" bg-yellow-500/90 backdrop-blur-sm px-2 py-1 rounded-md shadow-sm flex items-center gap-1">
+              <CrownIcon className="text-white" size={14} />
+              <span className="text-[10px] font-bold text-white uppercase tracking-wider">
+                Twój
+              </span>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* SEKCJA TEKSTU I AKCJI */}
