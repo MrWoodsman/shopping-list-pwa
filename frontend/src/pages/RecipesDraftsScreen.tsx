@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ConfirmModal } from "@/components/overlay/ConfirmModal";
 import { ROUTES } from "@/config/routes"; // Dodaj import swoich ścieżek
 import type { RecipeItem as RecipeItemType } from "@shared/types";
+import { useDeleteRecipeMutation } from "@/hooks/useRecipeMutations";
 
 export function RecipesDraftsScreen() {
   const { data, isLoading, error } = useAllRecipesQuery();
@@ -76,7 +77,7 @@ function RecipeItem({ recipe }: { recipe: RecipeItemType }) {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   // ODKOMENTUJ TO JAK ZROBISZ MUTACJĘ DO USUWANIA
-  // const { mutate: deleteRecipe, isPending: isDeleting } = useDeleteRecipeMutation();
+  const { mutate: deleteRecipe, isPending: isDeleting } = useDeleteRecipeMutation();
 
   const handleEdit = () => {
     // Przekazujemy ID przepisu np. przez Search Params (?id=123),
@@ -85,11 +86,10 @@ function RecipeItem({ recipe }: { recipe: RecipeItemType }) {
   };
 
   const handleDeleteConfirm = () => {
-    // deleteRecipe(recipe.id, {
-    //   onSuccess: () => setShowDeleteModal(false)
-    // });
+    deleteRecipe(recipe.id, {
+      onSuccess: () => setShowDeleteModal(false),
+    });
 
-    console.log("Usuwam z bazy przepis o ID:", recipe.id);
     setShowDeleteModal(false); // Tymczasowe zamknięcie modala dla testów UI
   };
 
@@ -164,7 +164,7 @@ function RecipeItem({ recipe }: { recipe: RecipeItemType }) {
             variant="destructive"
             size="icon"
             onClick={() => setShowDeleteModal(true)}
-            // disabled={isDeleting} // Blokada podczas usuwania
+            disabled={isDeleting} // Blokada podczas usuwania
           >
             <Trash2 size={18} />
           </Button>
