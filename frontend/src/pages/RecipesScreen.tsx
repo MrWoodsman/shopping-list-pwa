@@ -103,7 +103,7 @@ function RecipeCard({
             <div className=" bg-blue-600/90 backdrop-blur-sm px-2 py-1 rounded-md shadow-sm flex items-center gap-1">
               <Globe className="text-white" size={14} />
               <span className="text-[10px] font-bold text-white uppercase tracking-wider">
-                Global
+                Globalny
               </span>
             </div>
           )}
