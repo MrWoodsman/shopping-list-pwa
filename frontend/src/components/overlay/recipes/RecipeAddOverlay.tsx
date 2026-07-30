@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button"; // Upewnij się, że masz poprawną ścieżkę
+import { Button } from "@/components/ui/button";
 import {
   Drawer,
   DrawerContent,
@@ -8,25 +8,28 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { Plus, Clock } from "lucide-react";
+import { Plus, Clock, ListOrdered } from "lucide-react";
 
 interface RecipeAddOverlayProps {
   children: React.ReactNode;
+  draftsCount?: number; // Dodajemy prop dla liczby szkiców!
   onAddNew?: () => void;
   onOpenDrafts?: () => void;
+  onOpenAll?: () => void;
 }
 
-export function RecipeAddOverlay({ children, onAddNew, onOpenDrafts }: RecipeAddOverlayProps) {
+export function RecipeAddOverlay({
+  children,
+  draftsCount = 0, // Domyślnie 0, możesz to pobrać z React Query
+  onAddNew,
+  onOpenDrafts,
+  onOpenAll,
+}: RecipeAddOverlayProps) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleCreateNew = () => {
+  const handleAction = (action?: () => void) => {
     setIsOpen(false);
-    if (onAddNew) onAddNew();
-  };
-
-  const handleOpenDrafts = () => {
-    setIsOpen(false);
-    if (onOpenDrafts) onOpenDrafts();
+    if (action) action();
   };
 
   return (
@@ -35,29 +38,51 @@ export function RecipeAddOverlay({ children, onAddNew, onOpenDrafts }: RecipeAdd
 
       <DrawerContent className="bg-background border-border px-4 pb-[max(24px,env(safe-area-inset-bottom))]">
         <DrawerHeader className="px-0 text-left">
-          <DrawerTitle>Zarządzanie przepisami</DrawerTitle>
+          <DrawerTitle className="text-xl">Co chcesz zrobić?</DrawerTitle>
           <DrawerDescription>
-            Dodaj nowy przepis lub wróć do nieskończonych szkiców.
+            Dodaj nowy przepis do bazy lub zarządzaj swoimi listami.
           </DrawerDescription>
         </DrawerHeader>
 
-        {/* Skopiowane 1:1 z Twojego starego kodu (gap-4 py-2) */}
-        <div className="flex flex-col gap-4 py-2">
+        <div className="flex flex-col gap-3 py-4">
+          {/* GŁÓWNA AKCJA - Wyraźna, w kolorze primary */}
           <Button
-            className="w-full h-11 flex items-center justify-center gap-2"
-            onClick={handleCreateNew}
+            className="w-full h-14 flex items-center justify-start gap-3 px-4 rounded-xl"
+            onClick={() => handleAction(onAddNew)}
           >
-            <Plus className="w-5 h-5" />
-            Utwórz nowy przepis
+            <div className="bg-background/20 p-1.5 rounded-md">
+              <Plus className="w-5 h-5" />
+            </div>
+            <span className="text-base font-medium">Utwórz nowy przepis</span>
+          </Button>
+
+          <hr className="border-border/50 my-1" />
+
+          {/* AKCJE DRUGORZĘDNE - Subtelniejsze */}
+          <Button
+            variant="ghost"
+            className="w-full h-12 flex items-center justify-between px-2 text-muted-foreground hover:text-foreground"
+            onClick={() => handleAction(onOpenDrafts)}
+          >
+            <div className="flex items-center gap-3">
+              <Clock className="w-5 h-5" />
+              <span className="text-base">Dokończ szkice</span>
+            </div>
+            {/* ZNACZEK LICZNIKA SZKICÓW */}
+            {draftsCount > 0 && (
+              <span className="bg-primary/10 text-primary text-xs font-bold px-2 py-0.5 rounded-full flex items-center justify-center min-w-6">
+                {draftsCount}
+              </span>
+            )}
           </Button>
 
           <Button
-            variant="outline"
-            className="w-full h-11 flex items-center justify-center gap-2"
-            onClick={handleOpenDrafts}
+            variant="ghost"
+            className="w-full h-12 flex items-center justify-start gap-3 px-2 text-muted-foreground hover:text-foreground"
+            onClick={() => handleAction(onOpenAll)}
           >
-            <Clock className="w-5 h-5 text-muted-foreground" />
-            Przepisy do dokończenia
+            <ListOrdered className="w-5 h-5" />
+            <span className="text-base">Moje wszystkie przepisy</span>
           </Button>
         </div>
       </DrawerContent>
