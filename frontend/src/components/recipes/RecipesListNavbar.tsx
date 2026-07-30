@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 // ICONS
-import { Pencil, Search, Funnel } from "lucide-react";
+import { Search, Funnel, MoreVerticalIcon } from "lucide-react";
 // UI
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -40,7 +40,7 @@ export function RecipesListNavbar({ inputVal, setInputVal }: RecipesListsNavbarP
             onOpenDrafts={() => navigate(ROUTES.RECIPES_DRAFTS)}
           >
             <Button variant="default" size={"icon"} onClick={(e) => e.currentTarget.blur()}>
-              <Pencil className="size-4" />
+              <MoreVerticalIcon className="size-4" />
             </Button>
           </RecipeAddOverlay>
         </div>
