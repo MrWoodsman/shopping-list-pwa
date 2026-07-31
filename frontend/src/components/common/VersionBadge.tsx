@@ -20,13 +20,11 @@ export function VersionBadge() {
 
   // 1. HISTORIA ZMIAN (Najnowsza wersja ZAWSZE musi być jako PIERWSZA w tablicy!)
   const changelog: Release[] = [
-    // {
-    //   version: "0.6.0",
-    //   date: "29.07.2026",
-    //   changes: [
-    //     "Opcja importowania składników z przepisu prosto do listy",
-    //   ],
-    // },
+    {
+      version: "0.52.0",
+      date: "31.07.2026",
+      changes: ["Opcja importowania składników z przepisu prosto do listy"],
+    },
     {
       version: "0.51.1",
       date: "30.07.2026",
