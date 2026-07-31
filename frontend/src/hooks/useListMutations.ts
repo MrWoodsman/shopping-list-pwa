@@ -1,5 +1,6 @@
-import { addListApi, deleteListApi, renameListApi } from "@/api/lists";
+import { addListApi, addRecipeToListApi, deleteListApi, renameListApi } from "@/api/lists";
 import { showErrorToast } from "@/utils/errorHandler";
+import type { AddRecipeToListPayload } from "@shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 // DODAWANIE LISTY
@@ -41,6 +42,20 @@ export const useRenameListMutation = () => {
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["shoppingLists"] });
       queryClient.invalidateQueries({ queryKey: ["shoppingList", String(variables.listId)] });
+    },
+  });
+};
+
+// DODAWNIE PRZEPISU DO LISTY
+export const useAddRecipeToListMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: AddRecipeToListPayload) => addRecipeToListApi(payload),
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["shoppingLists"] });
+      const targetId = data.targetListId || variables.target.list_id;
+      if (targetId) queryClient.invalidateQueries({ queryKey: ["shoppingList", String(targetId)] });
     },
   });
 };

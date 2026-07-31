@@ -23,6 +23,7 @@ import { ROUTES } from "@/config/routes";
 import { useGroup } from "@/hooks/useGroup";
 import { useDeleteRecipeMutation } from "@/hooks/useRecipeMutations";
 import { ConfirmModal } from "@/components/overlay/ConfirmModal"; // Dopasuj ścieżkę do swojego pliku!
+import { RecipeToShoppingListOverlay } from "@/components/overlay/recipes/RecipeToShoppingListOverlay";
 
 export function RecipeViewScreen() {
   const { groupId } = useGroup();
@@ -55,12 +56,6 @@ export function RecipeViewScreen() {
 
   // Przygotowanie posortowanych kroków
   const sortedSteps = data?.steps ? [...data.steps].sort((a, b) => a.order - b.order) : [];
-
-  // Funkcja obsługująca dodanie składników do listy zakupów
-  const handleAddToShoppingList = () => {
-    console.log("Dodawanie składników do listy:", data.ingredients);
-    // Tutaj możesz wywołać swoją mutację dodającą do listy zakupów
-  };
 
   return (
     <>
@@ -117,13 +112,24 @@ export function RecipeViewScreen() {
                   )}
 
                   {/* Opcja dodania składników do listy zakupów */}
-                  <DropdownMenuItem
-                    onClick={handleAddToShoppingList}
-                    className="gap-2 cursor-pointer"
+                  <RecipeToShoppingListOverlay
+                    recipeName={data.name}
+                    ingredients={(data.ingredients || []).map((ing) => ({
+                      ...ing,
+                      id: ing.id || crypto.randomUUID(), // Zabezpieczenie: upewnia TS, że id zawsze tu będzie
+                    }))}
                   >
-                    <ShoppingCart size={16} />
-                    Dodaj składniki do listy
-                  </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onSelect={(e) => {
+                        // Blokujemy domyślne zamknięcie menu, żeby Drawer mógł się spokojnie otworzyć!
+                        e.preventDefault();
+                      }}
+                      className="cursor-pointer"
+                    >
+                      <ShoppingCart size={16} className="mr-2" />
+                      Dodaj składniki do listy
+                    </DropdownMenuItem>
+                  </RecipeToShoppingListOverlay>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>

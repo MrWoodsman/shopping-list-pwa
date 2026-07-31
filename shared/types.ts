@@ -46,3 +46,17 @@ export interface RecipeItem {
     image_url?: string | null;
   }>;
 }
+
+// INTERFACE DO AddRecipeToListAPI
+export interface AddRecipeToListPayload {
+  target: {
+    mode: "new" | "existing";
+    list_id?: string;
+    new_list_name?: string;
+  };
+  ingredients: {
+    name: string;
+    quantity: number | string;
+    unit: string;
+  }[];
+}

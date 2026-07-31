@@ -1,4 +1,4 @@
-import type { ShoppingListData } from "@shared/types";
+import type { AddRecipeToListPayload, ShoppingListData } from "@shared/types";
 import { fetchWithGroup } from "./api";
 
 // DODAWANIE LISTY
@@ -61,6 +61,21 @@ export const fetchShoppingListApi = async (listId: string): Promise<ShoppingList
   const response = await fetchWithGroup(`/api/v1/lists/${listId}`);
 
   if (!response.ok) throw new Error("Błąd pobierania");
+
+  return response.json();
+};
+
+// DODAWANIE PRZEPISU DO LISTY
+export const addRecipeToListApi = async (payload: AddRecipeToListPayload) => {
+  const response = await fetchWithGroup("/api/v1/lists/add-from-recipe", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) throw new Error("Błąd podczas dodawania przepisu do listy");
 
   return response.json();
 };

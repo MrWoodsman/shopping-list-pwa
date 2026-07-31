@@ -2,7 +2,7 @@ import { RecipesListNavbar } from "@/components/recipes/RecipesListNavbar";
 import { ROUTES } from "@/config/routes";
 import { useAllRecipesQuery } from "@/hooks/useRecipes";
 import type { RecipeItem } from "@shared/types";
-import { CrownIcon, Edit, Globe, ShoppingCart, Trash2 } from "lucide-react";
+import { CrownIcon, Edit, Globe, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 // NEW
@@ -90,6 +90,8 @@ function RecipeCard({
   const { groupId } = useGroup();
   const navigate = useNavigate();
 
+  console.log(recipe);
+
   return (
     <Card
       key={recipe.id}
@@ -164,10 +166,6 @@ function RecipeCard({
                     </DropdownMenuItem>
                   </>
                 )}
-                <DropdownMenuItem onClick={() => console.log("Dodawnie składników do listy")}>
-                  <ShoppingCart size={16} />
-                  Dodaj składniki do listy
-                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
