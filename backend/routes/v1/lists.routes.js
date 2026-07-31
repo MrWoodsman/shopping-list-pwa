@@ -210,4 +210,64 @@ router.delete("/:id/items/delete-all", async (req, res) => {
   res.json({ message: "Wyczyszczono" });
 });
 
+// POST /api/v1/lists/add-from-recipe
+router.post("/add-from-recipe", async (req, res) => {
+  const groupId = req.headers["x-group-id"];
+  if (!groupId) return res.status(401).json({ message: "Brak ID grupy" });
+
+  let { target, ingredients } = req.body || {};
+
+  // ROZPAKOWANIE DANYCH O SKŁADNIKACH
+  try {
+    if (typeof ingredients === "string") ingredients = JSON.parse(ingredients);
+    if (typeof target === "string") target = JSON.parse(target);
+  } catch (error) {
+    return res.status(400).json({ message: "Błędny format składników lub celu" });
+  }
+
+  // Prosta walidacja danych wejściowych
+  if (!target || !Array.isArray(ingredients) || ingredients.length === 0) {
+    return res.status(400).json({ message: "Brak wymaganych danych lub pusta lista składników" });
+  }
+
+  // OPERACJE NA BAZIE DANYCH
+  try {
+    await req.db.run("BEGIN TRANSACTION");
+
+    let targetListId = target.list_id;
+
+    // A. WYBRANIE UTWORZNEIA NOWEJ LISTY
+    if (target.mode === "new") {
+      const listName = target.new_list_name?.trim() || "Nowa lista z przepisu";
+      const id = randomUUID();
+
+      const newList = await req.db.run(`INSERT INTO lists (name, group_id, id) VALUES (?, ?, ?)`, [
+        listName,
+        groupId,
+        id,
+      ]);
+
+      targetListId = id;
+    }
+
+    // B. MASOWE DODWANIE SKLADNIKOW (BULK INSERT)
+    for (const ing of ingredients) {
+      const itemId = randomUUID();
+      await req.db.run(`INSERT INTO items (id, list_id, name, quantity, unit) VALUES (?,?,?,?,?)`, [
+        itemId,
+        targetListId,
+        ing.name,
+        ing.quantity,
+        ing.unit,
+      ]);
+    }
+
+    await req.db.run("COMMIT");
+    res.status(201).json({ message: "Dodano składniki do listy", targetListId });
+  } catch (error) {
+    await req.db.run("ROLLBACK");
+    res.status(500).json({ message: "Błąd", error: error.message });
+  }
+});
+
 module.exports = router;
