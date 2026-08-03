@@ -1,11 +1,13 @@
+require("dotenv").config();
 const sqlite3 = require("sqlite3");
 const { open } = require("sqlite");
 const path = require("path");
 
 async function initDB() {
-  // Otwieramy połączenie z plikiem (utworzy się automatycznie)
+  const dbPath = process.env.DB_PATH || path.join(__dirname, "data", "database.sqlite");
+
   const db = await open({
-    filename: path.join(__dirname, "database.sqlite"),
+    filename: dbPath,
     driver: sqlite3.Database,
   });
 
