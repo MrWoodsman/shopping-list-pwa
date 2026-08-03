@@ -61,7 +61,7 @@ export function RecipeAddOverlay({
           {/* AKCJE DRUGORZĘDNE - Subtelniejsze */}
           <Button
             variant="ghost"
-            className="w-full h-12 flex items-center justify-between px-2 text-muted-foreground hover:text-foreground"
+            className="w-full h-12 flex items-center justify-between px-2 text-muted-foreground hover:text-foreground border-foreground/10"
             onClick={() => handleAction(onOpenDrafts)}
           >
             <div className="flex items-center gap-3">
@@ -78,7 +78,7 @@ export function RecipeAddOverlay({
 
           <Button
             variant="ghost"
-            className="w-full h-12 flex items-center justify-start gap-3 px-2 text-muted-foreground hover:text-foreground"
+            className="w-full h-12 flex items-center justify-start gap-3 px-2 text-muted-foreground hover:text-foreground border-foreground/10"
             onClick={() => handleAction(onOpenAll)}
           >
             <ListOrdered className="w-5 h-5" />
