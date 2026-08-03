@@ -2,7 +2,7 @@ import { RecipesListNavbar } from "@/components/recipes/RecipesListNavbar";
 import { ROUTES } from "@/config/routes";
 import { useAllRecipesQuery } from "@/hooks/useRecipes";
 import type { RecipeItem } from "@shared/types";
-import { CrownIcon, Edit, Globe, Trash2 } from "lucide-react";
+import { ChefHat, CrownIcon, Edit, Globe, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 // NEW
@@ -100,11 +100,19 @@ function RecipeCard({
     >
       {/* SEKCJA ZDJĘCIA (Przeniesiona na górę dla lepszego efektu) */}
       <div className="relative aspect-video w-full overflow-hidden bg-muted">
-        <img
-          src={recipe.image_url || ""}
-          alt={`Zdjęcie przedstawiające ${recipe.name}`}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-        />
+        {recipe.image_url ? (
+          <img
+            src={recipe.image_url || ""}
+            alt={`Zdjęcie przedstawiające ${recipe.name}`}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+        ) : (
+          <div className="w-full h-full flex flex-col gap-2 items-center justify-center text-muted-foreground">
+            <ChefHat size={48} className="opacity-40" />
+            <h2 className="font-semibold">Brak zdjęcia</h2>
+          </div>
+        )}
+
         {/* Global Badge nałożony ładnie na zdjęcie */}
         <div className="badge-pos absolute top-2 left-2 flex gap-2">
           {!!recipe.is_global && (
