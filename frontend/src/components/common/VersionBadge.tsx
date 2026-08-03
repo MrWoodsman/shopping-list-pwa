@@ -21,6 +21,14 @@ export function VersionBadge() {
   // 1. HISTORIA ZMIAN (Najnowsza wersja ZAWSZE musi być jako PIERWSZA w tablicy!)
   const changelog: Release[] = [
     {
+      version: "0.53.0",
+      date: "03.08.2026",
+      changes: [
+        "Dodanie ekranu wyświetlającego wszystkie twoje przepisy dla łatwiejszego zarządzania",
+        "Poprawienie wychodzenia z edycji przepisów, teraz wraca do ostatniej karty",
+      ],
+    },
+    {
       version: "0.52.1",
       date: "02.08.2026",
       changes: ["Naprawienie błędu podczas scrolowani listy przepisów"],
