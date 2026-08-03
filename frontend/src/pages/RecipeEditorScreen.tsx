@@ -175,7 +175,7 @@ export function RecipeEditorScreen() {
 
   const confirmExit = () => {
     setShowExitDialog(false);
-    navigate(ROUTES.RECIPES, { replace: true });
+    navigate(-1);
   };
 
   // 5. ZAPISYWANIE (Teraz przyjmuje wybrany tryb z DropdownMenu)
