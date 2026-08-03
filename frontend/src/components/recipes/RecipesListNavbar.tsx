@@ -39,6 +39,7 @@ export function RecipesListNavbar({ inputVal, setInputVal, draftsCount }: Recipe
           <RecipeAddOverlay
             onAddNew={() => navigate(ROUTES.RECIPES_EDITOR)}
             onOpenDrafts={() => navigate(ROUTES.RECIPES_DRAFTS)}
+            onOpenAll={() => navigate(ROUTES.RECIPES_ALL_MY)}
             draftsCount={draftsCount}
           >
             <Button variant="default" size={"icon"} onClick={(e) => e.currentTarget.blur()}>
