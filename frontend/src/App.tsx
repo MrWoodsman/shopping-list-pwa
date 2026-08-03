@@ -21,6 +21,7 @@ import { ShoppingAllScreen } from "./pages/ShoppingAllScreen";
 import { RecipesDraftsScreen } from "./pages/RecipesDraftsScreen";
 import { RecipeEditorScreen } from "./pages/RecipeEditorScreen";
 import { RecipeViewScreen } from "./pages/RecipeViewScreen";
+import { RecipesAllScreen } from "./pages/RecipesAllScreen";
 
 function App() {
   const { groupId, joinGroup, leaveGroup } = useGroup();
@@ -59,15 +60,18 @@ function App() {
         <Route path={ROUTES.RECIPES_EDITOR} element={<RecipeEditorScreen />} />
 
         <Route element={<AppLayout />}>
+          {/* === LISTY ZAKUPÓW === */}
           <Route path={ROUTES.SHOPPING_LISTS} element={<ShoppingListsScreen />} />
           <Route path={ROUTES.SHOPPING_ALL} element={<ShoppingAllScreen />} />
           <Route path={ROUTES.LIST_DETAIL(":id")} element={<ShoppingScreen />} />
-
+          {/* === PRZEPISY === */}
           <Route path={ROUTES.RECIPES} element={<RecipesScreen />} />
+          <Route path={ROUTES.RECIPES_ALL_MY} element={<RecipesAllScreen />} />
           <Route path={ROUTES.RECIPES_DRAFTS} element={<RecipesDraftsScreen />} />
           <Route path={ROUTES.RECIPES_VIEW(":id")} element={<RecipeViewScreen />} />
-
+          {/* === ???? === */}
           <Route path={ROUTES.AUTO_LIST} element={<AutoListScreen />} />
+          {/* === USTAWIENIA === */}
           <Route
             path={ROUTES.SETTINGS}
             element={<SettingsScreen groupId={groupId} onLeave={leaveGroup} />}
