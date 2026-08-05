@@ -2,9 +2,17 @@ require("dotenv").config();
 const sqlite3 = require("sqlite3");
 const { open } = require("sqlite");
 const path = require("path");
+const fs = require("fs");
 
 async function initDB() {
   const dbPath = process.env.DB_PATH || path.join(__dirname, "data", "database.sqlite");
+
+  const dirPath = path.dirname(dbPath);
+
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath, { recursive: true });
+    console.log(`Utworzono brakujący folder dla bazy danych: ${dirPath}`);
+  }
 
   const db = await open({
     filename: dbPath,
