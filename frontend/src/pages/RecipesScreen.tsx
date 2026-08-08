@@ -19,6 +19,8 @@ import { useGroup } from "@/hooks/useGroup";
 import { ConfirmModal } from "@/components/overlay/ConfirmModal";
 import { useDeleteRecipeMutation } from "@/hooks/useRecipeMutations";
 import { showSuccessToast } from "@/utils/toastHandler";
+import { NotFound } from "@/components/common/NotFound";
+import { Loading } from "@/components/common/Loading";
 
 export function RecipesScreen() {
   // STAN MODALA
@@ -35,8 +37,20 @@ export function RecipesScreen() {
     item.name.toUpperCase().includes(searchVal.toUpperCase()),
   );
 
-  if (isLoading) return <div className="p-4 text-neutral-500">Ładowanie przepisów...</div>;
-  if (error) return <div className="p-4 text-red-500">Nie udało się załadować przepisów!</div>;
+  if (isLoading)
+    return (
+      <Loading
+        title="Ładowanie listy przepisów!"
+        description="Jeśli to trwa zbyt długo, sprawdź swoje połączenie internetowe."
+      />
+    );
+  if (error || !data)
+    return (
+      <NotFound
+        title="Nie udało się załadować przepisów!"
+        description="Ta lista nie istnieje lub wystąpił problem z połączeniem z serwerem."
+      />
+    );
 
   return (
     <>

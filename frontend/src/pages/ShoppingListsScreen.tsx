@@ -6,10 +6,27 @@ import { ShoppingListsNavbar } from "@/components/shopping-lists/ShoppingListsNa
 import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAllShoppingListsQuery } from "@/hooks/useLists";
+import { Loading } from "@/components/common/Loading";
+import { NotFound } from "@/components/common/NotFound";
 
 export function ShoppingListsScreen() {
   const { data, isLoading, error } = useAllShoppingListsQuery();
   const [searchInput, setSearchInput] = useState("");
+
+  if (isLoading)
+    return (
+      <Loading
+        title="Ładowanie list zakupów"
+        description="Jeśli to trwa zbyt długo, sprawdź swoje połączenie internetowe."
+      />
+    );
+  if (error || !data)
+    return (
+      <NotFound
+        title="Nie znaleziono list zakupowych"
+        description="Ta lista nie istnieje lub wystąpił problem z połączeniem z serwerem."
+      />
+    );
 
   return (
     <div className="w-full h-full flex flex-col gap-2">

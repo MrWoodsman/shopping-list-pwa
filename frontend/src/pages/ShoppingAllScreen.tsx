@@ -23,13 +23,27 @@ import type { ShoppingItem } from "@shared/types";
 import { ItemSettingsOverlay } from "@/components/overlay/items/ItemSettingsOverlay";
 import { useUniversalToggleItemMutation } from "@/hooks/useItemMutations";
 import { useAllShoppingItemsQuery } from "@/hooks/useItems";
+import { Loading } from "@/components/common/Loading";
+import { NotFound } from "@/components/common/NotFound";
 
 export function ShoppingAllScreen() {
   const { data: items = [], isLoading, error } = useAllShoppingItemsQuery();
   const universalToggleItemMutation = useUniversalToggleItemMutation();
 
-  if (isLoading) return <div className="p-4 text-neutral-500">Ładowanie produktów...</div>;
-  if (error) return <div className="p-4 text-red-500">Nie udało się załadować produktów.</div>;
+  if (isLoading)
+    return (
+      <Loading
+        title="Ładowanie listy przedmiotów do kupienia!"
+        description="Jeśli to trwa zbyt długo, sprawdź swoje połączenie internetowe."
+      />
+    );
+  if (error || !items)
+    return (
+      <NotFound
+        title="Nie udało się załadować przedmiotów do kupienia!"
+        description="Ta lista nie istnieje lub wystąpił problem z połączeniem z serwerem."
+      />
+    );
 
   const toBuyItems = items.filter((item) => !item.completed);
   const purchasedItems = items.filter((item) => item.completed);

@@ -25,6 +25,8 @@ import { useDeleteRecipeMutation } from "@/hooks/useRecipeMutations";
 import { ConfirmModal } from "@/components/overlay/ConfirmModal"; // Dopasuj ścieżkę do swojego pliku!
 import { RecipeToShoppingListOverlay } from "@/components/overlay/recipes/RecipeToShoppingListOverlay";
 import { showSuccessToast } from "@/utils/toastHandler";
+import { NotFound } from "@/components/common/NotFound";
+import { Loading } from "@/components/common/Loading";
 
 export function RecipeViewScreen() {
   const { groupId } = useGroup();
@@ -39,21 +41,20 @@ export function RecipeViewScreen() {
 
   const { data, isLoading, error } = useRecipeDetailsQuery(recipeId);
 
-  if (isLoading) {
+  if (isLoading)
     return (
-      <div className="w-full h-dvh flex items-center justify-center text-muted-foreground">
-        Ładowanie przepisu...
-      </div>
+      <Loading
+        title="Ładowanie przepisu"
+        description="Jeśli to trwa zbyt długo, sprawdź swoje połączenie internetowe."
+      />
     );
-  }
-
-  if (error || !data) {
+  if (error || !data)
     return (
-      <div className="w-full h-dvh flex items-center justify-center text-destructive">
-        Nie udało się załadować przepisu!
-      </div>
+      <NotFound
+        title="Nie udało się załadować przepisu!"
+        description="Ta lista nie istnieje lub wystąpił problem z połączeniem z serwerem."
+      />
     );
-  }
 
   // Przygotowanie posortowanych kroków
   const sortedSteps = data?.steps ? [...data.steps].sort((a, b) => a.order - b.order) : [];

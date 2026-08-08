@@ -25,6 +25,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ItemsInListOverlay } from "@/components/overlay/items/ItemsInListOverlay";
 import { useToggleItemMutation } from "@/hooks/useItemMutations";
 import { useShoppingListQuery } from "@/hooks/useLists";
+import { Loading } from "@/components/common/Loading";
+import { NotFound } from "@/components/common/NotFound";
 
 export function ShoppingScreen() {
   const { id } = useParams() as { id: string };
@@ -32,8 +34,20 @@ export function ShoppingScreen() {
   const { data, isLoading, error } = useShoppingListQuery(id);
   const toggleItemMutation = useToggleItemMutation(id!);
 
-  if (isLoading) return <div>Ładowanie szczegółów...</div>;
-  if (error || !data) return <div>Nie znaleziono listy.</div>;
+  if (isLoading)
+    return (
+      <Loading
+        title="Ładowanie zawartości listy"
+        description="Jeśli to trwa zbyt długo, sprawdź swoje połączenie internetowe."
+      />
+    );
+  if (error || !data)
+    return (
+      <NotFound
+        title="Nie znaleziono zawartości listy"
+        description="Ta lista nie istnieje lub wystąpił problem z połączeniem z serwerem."
+      />
+    );
 
   const items = data.items || [];
   const toBuyItems = items.filter((item) => !item.completed);

@@ -9,6 +9,8 @@ import type { RecipeItem as RecipeItemType } from "@shared/types";
 import { useDeleteRecipeMutation } from "@/hooks/useRecipeMutations";
 import { useGroup } from "@/hooks/useGroup";
 import { showSuccessToast } from "@/utils/toastHandler";
+import { Loading } from "@/components/common/Loading";
+import { NotFound } from "@/components/common/NotFound";
 
 type FilterType = "all" | "draft" | "private" | "global";
 
@@ -20,9 +22,20 @@ export function RecipesAllScreen() {
   const [searchVal, setSearchVal] = useState("");
   const [activeFilter, setActiveFilter] = useState<FilterType>("all");
 
-  if (isLoading) return <div className="p-4 text-neutral-500">Ładowanie Twoich przepisów...</div>;
-  if (error) return <div className="p-4 text-red-500">Nie udało się załadować przepisów!</div>;
-
+  if (isLoading)
+    return (
+      <Loading
+        title="Ładowanie listy przepisów!"
+        description="Jeśli to trwa zbyt długo, sprawdź swoje połączenie internetowe."
+      />
+    );
+  if (error || !data)
+    return (
+      <NotFound
+        title="Nie udało się załadować przepisów!"
+        description="Ta lista nie istnieje lub wystąpił problem z połączeniem z serwerem."
+      />
+    );
   // 1. Wyciągamy tylko przepisy, których jesteś właścicielem
   const owned = data?.filter((item) => item.group_id === groupId) || [];
 

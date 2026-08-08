@@ -10,13 +10,27 @@ import { ROUTES } from "@/config/routes"; // Dodaj import swoich ścieżek
 import type { RecipeItem as RecipeItemType } from "@shared/types";
 import { useDeleteRecipeMutation } from "@/hooks/useRecipeMutations";
 import { showSuccessToast } from "@/utils/toastHandler";
+import { Loading } from "@/components/common/Loading";
+import { NotFound } from "@/components/common/NotFound";
 
 export function RecipesDraftsScreen() {
   const { data, isLoading, error } = useAllRecipesQuery();
   const [searchVal, setSearchVal] = useState("");
 
-  if (isLoading) return <div className="p-4 text-neutral-500">Ładowanie szkiców...</div>;
-  if (error) return <div className="p-4 text-red-500">Nie udało się załadować szkiców!</div>;
+  if (isLoading)
+    return (
+      <Loading
+        title="Ładowanie listy przepisów!"
+        description="Jeśli to trwa zbyt długo, sprawdź swoje połączenie internetowe."
+      />
+    );
+  if (error || !data)
+    return (
+      <NotFound
+        title="Nie udało się załadować przepisów!"
+        description="Ta lista nie istnieje lub wystąpił problem z połączeniem z serwerem."
+      />
+    );
 
   const drafts = data?.filter((item) => item.status === "draft") || [];
   const filteredDrafts = drafts.filter((item) =>
