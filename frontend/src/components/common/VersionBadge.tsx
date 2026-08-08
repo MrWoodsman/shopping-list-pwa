@@ -21,6 +21,13 @@ export function VersionBadge() {
   // 1. HISTORIA ZMIAN (Najnowsza wersja ZAWSZE musi być jako PIERWSZA w tablicy!)
   const changelog: Release[] = [
     {
+      version: "0.55.0",
+      date: "08.08.2026",
+      changes: [
+        "Dodanie ekranów ładowania oraz ekranów jeśli żadana rzecz nie zostanie znaleziona",
+      ],
+    },
+    {
       version: "0.54.0",
       date: "08.08.2026",
       changes: [
