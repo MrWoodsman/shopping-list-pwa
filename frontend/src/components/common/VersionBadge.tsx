@@ -21,6 +21,16 @@ export function VersionBadge() {
   // 1. HISTORIA ZMIAN (Najnowsza wersja ZAWSZE musi być jako PIERWSZA w tablicy!)
   const changelog: Release[] = [
     {
+      version: "0.54.0",
+      date: "08.08.2026",
+      changes: [
+        "Dodanie przekierownia na ekran list po dodaniu składników z przepisu do listy",
+        "Dodanie komunikatuów (toast) sukcesu oraz informacyjnego",
+        "Poprawienie komunikatu (toast) error",
+        "Dodanie komunikatów (toast) to większej ilośći cznośći, dla lepszej przejrzystośći co sie stało",
+      ],
+    },
+    {
       version: "0.53.1",
       date: "05.08.2026",
       changes: ["Naprawienie problemu ze startowaniem serwera"],
