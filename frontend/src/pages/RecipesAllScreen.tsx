@@ -8,6 +8,7 @@ import { ROUTES } from "@/config/routes";
 import type { RecipeItem as RecipeItemType } from "@shared/types";
 import { useDeleteRecipeMutation } from "@/hooks/useRecipeMutations";
 import { useGroup } from "@/hooks/useGroup";
+import { showSuccessToast } from "@/utils/toastHandler";
 
 type FilterType = "all" | "draft" | "private" | "global";
 
@@ -144,7 +145,10 @@ function RecipeItem({ recipe }: { recipe: RecipeItemType }) {
 
   const handleDeleteConfirm = () => {
     deleteRecipe(recipe.id, {
-      onSuccess: () => setShowDeleteModal(false),
+      onSuccess: () => {
+        setShowDeleteModal(false);
+        showSuccessToast(`Usunięto przepis ${recipe.name}`);
+      },
     });
   };
 

@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/drawer";
 import { EllipsisVertical, Trash2, Pencil, X } from "lucide-react";
 import { useDeleteListMutation, useRenameListMutation } from "@/hooks/useListMutations";
+import { showSuccessToast } from "@/utils/toastHandler";
 
 interface ListSettingsProps {
   listId: string;
@@ -87,6 +88,7 @@ export function ListSettingsOverlay({ listId, listName }: ListSettingsProps) {
                         onSuccess: () => {
                           setIsEditingName(false);
                           setIsOpen(false);
+                          showSuccessToast(`Zmieniono nazwe listy na ${newName}`);
                         },
                       },
                     )
@@ -114,7 +116,10 @@ export function ListSettingsOverlay({ listId, listName }: ListSettingsProps) {
                 disabled={deleteListMutation.isPending}
                 onClick={() =>
                   deleteListMutation.mutate(listId, {
-                    onSuccess: () => setIsOpen(false),
+                    onSuccess: () => {
+                      setIsOpen(false);
+                      showSuccessToast(`Usunięto listę ${listName}`);
+                    },
                   })
                 }
               >

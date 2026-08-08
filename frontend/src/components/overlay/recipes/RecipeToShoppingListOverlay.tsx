@@ -23,6 +23,7 @@ import { useAddRecipeToListMutation } from "@/hooks/useListMutations";
 import { useAllShoppingListsQuery } from "@/hooks/useLists";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "@/config/routes";
+import { showSuccessToast } from "@/utils/toastHandler";
 
 interface Ingredient {
   id: string;
@@ -102,7 +103,7 @@ export function RecipeToShoppingListOverlay({
         onSuccess: () => {
           setIsOpen(false);
           navigate(ROUTES.SHOPPING_LISTS);
-          // Tutaj możesz wywołać dodatkowy toast o sukcesie!
+          showSuccessToast(`Dodano potrzebne składniki do listy`);
         },
       },
     );

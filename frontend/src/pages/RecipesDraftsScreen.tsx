@@ -9,6 +9,7 @@ import { ConfirmModal } from "@/components/overlay/ConfirmModal";
 import { ROUTES } from "@/config/routes"; // Dodaj import swoich ścieżek
 import type { RecipeItem as RecipeItemType } from "@shared/types";
 import { useDeleteRecipeMutation } from "@/hooks/useRecipeMutations";
+import { showSuccessToast } from "@/utils/toastHandler";
 
 export function RecipesDraftsScreen() {
   const { data, isLoading, error } = useAllRecipesQuery();
@@ -87,7 +88,10 @@ function RecipeItem({ recipe }: { recipe: RecipeItemType }) {
 
   const handleDeleteConfirm = () => {
     deleteRecipe(recipe.id, {
-      onSuccess: () => setShowDeleteModal(false),
+      onSuccess: () => {
+        setShowDeleteModal(false);
+        showSuccessToast(`Usunięto przepis ${recipe.name}`);
+      },
     });
 
     setShowDeleteModal(false); // Tymczasowe zamknięcie modala dla testów UI

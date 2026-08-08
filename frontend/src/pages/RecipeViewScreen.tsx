@@ -24,6 +24,7 @@ import { useGroup } from "@/hooks/useGroup";
 import { useDeleteRecipeMutation } from "@/hooks/useRecipeMutations";
 import { ConfirmModal } from "@/components/overlay/ConfirmModal"; // Dopasuj ścieżkę do swojego pliku!
 import { RecipeToShoppingListOverlay } from "@/components/overlay/recipes/RecipeToShoppingListOverlay";
+import { showSuccessToast } from "@/utils/toastHandler";
 
 export function RecipeViewScreen() {
   const { groupId } = useGroup();
@@ -254,9 +255,9 @@ export function RecipeViewScreen() {
         onConfirm={() => {
           deleteRecipe(data.id, {
             onSuccess: () => {
-              // Zamykamy modal i wracamy do listy po pomyślnym usunięciu
               setIsDeleteDialogOpen(false);
               navigate(ROUTES.RECIPES, { replace: true });
+              showSuccessToast(`Usunięto przepis ${data.name}`);
             },
           });
         }}

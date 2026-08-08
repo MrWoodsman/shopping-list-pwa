@@ -10,6 +10,7 @@ import {
 import { Plus } from "lucide-react";
 import { Checkbox } from "../../ui/checkbox";
 import { useAddItemMutation } from "@/hooks/useItemMutations";
+import { showSuccessToast } from "@/utils/toastHandler";
 
 interface ItemAddOverlayProps {
   listId: string;
@@ -56,6 +57,7 @@ export function ItemAddOverlay({ listId }: ItemAddOverlayProps) {
       },
       {
         onSuccess: () => {
+          showSuccessToast(`Pomyślnie dodano produkt ${nameToSubmit}`);
           if (!keepOpen) {
             setIsOpen(false);
             setNewItemName("");

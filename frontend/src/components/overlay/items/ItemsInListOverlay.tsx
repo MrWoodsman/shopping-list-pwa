@@ -18,6 +18,7 @@ import {
   useDeleteCompletedMutation,
   useDeleteAllMutation,
 } from "@/hooks/useItemMutations";
+import { showErrorToast, showSuccessToast } from "@/utils/toastHandler";
 
 interface ItemsInListOverlayProps {
   listID: string;
@@ -37,7 +38,7 @@ export function ItemsInListOverlay({ listID, items = [] }: ItemsInListOverlayPro
 
   // WSPÓLNA FUNKCJA PO ZAKOŃCZENIU MUTACJI
   const onSuccessAction = (message: string) => {
-    toast.success(message);
+    showSuccessToast(message);
     setIsOpen(false);
   };
 
@@ -61,8 +62,7 @@ export function ItemsInListOverlay({ listID, items = [] }: ItemsInListOverlayPro
 
     if (navigator.clipboard && window.isSecureContext) {
       navigator.clipboard.writeText(finalString);
-      toast.success("Skopiowano listę do schowka!");
-      setIsOpen(false);
+      onSuccessAction("Skopiowano listę do schowka!");
     } else {
       const textArea = document.createElement("textarea");
       textArea.value = finalString;
@@ -73,9 +73,9 @@ export function ItemsInListOverlay({ listID, items = [] }: ItemsInListOverlayPro
 
       try {
         document.execCommand("copy");
-        toast.success("Skopiowano listę do schowka!");
+        onSuccessAction("Skopiowano listę do schowka!");
       } catch (error) {
-        toast.error("Przeglądarka zablokowała kopiowanie.", error!);
+        showErrorToast(error instanceof Error ? error : "Wystąpił błąd podczas kopiowania");
       } finally {
         textArea.remove();
         setIsOpen(false);

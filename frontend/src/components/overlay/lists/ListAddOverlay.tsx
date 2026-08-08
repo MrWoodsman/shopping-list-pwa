@@ -9,6 +9,7 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { useAddListMutation } from "@/hooks/useListMutations";
+import { showSuccessToast } from "@/utils/toastHandler";
 
 interface ListAddOverlayProps {
   children: React.ReactNode;
@@ -27,6 +28,7 @@ export function ListAddOverlay({ children }: ListAddOverlayProps) {
       onSuccess: () => {
         setNewListName("");
         setIsOpen(false);
+        showSuccessToast(`Pomyślnie utworzono liste ${trimmedName}`);
       },
     });
   };

@@ -12,6 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { EllipsisVertical, Trash2, Check } from "lucide-react";
 import { type ShoppingItem } from "@shared/types";
 import { useDeleteItemMutation, useUpdateItemMutation } from "@/hooks/useItemMutations";
+import { showSuccessToast } from "@/utils/toastHandler";
 
 interface ItemSettingsProps {
   listId: string;
@@ -122,7 +123,10 @@ export function ItemSettingsOverlay({ listId, item }: ItemSettingsProps) {
                   },
                 },
                 {
-                  onSuccess: () => setIsOpen(false),
+                  onSuccess: () => {
+                    showSuccessToast(`Zapisano zmiany dla ${trimmedName}`);
+                    setIsOpen(false);
+                  },
                 },
               );
             }}
@@ -139,7 +143,10 @@ export function ItemSettingsOverlay({ listId, item }: ItemSettingsProps) {
             disabled={deleteItemMutation.isPending}
             onClick={() =>
               deleteItemMutation.mutate(item.id, {
-                onSuccess: () => setIsOpen(false),
+                onSuccess: () => {
+                  showSuccessToast(`Pomyślnie usunięto ${item.name}`);
+                  setIsOpen(false);
+                },
               })
             }
           >

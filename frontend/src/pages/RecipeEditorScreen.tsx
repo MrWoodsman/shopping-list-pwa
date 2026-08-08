@@ -22,6 +22,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { showSuccessToast } from "@/utils/toastHandler";
 
 export function RecipeEditorScreen() {
   const navigate = useNavigate();
@@ -220,11 +221,19 @@ export function RecipeEditorScreen() {
     if (isEditing && recipeId) {
       updateRecipe(
         { id: recipeId, formData },
-        { onSuccess: () => navigate(ROUTES.RECIPES, { replace: true }) },
+        {
+          onSuccess: () => {
+            navigate(ROUTES.RECIPES, { replace: true });
+            showSuccessToast(`Zaktualizowano przepis ${name}`);
+          },
+        },
       );
     } else {
       createRecipe(formData, {
-        onSuccess: () => navigate(ROUTES.RECIPES, { replace: true }),
+        onSuccess: () => {
+          navigate(ROUTES.RECIPES, { replace: true });
+          showSuccessToast(`Utworzono przepis ${name}`);
+        },
       });
     }
   };

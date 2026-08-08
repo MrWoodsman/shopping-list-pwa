@@ -18,6 +18,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useGroup } from "@/hooks/useGroup";
 import { ConfirmModal } from "@/components/overlay/ConfirmModal";
 import { useDeleteRecipeMutation } from "@/hooks/useRecipeMutations";
+import { showSuccessToast } from "@/utils/toastHandler";
 
 export function RecipesScreen() {
   // STAN MODALA
@@ -72,6 +73,7 @@ export function RecipesScreen() {
           deleteRecipe(recipeToDelete.id, {
             onSuccess: () => {
               setRecipeToDelete(null);
+              showSuccessToast(`Usunięto przepis ${recipeToDelete.name}`);
             },
           });
         }}
