@@ -19,9 +19,10 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Loader2, ShoppingCart } from "lucide-react";
 
-// WAŻNE: Zaimportuj swoje mutacje i zapytania (podmień ścieżki na poprawne dla Twojego projektu)
 import { useAddRecipeToListMutation } from "@/hooks/useListMutations";
 import { useAllShoppingListsQuery } from "@/hooks/useLists";
+import { useNavigate } from "react-router-dom";
+import { ROUTES } from "@/config/routes";
 
 interface Ingredient {
   id: string;
@@ -41,6 +42,7 @@ export function RecipeToShoppingListOverlay({
   recipeName,
   ingredients,
 }: RecipeToShoppingListOverlayProps) {
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
 
   // 1. ZAPYTANIA API
@@ -99,6 +101,7 @@ export function RecipeToShoppingListOverlay({
       {
         onSuccess: () => {
           setIsOpen(false);
+          navigate(ROUTES.SHOPPING_LISTS);
           // Tutaj możesz wywołać dodatkowy toast o sukcesie!
         },
       },
@@ -110,7 +113,15 @@ export function RecipeToShoppingListOverlay({
       <DrawerTrigger asChild>{children}</DrawerTrigger>
 
       {/* Drawer na wysokość max 90% ekranu, układ Flex, by guzik zawsze był na dole */}
-      <DrawerContent className="bg-background border-border max-h-[90dvh] flex flex-col pb-[max(16px,env(safe-area-inset-bottom))]">
+      <DrawerContent
+        onPointerDownOutside={(e) => {
+          e.preventDefault();
+        }}
+        onInteractOutside={(e) => {
+          e.preventDefault();
+        }}
+        className="bg-background border-border max-h-[90dvh] flex flex-col pb-[max(16px,env(safe-area-inset-bottom))]"
+      >
         <DrawerHeader className="text-left px-4">
           <DrawerTitle className="text-xl flex items-center gap-2">
             <ShoppingCart className="w-5 h-5 text-primary" />
