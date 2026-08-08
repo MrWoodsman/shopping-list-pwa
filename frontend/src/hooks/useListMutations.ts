@@ -1,5 +1,5 @@
 import { addListApi, addRecipeToListApi, deleteListApi, renameListApi } from "@/api/lists";
-import { showErrorToast } from "@/utils/errorHandler";
+import { showErrorToast } from "@/utils/toastHandler";
 import type { AddRecipeToListPayload } from "@shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 

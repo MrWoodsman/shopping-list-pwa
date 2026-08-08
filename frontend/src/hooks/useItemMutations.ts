@@ -11,7 +11,7 @@ import {
   updateItemApi,
 } from "@/api/items";
 import { type ShoppingListData } from "@shared/types";
-import { showErrorToast } from "@/utils/errorHandler";
+import { showErrorToast } from "@/utils/toastHandler";
 
 // DODAWANIE PRZEDMIOTÓW
 export const useAddItemMutation = (listId: string) => {

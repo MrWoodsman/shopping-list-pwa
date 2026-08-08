@@ -1,7 +1,7 @@
 // src/hooks/useCreateRecipe.ts
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createRecipeApi, deleteRecipeApi, updateRecipeApi } from "@/api/recipes";
-import { showErrorToast } from "@/utils/errorHandler";
+import { showErrorToast } from "@/utils/toastHandler";
 
 // TWORZENIE PRZEPISU
 export const useCreateRecipeMutation = () => {
